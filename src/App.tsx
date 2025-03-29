@@ -45,7 +45,7 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
-              <Route path="orders" element={<Products />} /> {/* Placeholder */}
+              <Route path="orders" element={<Products />} /> {/* This will be replaced with Orders component later */}
               <Route path="posts" element={<Posts />} />
               <Route path="customers" element={<Dashboard />} /> {/* Placeholder */}
               <Route path="pages" element={<Pages />} />

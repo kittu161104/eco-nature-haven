@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -66,16 +68,19 @@ const Register = () => {
         return;
       }
       
-      // Store user in localStorage (in a real app, this would be handled by a backend)
-      localStorage.setItem("user", JSON.stringify({
+      // Create user object
+      const userData = {
         name: data.name,
         email: data.email,
         role: isAdminEmail ? "admin" : "customer",
-      }));
+      };
+      
+      // Store user in localStorage and context
+      login(userData);
       
       toast({
         title: "Registration Successful",
-        description: "Your account has been created!",
+        description: "Your account has been created and you're now logged in!",
       });
       
       // Redirect based on role

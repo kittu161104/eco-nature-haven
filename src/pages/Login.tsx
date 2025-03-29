@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -50,11 +52,15 @@ const Login = () => {
       // Simple role-based routing based on email domain
       if (data.email.endsWith("@nature.com")) {
         // Admin user
-        localStorage.setItem("user", JSON.stringify({
+        const userData = {
           email: data.email,
-          role: "admin",
+          role: "admin" as const,
           name: data.email.split("@")[0]
-        }));
+        };
+        
+        // Login with context (which also sets localStorage)
+        login(userData);
+        
         toast({
           title: "Admin Login Successful",
           description: "Welcome to the admin portal!",
@@ -62,11 +68,15 @@ const Login = () => {
         navigate("/admin");
       } else if (data.email.endsWith("@gmail.com")) {
         // Customer user
-        localStorage.setItem("user", JSON.stringify({
+        const userData = {
           email: data.email,
-          role: "customer",
+          role: "customer" as const,
           name: data.email.split("@")[0]
-        }));
+        };
+        
+        // Login with context (which also sets localStorage)
+        login(userData);
+        
         toast({
           title: "Login Successful",
           description: "Welcome back!",

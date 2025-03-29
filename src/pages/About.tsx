@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Link } from "react-router-dom";
 import CTASection from "@/components/CTASection";
 import { Leaf, Heart, Users, Globe } from "lucide-react";
 
-const values = [
+const defaultValues = [
   {
     icon: Leaf,
     title: "Sustainability",
@@ -29,7 +30,7 @@ const values = [
   },
 ];
 
-const team = [
+const defaultTeam = [
   {
     name: "Emily Johnson",
     role: "Founder & Head Botanist",
@@ -51,6 +52,51 @@ const team = [
 ];
 
 const About = () => {
+  const [content, setContent] = useState<string | null>(null);
+  
+  // Load content from localStorage if available
+  useEffect(() => {
+    const savedContent = localStorage.getItem('page_about');
+    if (savedContent) {
+      setContent(savedContent);
+    }
+  }, []);
+  
+  // If we have custom content from the CMS, render it
+  if (content) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow">
+          <div className="bg-eco-800 text-white py-20">
+            <div className="eco-container">
+              <div className="max-w-3xl mx-auto text-center">
+                <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">
+                  Our Story
+                </h1>
+              </div>
+            </div>
+          </div>
+          
+          <section className="py-16">
+            <div className="eco-container">
+              <div className="prose prose-green mx-auto">
+                <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />
+              </div>
+            </div>
+          </section>
+          
+          <CTASection />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
+  // Fallback to default About page
+  const values = defaultValues;
+  const team = defaultTeam;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
