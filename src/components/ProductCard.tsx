@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Heart } from "lucide-react";
 
 export interface ProductProps {
@@ -34,10 +34,43 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
   const addToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Get existing cart items
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+    // Check if product already exists in cart
+    const existingItem = existingCart.find((item: any) => item.id === product.id);
+    
+    let updatedCart;
+    if (existingItem) {
+      // Update quantity if item exists
+      updatedCart = existingCart.map((item: any) => 
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+    } else {
+      // Add new item to cart
+      updatedCart = [
+        ...existingCart, 
+        { 
+          id: product.id, 
+          name: product.name, 
+          price: product.discountPrice || product.price,
+          quantity: 1,
+          image: product.image
+        }
+      ];
+    }
+    
+    // Save updated cart
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    
     toast({
       title: "Added to cart",
       description: `${product.name} added to your cart`,
     });
+    
+    // Dispatch custom event for cart update
+    window.dispatchEvent(new CustomEvent('cart-updated'));
   };
 
   return (
@@ -88,11 +121,11 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
           <div>
             {product.discountPrice ? (
               <div className="flex items-center space-x-2">
-                <span className="font-medium text-lg text-gray-900">${product.discountPrice.toFixed(2)}</span>
-                <span className="text-sm text-gray-500 line-through">${product.price.toFixed(2)}</span>
+                <span className="font-medium text-lg text-gray-900">₹{product.discountPrice.toFixed(2)}</span>
+                <span className="text-sm text-gray-500 line-through">₹{product.price.toFixed(2)}</span>
               </div>
             ) : (
-              <span className="font-medium text-lg text-gray-900">${product.price.toFixed(2)}</span>
+              <span className="font-medium text-lg text-gray-900">₹{product.price.toFixed(2)}</span>
             )}
           </div>
           <Button 

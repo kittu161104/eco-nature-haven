@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;
@@ -44,23 +44,25 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const updateCart = (updatedCart: CartItem[]) => {
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    // Dispatch event for cart updates
+    window.dispatchEvent(new CustomEvent('cart-updated'));
   };
 
-  const incrementQuantity = (itemId: number) => {
+  const incrementQuantity = (itemId: string) => {
     const updatedCart = cartItems.map(item => 
       item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
     );
     updateCart(updatedCart);
   };
 
-  const decrementQuantity = (itemId: number) => {
+  const decrementQuantity = (itemId: string) => {
     const updatedCart = cartItems.map(item => 
       item.id === itemId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     );
     updateCart(updatedCart);
   };
 
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => {
     const updatedCart = cartItems.filter(item => item.id !== itemId);
     updateCart(updatedCart);
     
@@ -80,7 +82,7 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     // Create order in localStorage for admin to view
     const orders = JSON.parse(localStorage.getItem("orders") || "[]");
     const newOrder = {
-      id: Math.max(...orders.map((o: any) => o.id), 0) + 1,
+      id: Math.max(...orders.map((o: any) => o.id || 0), 0) + 1,
       orderNumber: `ORD-${Date.now().toString().slice(-8)}`,
       customer: "Guest Customer",
       date: new Date().toLocaleDateString("en-US", {
@@ -155,7 +157,7 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm">{item.name}</h4>
-                    <div className="text-sm text-gray-500">${item.price.toFixed(2)}</div>
+                    <div className="text-sm text-gray-500">₹{item.price.toFixed(2)}</div>
                     <div className="flex items-center gap-2 mt-1">
                       <button 
                         onClick={() => decrementQuantity(item.id)}
@@ -174,7 +176,7 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">${(item.price * item.quantity).toFixed(2)}</div>
+                    <div className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</div>
                     <button 
                       onClick={() => removeItem(item.id)}
                       className="mt-1 text-red-500 hover:text-red-700"
@@ -188,7 +190,7 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
               <div className="pt-2">
                 <div className="flex justify-between py-2 font-medium">
                   <span>Subtotal:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between py-2 text-sm text-gray-500">
                   <span>Shipping:</span>
@@ -196,7 +198,7 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                 </div>
                 <div className="flex justify-between py-2 font-bold text-lg">
                   <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>

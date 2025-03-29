@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +22,10 @@ const Settings = () => {
   const [generalSettings, setGeneralSettings] = useState({
     storeName: "Natural Green Nursery",
     storeEmail: "info@naturalgreen.com",
-    storePhone: "+1 (555) 123-4567",
-    storeAddress: "123 Green Avenue, Eco City, EC 12345",
-    currency: "USD",
-    taxRate: "7.5",
+    storePhone: "+91 9876543210",
+    storeAddress: "123 Garden Street, Green City, India",
+    currency: "INR",
+    taxRate: "18",
   });
   
   const [emailSettings, setEmailSettings] = useState({
@@ -41,7 +41,27 @@ const Settings = () => {
     logoUrl: "",
     enableDarkMode: false,
     productsPerPage: "12",
+    backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
   });
+
+  // Load settings on mount
+  useEffect(() => {
+    const storedGeneralSettings = localStorage.getItem("generalSettings");
+    const storedEmailSettings = localStorage.getItem("emailSettings");
+    const storedAppearanceSettings = localStorage.getItem("appearanceSettings");
+    
+    if (storedGeneralSettings) {
+      setGeneralSettings(JSON.parse(storedGeneralSettings));
+    }
+    
+    if (storedEmailSettings) {
+      setEmailSettings(JSON.parse(storedEmailSettings));
+    }
+    
+    if (storedAppearanceSettings) {
+      setAppearanceSettings(JSON.parse(storedAppearanceSettings));
+    }
+  }, []);
 
   const handleGeneralChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -87,6 +107,9 @@ const Settings = () => {
     localStorage.setItem("emailSettings", JSON.stringify(emailSettings));
     localStorage.setItem("appearanceSettings", JSON.stringify(appearanceSettings));
     
+    // Apply background image directly
+    document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
+    
     toast({
       title: "Settings saved",
       description: "Your settings have been saved successfully.",
@@ -98,10 +121,10 @@ const Settings = () => {
     setGeneralSettings({
       storeName: "Natural Green Nursery",
       storeEmail: "info@naturalgreen.com",
-      storePhone: "+1 (555) 123-4567",
-      storeAddress: "123 Green Avenue, Eco City, EC 12345",
-      currency: "USD",
-      taxRate: "7.5",
+      storePhone: "+91 9876543210",
+      storeAddress: "123 Garden Street, Green City, India",
+      currency: "INR",
+      taxRate: "18",
     });
     
     setEmailSettings({
@@ -117,6 +140,7 @@ const Settings = () => {
       logoUrl: "",
       enableDarkMode: false,
       productsPerPage: "12",
+      backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
     });
     
     toast({
@@ -191,11 +215,10 @@ const Settings = () => {
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="INR">INR (₹)</SelectItem>
                   <SelectItem value="USD">USD ($)</SelectItem>
                   <SelectItem value="EUR">EUR (€)</SelectItem>
                   <SelectItem value="GBP">GBP (£)</SelectItem>
-                  <SelectItem value="CAD">CAD (C$)</SelectItem>
-                  <SelectItem value="AUD">AUD (A$)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -339,6 +362,17 @@ const Settings = () => {
             </div>
             
             <div className="space-y-2">
+              <Label htmlFor="backgroundImage">Background Image URL</Label>
+              <Input
+                id="backgroundImage"
+                name="backgroundImage"
+                placeholder="https://example.com/background.jpg"
+                value={appearanceSettings.backgroundImage}
+                onChange={handleAppearanceChange}
+              />
+            </div>
+            
+            <div className="space-y-2">
               <Label htmlFor="productsPerPage">Products Per Page</Label>
               <Select 
                 value={appearanceSettings.productsPerPage}
@@ -381,6 +415,7 @@ const Settings = () => {
                 className="h-8 rounded mt-2" 
                 style={{ backgroundColor: appearanceSettings.secondaryColor }}
               ></div>
+              <div className="h-32 mt-2 rounded bg-cover bg-center" style={{ backgroundImage: `url(${appearanceSettings.backgroundImage})` }}></div>
             </div>
           </div>
         </TabsContent>
