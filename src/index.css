@@ -1,108 +1,93 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 120 30% 98%;
-    --foreground: 120 10% 15%;
-
-    --card: 120 30% 98%;
-    --card-foreground: 120 10% 15%;
-
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 120 10% 15%;
-
-    --primary: 142 35% 42%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 120 15% 94%;
-    --secondary-foreground: 120 10% 15%;
-
-    --muted: 120 15% 94%;
-    --muted-foreground: 120 5% 45%;
-
-    --accent: 36 40% 65%;
-    --accent-foreground: 120 10% 15%;
-
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 120 15% 90%;
-    --input: 120 15% 90%;
-    --ring: 142 35% 42%;
-
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 120 10% 10%;
-    --foreground: 120 10% 98%;
-
-    --card: 120 10% 12%;
-    --card-foreground: 120 10% 98%;
-
-    --popover: 120 10% 12%;
-    --popover-foreground: 120 10% 98%;
-
-    --primary: 142 30% 40%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 120 10% 18%;
-    --secondary-foreground: 120 10% 98%;
-
-    --muted: 120 10% 18%;
-    --muted-foreground: 120 10% 65%;
-
-    --accent: 36 30% 45%;
-    --accent-foreground: 120 10% 98%;
-
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 120 10% 98%;
-
-    --border: 120 10% 20%;
-    --input: 120 10% 20%;
-    --ring: 142 30% 40%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 142.4 71.8% 29.2%;
   }
+}
+
+/* Custom Eco-friendly color theme */
+:root {
+  --eco-50: #f5f9f7;
+  --eco-100: #e6f3ea;
+  --eco-200: #c8e5d5;
+  --eco-300: #9ad0af;
+  --eco-400: #6cb685;
+  --eco-500: #48a05d;
+  --eco-600: #328a46;
+  --eco-700: #297039;
+  --eco-800: #245a32;
+  --eco-900: #1a462a;
+  --eco-950: #0e2c1a;
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
-
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif font-bold;
+    font-family: 'Merriweather', serif;
   }
 }
 
 @layer components {
   .eco-container {
-    @apply container px-4 md:px-6 mx-auto;
-  }
-  
-  .section-title {
-    @apply text-3xl md:text-4xl font-serif font-bold text-eco-800 mb-6;
-  }
-  
-  .leaf-decoration {
-    @apply inline-block text-eco-500 mx-1 animate-leaf-sway;
-  }
-  
-  .btn-eco-primary {
-    @apply bg-eco-600 hover:bg-eco-700 text-white font-medium py-2 px-4 rounded-md 
-           transition-colors duration-300 shadow-sm flex items-center justify-center gap-2;
-  }
-  
-  .btn-eco-secondary {
-    @apply bg-earth-100 hover:bg-earth-200 text-earth-900 font-medium py-2 px-4 rounded-md 
-           border border-earth-200 transition-colors duration-300 shadow-sm flex items-center justify-center gap-2;
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
   }
 }
+
+.bg-eco-50 { background-color: var(--eco-50); }
+.bg-eco-100 { background-color: var(--eco-100); }
+.bg-eco-600 { background-color: var(--eco-600); }
+.text-eco-600 { color: var(--eco-600); }
+.text-eco-800 { color: var(--eco-800); }
+.hover\:bg-eco-50:hover { background-color: var(--eco-50); }
+.hover\:text-eco-600:hover { color: var(--eco-600); }

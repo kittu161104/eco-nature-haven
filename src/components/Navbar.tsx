@@ -2,11 +2,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, Menu, X, Leaf, Search } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { ShoppingCart, Menu, X, Leaf, Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import SearchModal from "./SearchModal";
+import CartModal from "./CartModal";
+import ProfileMenu from "./ProfileMenu";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
   
   const toggleMenu = () => {
@@ -14,24 +19,11 @@ const Navbar = () => {
   };
 
   const handleSearchClick = () => {
-    toast({
-      title: "Search coming soon",
-      description: "Our search functionality will be available in the next update.",
-    });
+    setIsSearchOpen(true);
   };
 
   const handleCartClick = () => {
-    toast({
-      title: "Shopping cart",
-      description: "Your shopping cart is currently empty.",
-    });
-  };
-
-  const handleProfileClick = () => {
-    toast({
-      title: "User profile",
-      description: "Login and signup features coming soon.",
-    });
+    setIsCartOpen(true);
   };
 
   return (
@@ -83,14 +75,8 @@ const Navbar = () => {
             >
               <ShoppingCart className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-eco-800 hover:text-eco-600 hover:bg-eco-50"
-              onClick={handleProfileClick}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            
+            <ProfileMenu />
 
             {/* Mobile Menu Button */}
             <Button
@@ -147,6 +133,12 @@ const Navbar = () => {
           </div>
         )}
       </div>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      
+      {/* Cart Modal */}
+      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 };
