@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,47 +28,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Plus, Trash, Eye } from "lucide-react";
-
-// Sample blog post data
-const initialPosts = [
-  {
-    id: 1,
-    title: "10 Tips for Indoor Plant Care",
-    excerpt: "Learn how to keep your indoor plants thriving all year round...",
-    status: "published",
-    author: "Emily Johnson",
-    date: "2023-10-15",
-    category: "Plant Care",
-  },
-  {
-    id: 2,
-    title: "Sustainable Gardening Practices",
-    excerpt: "Discover eco-friendly gardening methods that help the environment...",
-    status: "published",
-    author: "Michael Chen",
-    date: "2023-09-28",
-    category: "Sustainability",
-  },
-  {
-    id: 3,
-    title: "Best Plants for Beginners",
-    excerpt: "New to gardening? These plants are perfect for starting your journey...",
-    status: "draft",
-    author: "Sarah Wilson",
-    date: "2023-10-02",
-    category: "Beginners Guide",
-  },
-  {
-    id: 4,
-    title: "Seasonal Planting Guide",
-    excerpt: "What to plant during each season for optimal growth and harvest...",
-    status: "published",
-    author: "Emily Johnson",
-    date: "2023-08-10",
-    category: "Seasonal Tips",
-  },
-];
+import { Pencil, Plus, Trash, Search } from "lucide-react";
 
 interface Post {
   id: number;
@@ -78,28 +38,43 @@ interface Post {
   author: string;
   date: string;
   category: string;
+  content?: string;
 }
 
 const Posts = () => {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<Omit<Post, "id" | "date">>({
     title: "",
     excerpt: "",
     status: "draft",
-    author: "Admin",
-    category: "Plant Care",
+    author: "",
+    category: "",
+    content: "",
   });
   const { toast } = useToast();
+
+  // Load posts from localStorage or use sample data on first load
+  useEffect(() => {
+    const savedPosts = localStorage.getItem("posts");
+    if (savedPosts) {
+      setPosts(JSON.parse(savedPosts));
+    } else {
+      // Don't set any sample data, start with empty array
+      localStorage.setItem("posts", JSON.stringify([]));
+    }
+  }, []);
 
   const handleAddPost = () => {
     setFormData({
       title: "",
       excerpt: "",
       status: "draft",
-      author: "Admin",
-      category: "Plant Care",
+      author: "",
+      category: "",
+      content: "",
     });
     setEditingPost(null);
     setIsDialogOpen(true);
@@ -112,55 +87,65 @@ const Posts = () => {
       status: post.status,
       author: post.author,
       category: post.category,
+      content: post.content || "",
     });
     setEditingPost(post);
     setIsDialogOpen(true);
   };
 
   const handleDeletePost = (id: number) => {
-    setPosts(posts.filter((post) => post.id !== id));
+    const updatedPosts = posts.filter((post) => post.id !== id);
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
     toast({
       title: "Post deleted",
-      description: "The blog post has been deleted successfully.",
+      description: "The post has been deleted successfully.",
     });
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const currentDate = new Date().toISOString().split('T')[0];
-    
     if (editingPost) {
       // Update existing post
-      setPosts(
-        posts.map((post) =>
-          post.id === editingPost.id
-            ? { ...post, ...formData }
-            : post
-        )
+      const updatedPosts = posts.map((post) =>
+        post.id === editingPost.id
+          ? { 
+              ...post, 
+              ...formData, 
+            }
+          : post
       );
+      setPosts(updatedPosts);
+      localStorage.setItem("posts", JSON.stringify(updatedPosts));
       toast({
         title: "Post updated",
-        description: "The blog post has been updated successfully.",
+        description: "The post has been updated successfully.",
       });
     } else {
       // Add new post
-      const newPost = {
+      const newPost: Post = {
         id: Math.max(...posts.map((p) => p.id), 0) + 1,
+        date: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
         ...formData,
-        date: currentDate,
       };
-      setPosts([...posts, newPost]);
+      const updatedPosts = [...posts, newPost];
+      setPosts(updatedPosts);
+      localStorage.setItem("posts", JSON.stringify(updatedPosts));
       toast({
         title: "Post added",
-        description: "The new blog post has been added successfully.",
+        description: "The new post has been added successfully.",
       });
     }
     
     setIsDialogOpen(false);
   };
 
-  const handleInputChange = (
+  const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -170,12 +155,18 @@ const Posts = () => {
     });
   };
 
-  const handleSelectChange = (field: string, value: string) => {
+  const handleStatusChange = (value: "published" | "draft") => {
     setFormData({
       ...formData,
-      [field]: value,
+      status: value,
     });
   };
+
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -187,77 +178,88 @@ const Posts = () => {
         </Button>
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg">
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Input
+          placeholder="Search posts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
               <TableHead>Author</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {posts.map((post) => (
-              <TableRow key={post.id}>
-                <TableCell className="font-medium">{post.title}</TableCell>
-                <TableCell>{post.category}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={post.status === "published" ? "default" : "outline"}
-                    className={post.status === "published" ? "bg-green-500" : ""}
-                  >
-                    {post.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>{post.date}</TableCell>
-                <TableCell>{post.author}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toast({
-                      title: "View post",
-                      description: "Viewing functionality will be implemented soon.",
-                    })}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditPost(post)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeletePost(post.id)}
-                    className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell className="font-medium">{post.title}</TableCell>
+                  <TableCell>
+                    <Badge
+                      className={
+                        post.status === "published"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }
+                    >
+                      {post.status === "published" ? "Published" : "Draft"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{post.author}</TableCell>
+                  <TableCell>{post.category}</TableCell>
+                  <TableCell>{post.date}</TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditPost(post)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  No posts found. Click "Add Post" to create your first blog post.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
 
       {/* Add/Edit Post Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              {editingPost ? "Edit Blog Post" : "Add New Blog Post"}
+              {editingPost ? "Edit Post" : "Add New Post"}
             </DialogTitle>
             <DialogDescription>
               {editingPost
-                ? "Make changes to the blog post details below."
-                : "Fill in the details for the new blog post."}
+                ? "Make changes to the post below."
+                : "Fill in the details for the new post."}
             </DialogDescription>
           </DialogHeader>
 
@@ -270,9 +272,55 @@ const Posts = () => {
                 id="title"
                 name="title"
                 value={formData.title}
-                onChange={handleInputChange}
+                onChange={handleFormChange}
                 required
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="author" className="text-sm font-medium">
+                  Author
+                </label>
+                <Input
+                  id="author"
+                  name="author"
+                  value={formData.author}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="category" className="text-sm font-medium">
+                  Category
+                </label>
+                <Input
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="status" className="text-sm font-medium">
+                  Status
+                </label>
+                <Select
+                  value={formData.status}
+                  onValueChange={handleStatusChange}
+                >
+                  <SelectTrigger id="status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -283,62 +331,22 @@ const Posts = () => {
                 id="excerpt"
                 name="excerpt"
                 value={formData.excerpt}
-                onChange={handleInputChange}
-                rows={3}
+                onChange={handleFormChange}
+                rows={2}
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="category" className="text-sm font-medium">
-                  Category
-                </label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => handleSelectChange("category", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Plant Care">Plant Care</SelectItem>
-                    <SelectItem value="Sustainability">Sustainability</SelectItem>
-                    <SelectItem value="Beginners Guide">Beginners Guide</SelectItem>
-                    <SelectItem value="Seasonal Tips">Seasonal Tips</SelectItem>
-                    <SelectItem value="DIY Projects">DIY Projects</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="status" className="text-sm font-medium">
-                  Status
-                </label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value) => handleSelectChange("status", value as "published" | "draft")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <label htmlFor="author" className="text-sm font-medium">
-                Author
+              <label htmlFor="content" className="text-sm font-medium">
+                Content
               </label>
-              <Input
-                id="author"
-                name="author"
-                value={formData.author}
-                onChange={handleInputChange}
+              <Textarea
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleFormChange}
+                rows={10}
                 required
               />
             </div>

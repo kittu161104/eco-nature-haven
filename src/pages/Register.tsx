@@ -27,7 +27,7 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 
@@ -37,7 +37,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -56,38 +56,47 @@ const Register = () => {
     setTimeout(() => {
       setIsLoading(false);
       
-      const isAdminEmail = data.email.endsWith("@nature.com");
-      const isCustomerEmail = data.email.endsWith("@gmail.com");
-      
-      if (!isAdminEmail && !isCustomerEmail) {
+      try {
+        // Determine role based on email domain
+        let role: "admin" | "customer" = "customer";
+        
+        if (data.email.endsWith("@nature.com")) {
+          role = "admin";
+        } else if (data.email.endsWith("@gmail.com")) {
+          role = "customer";
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description: "Please use an email ending with @nature.com (for admin) or @gmail.com (for customer).",
+          });
+          return;
+        }
+        
+        // Register with context (which also sets localStorage)
+        register({
+          email: data.email,
+          name: data.name,
+          role: role,
+        });
+        
+        toast({
+          title: "Registration Successful",
+          description: "Your account has been created.",
+        });
+        
+        // Redirect based on role
+        if (role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } catch (error) {
         toast({
           variant: "destructive",
           title: "Registration Failed",
-          description: "Invalid email domain. Admin emails must end with @nature.com and customer emails must end with @gmail.com.",
+          description: "An error occurred during registration.",
         });
-        return;
-      }
-      
-      // Create user object
-      const userData = {
-        name: data.name,
-        email: data.email,
-        role: isAdminEmail ? "admin" : "customer",
-      };
-      
-      // Store user in localStorage and context
-      login(userData);
-      
-      toast({
-        title: "Registration Successful",
-        description: "Your account has been created and you're now logged in!",
-      });
-      
-      // Redirect based on role
-      if (isAdminEmail) {
-        navigate("/admin");
-      } else {
-        navigate("/");
       }
     }, 1500);
   };
@@ -111,7 +120,7 @@ const Register = () => {
                 className="p-0 h-auto" 
                 onClick={() => navigate("/login")}
               >
-                sign in to your existing account
+                sign in to your account
               </Button>
             </p>
           </div>
@@ -125,15 +134,15 @@ const Register = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your Name" {...field} />
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -144,10 +153,6 @@ const Register = () => {
                       <Input placeholder="your.email@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Admin emails must end with @nature.com<br />
-                      Customer emails must end with @gmail.com
-                    </p>
                   </FormItem>
                 )}
               />
@@ -165,7 +170,7 @@ const Register = () => {
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="confirmPassword"
@@ -194,6 +199,12 @@ const Register = () => {
               </div>
             </form>
           </Form>
+          
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            <p>Register with:</p>
+            <p>Admin: example@nature.com</p>
+            <p>Customer: example@gmail.com</p>
+          </div>
         </div>
       </main>
       <Footer />

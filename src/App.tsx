@@ -18,6 +18,9 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import Posts from "./pages/admin/Posts";
 import Pages from "./pages/admin/Pages";
+import Orders from "./pages/admin/Orders";
+import Customers from "./pages/admin/Customers";
+import Settings from "./pages/admin/Settings";
 
 // Add CSS class for container
 import "./index.css";
@@ -45,11 +48,11 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
-              <Route path="orders" element={<Products />} /> {/* This will be replaced with Orders component later */}
+              <Route path="orders" element={<Orders />} />
               <Route path="posts" element={<Posts />} />
-              <Route path="customers" element={<Dashboard />} /> {/* Placeholder */}
+              <Route path="customers" element={<Customers />} />
               <Route path="pages" element={<Pages />} />
-              <Route path="settings" element={<Dashboard />} /> {/* Placeholder */}
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* Catch-all Route */}
