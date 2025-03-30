@@ -19,7 +19,7 @@ const FeaturedProducts = () => {
       setProducts(parsedProducts);
       
       // Extract unique categories
-      const uniqueCategories = ["All", ...new Set(parsedProducts.map((p: ProductProps) => p.category))];
+      const uniqueCategories = ["All", ...new Set(parsedProducts.map((p: ProductProps) => p.category))] as string[];
       setCategories(uniqueCategories);
     }
     

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -52,53 +51,13 @@ const Register = () => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
+    try {
+      await register(data.name, data.email, data.password);
+      // Register function already handles navigation and toast messages
+    } catch (error) {
+      // Error handling is done in register function
       setIsLoading(false);
-      
-      try {
-        // Determine role based on email domain
-        let role: "admin" | "customer" = "customer";
-        
-        if (data.email.endsWith("@nature.com")) {
-          role = "admin";
-        } else if (data.email.endsWith("@gmail.com")) {
-          role = "customer";
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Registration Failed",
-            description: "Please use an email ending with @nature.com (for admin) or @gmail.com (for customer).",
-          });
-          return;
-        }
-        
-        // Register with context (which also sets localStorage)
-        register({
-          email: data.email,
-          name: data.name,
-          role: role,
-        });
-        
-        toast({
-          title: "Registration Successful",
-          description: "Your account has been created.",
-        });
-        
-        // Redirect based on role
-        if (role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Registration Failed",
-          description: "An error occurred during registration.",
-        });
-      }
-    }, 1500);
+    }
   };
 
   return (

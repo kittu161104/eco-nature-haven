@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -45,52 +44,13 @@ const Login = () => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
+    try {
+      await login(data.email, data.password);
+      // Login function already handles navigation and toast messages
+    } catch (error) {
+      // Error handling is done in login function
       setIsLoading(false);
-      
-      // Simple role-based routing based on email domain
-      if (data.email.endsWith("@nature.com")) {
-        // Admin user
-        const userData = {
-          email: data.email,
-          role: "admin" as const,
-          name: data.email.split("@")[0]
-        };
-        
-        // Login with context (which also sets localStorage)
-        login(userData);
-        
-        toast({
-          title: "Admin Login Successful",
-          description: "Welcome to the admin portal!",
-        });
-        navigate("/admin");
-      } else if (data.email.endsWith("@gmail.com")) {
-        // Customer user
-        const userData = {
-          email: data.email,
-          role: "customer" as const,
-          name: data.email.split("@")[0]
-        };
-        
-        // Login with context (which also sets localStorage)
-        login(userData);
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-        navigate("/");
-      } else {
-        // Invalid domain
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: "Invalid email domain. Admin emails must end with @nature.com and customer emails must end with @gmail.com.",
-        });
-      }
-    }, 1500);
+    }
   };
 
   return (
