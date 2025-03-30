@@ -24,7 +24,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Tabs,
@@ -53,7 +52,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface OrderItem {
   id: string;
@@ -106,6 +105,20 @@ interface Order {
   createdAt: string;
   updatedAt: string;
 }
+
+// Helper function to safely format dates
+const safeFormatDate = (dateString: string, formatStr: string = 'MMM dd, yyyy - HH:mm'): string => {
+  if (!dateString) return 'Invalid date';
+  
+  try {
+    const date = parseISO(dateString);
+    if (!isValid(date)) return 'Invalid date';
+    return format(date, formatStr);
+  } catch (error) {
+    console.error("Date formatting error:", error, "for date string:", dateString);
+    return 'Invalid date';
+  }
+};
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -284,7 +297,7 @@ const Orders = () => {
           return { 
             ...order, 
             actions: updatedActions,
-            status: "cancelled",
+            status: "cancelled" as Order["status"],
             tracking: updatedTracking,
             updatedAt: new Date().toISOString()
           };
@@ -719,7 +732,7 @@ const Orders = () => {
                                 <div className="ml-10">
                                   <p className="font-medium capitalize">{step.status.replace(/_/g, ' ')}</p>
                                   <p className="text-sm text-gray-500">
-                                    {format(new Date(step.date), 'MMM dd, yyyy - HH:mm')}
+                                    {safeFormatDate(step.date)}
                                   </p>
                                   <p className="text-sm">{step.message}</p>
                                 </div>
@@ -750,7 +763,7 @@ const Orders = () => {
                           </div>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                            <p>Customer since: {format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy')}</p>
+                            <p>Customer since: {safeFormatDate(selectedOrder.createdAt, 'MMM dd, yyyy')}</p>
                           </div>
                         </div>
                       </div>
@@ -785,7 +798,7 @@ const Orders = () => {
                             .map(order => (
                               <TableRow key={order.id}>
                                 <TableCell>{order.orderNumber}</TableCell>
-                                <TableCell>{format(new Date(order.createdAt), 'MMM dd, yyyy')}</TableCell>
+                                <TableCell>{safeFormatDate(order.createdAt, 'MMM dd, yyyy')}</TableCell>
                                 <TableCell>
                                   <Badge className={getStatusColor(order.status)}>
                                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -818,7 +831,7 @@ const Orders = () => {
                             
                             <div className="space-y-3">
                               <div>
-                                <p className="text-sm text-gray-500">Requested on {format(new Date(action.requestDate), 'MMM dd, yyyy - HH:mm')}</p>
+                                <p className="text-sm text-gray-500">Requested on {safeFormatDate(action.requestDate)}</p>
                               </div>
                               
                               <div className="bg-gray-50 p-3 rounded-md">
@@ -899,7 +912,7 @@ const Orders = () => {
                                       </Badge>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                      {format(new Date(action.requestDate), 'MMM dd, yyyy')}
+                                      {safeFormatDate(action.requestDate, 'MMM dd, yyyy')}
                                     </p>
                                   </div>
                                 ))}
