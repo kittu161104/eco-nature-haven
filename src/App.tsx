@@ -24,6 +24,7 @@ import Customers from "./pages/admin/Customers";
 import Settings from "./pages/admin/Settings";
 import Account from "./pages/Account";
 import UserOrders from "./pages/UserOrders";
+import Payment from "./pages/Payment";
 
 // Add CSS class for container
 import "./index.css";
@@ -83,6 +84,7 @@ const AppContent = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/account" element={<Account />} />
       <Route path="/orders" element={<UserOrders />} />
+      <Route path="/payment" element={<Payment />} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>

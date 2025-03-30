@@ -31,6 +31,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Package, 
   ShoppingBag, 
@@ -39,9 +59,14 @@ import {
   IndianRupee, 
   Truck, 
   CheckCircle2,
-  ClipboardList 
+  ClipboardList,
+  XCircle,
+  RefreshCw,
+  ArrowLeft,
+  AlertCircle
 } from "lucide-react";
 import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
 
 // Order type definition
 interface OrderItem {
@@ -53,12 +78,33 @@ interface OrderItem {
   image: string;
 }
 
+interface TrackingHistory {
+  status: string;
+  date: string;
+  message: string;
+}
+
+interface OrderAction {
+  type: "cancel" | "return" | "refund";
+  requestDate: string;
+  reason: string;
+  status: "pending" | "approved" | "rejected";
+  responseMessage?: string;
+  responseDate?: string;
+}
+
 interface Order {
   id: string;
   userId: string;
+  orderNumber: string;
   items: OrderItem[];
   total: number;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  tracking?: {
+    current: string;
+    history: TrackingHistory[];
+  };
+  actions?: OrderAction[];
   shippingAddress: {
     name: string;
     address: string;
@@ -68,6 +114,7 @@ interface Order {
     country: string;
   };
   paymentMethod: string;
+  paymentDetails?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,6 +122,10 @@ interface Order {
 const UserOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+  const [actionType, setActionType] = useState<"cancel" | "return" | "refund">("cancel");
+  const [actionReason, setActionReason] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -161,6 +212,107 @@ const UserOrders = () => {
     }
   };
 
+  const getActionStatusBadge = (status: OrderAction['status']) => {
+    switch (status) {
+      case "pending":
+        return <Badge className="bg-yellow-500">Pending</Badge>;
+      case "approved":
+        return <Badge className="bg-green-500">Approved</Badge>;
+      case "rejected":
+        return <Badge className="bg-red-500">Rejected</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
+  const handleOrderAction = () => {
+    if (!selectedOrder || !actionReason.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please provide a reason for your request.",
+      });
+      return;
+    }
+
+    const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    const orderIndex = allOrders.findIndex((o: Order) => o.id === selectedOrder.id);
+    
+    if (orderIndex !== -1) {
+      // Create new action
+      const newAction: OrderAction = {
+        type: actionType,
+        requestDate: new Date().toISOString(),
+        reason: actionReason,
+        status: "pending"
+      };
+      
+      // Update order with the new action
+      if (!allOrders[orderIndex].actions) {
+        allOrders[orderIndex].actions = [];
+      }
+      
+      allOrders[orderIndex].actions.push(newAction);
+      
+      // If cancellation and order is still pending, update status
+      if (actionType === "cancel" && allOrders[orderIndex].status === "pending") {
+        allOrders[orderIndex].status = "cancelled";
+        
+        if (allOrders[orderIndex].tracking) {
+          allOrders[orderIndex].tracking.current = "cancelled";
+          allOrders[orderIndex].tracking.history.push({
+            status: "cancelled",
+            date: new Date().toISOString(),
+            message: "Order cancelled by customer"
+          });
+        }
+      }
+      
+      // Save updated orders
+      localStorage.setItem("orders", JSON.stringify(allOrders));
+      
+      // Refresh orders list
+      setOrders(allOrders.filter((order: Order) => order.userId === user?.id));
+      
+      // Show success message
+      toast({
+        title: 
+          actionType === "cancel" ? "Cancellation request submitted" :
+          actionType === "return" ? "Return request submitted" :
+          "Refund request submitted",
+        description: "Your request has been submitted and will be processed soon.",
+      });
+      
+      // Dispatch event for admin panel to update
+      window.dispatchEvent(new CustomEvent('orders-updated'));
+      
+      // Close dialog and reset form
+      setIsActionDialogOpen(false);
+      setActionReason("");
+      setSelectedOrder(null);
+    }
+  };
+
+  const canCancel = (order: Order) => {
+    return order.status === "pending";
+  };
+
+  const canReturn = (order: Order) => {
+    return order.status === "delivered" && 
+           (new Date().getTime() - new Date(order.updatedAt).getTime()) < 14 * 24 * 60 * 60 * 1000; // 14 days
+  };
+
+  const canRefund = (order: Order) => {
+    return (order.status === "delivered" || order.status === "shipped") && 
+           (new Date().getTime() - new Date(order.createdAt).getTime()) < 30 * 24 * 60 * 60 * 1000; // 30 days
+  };
+
+  const hasActiveAction = (order: Order, type: "cancel" | "return" | "refund") => {
+    return order.actions?.some(action => 
+      action.type === type && action.status === "pending"
+    );
+  };
+
   if (!user) {
     return null;
   }
@@ -191,7 +343,7 @@ const UserOrders = () => {
                       <div>
                         <CardTitle className="flex items-center">
                           <Package className="h-5 w-5 mr-2 text-eco-600" />
-                          Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}
+                          Order #{order.orderNumber || (typeof order.id === 'string' ? order.id.slice(-8) : order.id)}
                         </CardTitle>
                         <CardDescription className="mt-1">
                           <div className="flex items-center gap-4">
@@ -223,6 +375,41 @@ const UserOrders = () => {
                         </AccordionTrigger>
                         <AccordionContent className="px-6 pb-4">
                           <div className="space-y-4">
+                            {/* Order Tracking Section */}
+                            {order.tracking && (
+                              <div className="bg-gray-50 p-4 rounded-md">
+                                <h3 className="font-medium mb-4 flex items-center">
+                                  <Truck className="h-4 w-4 mr-2" />
+                                  Order Tracking
+                                </h3>
+                                <div className="relative">
+                                  <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                                  <div className="space-y-6">
+                                    {order.tracking.history.map((step, index) => (
+                                      <div key={index} className="relative flex items-start">
+                                        <div className={`absolute left-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                                          index === 0 ? "bg-eco-600 text-white" : "bg-gray-200 text-gray-500"
+                                        }`}>
+                                          {index === 0 ? (
+                                            <CheckCircle2 className="w-4 h-4" />
+                                          ) : (
+                                            <span className="text-xs">{index + 1}</span>
+                                          )}
+                                        </div>
+                                        <div className="ml-10">
+                                          <p className="font-medium capitalize">{step.status}</p>
+                                          <p className="text-sm text-gray-500">
+                                            {format(new Date(step.date), 'MMM dd, yyyy - HH:mm')}
+                                          </p>
+                                          <p className="text-sm">{step.message}</p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
                             <div className="bg-gray-50 p-4 rounded-md">
                               <h3 className="font-medium mb-2 flex items-center">
                                 <Truck className="h-4 w-4 mr-2" />
@@ -236,6 +423,7 @@ const UserOrders = () => {
                               <p>{order.shippingAddress.country}</p>
                             </div>
                             
+                            {/* Order Items Section */}
                             <div className="bg-gray-50 p-4 rounded-md">
                               <h3 className="font-medium mb-2 flex items-center">
                                 <ClipboardList className="h-4 w-4 mr-2" />
@@ -274,6 +462,7 @@ const UserOrders = () => {
                               </Table>
                             </div>
                             
+                            {/* Payment Summary Section */}
                             <div className="bg-gray-50 p-4 rounded-md">
                               <h3 className="font-medium mb-2">Payment Summary</h3>
                               <div className="space-y-2">
@@ -294,17 +483,128 @@ const UserOrders = () => {
                                   <span>Payment Method</span>
                                   <span>{order.paymentMethod}</span>
                                 </div>
+                                {order.paymentDetails && (
+                                  <div className="flex justify-between text-sm text-muted-foreground">
+                                    <span>Payment Details</span>
+                                    <span>{order.paymentDetails}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
+
+                            {/* Order Actions History Section */}
+                            {order.actions && order.actions.length > 0 && (
+                              <div className="bg-gray-50 p-4 rounded-md">
+                                <h3 className="font-medium mb-2 flex items-center">
+                                  <ClipboardList className="h-4 w-4 mr-2" />
+                                  Action History
+                                </h3>
+                                <div className="space-y-4">
+                                  {order.actions.map((action, index) => (
+                                    <div key={index} className="border-b pb-3 last:border-0 last:pb-0">
+                                      <div className="flex justify-between items-start">
+                                        <div>
+                                          <p className="font-medium capitalize">
+                                            {action.type} Request
+                                          </p>
+                                          <p className="text-sm text-gray-500">
+                                            {format(new Date(action.requestDate), 'MMM dd, yyyy - HH:mm')}
+                                          </p>
+                                        </div>
+                                        <div>
+                                          {getActionStatusBadge(action.status)}
+                                        </div>
+                                      </div>
+                                      <p className="text-sm mt-2">
+                                        <span className="font-medium">Reason:</span> {action.reason}
+                                      </p>
+                                      {action.responseMessage && (
+                                        <div className="mt-2 text-sm bg-gray-100 p-2 rounded">
+                                          <p className="font-medium">Response:</p>
+                                          <p>{action.responseMessage}</p>
+                                          {action.responseDate && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              {format(new Date(action.responseDate), 'MMM dd, yyyy - HH:mm')}
+                                            </p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
                   </CardContent>
-                  <CardFooter className="flex justify-between bg-gray-50 border-t">
+                  <CardFooter className="flex flex-wrap gap-2 bg-gray-50 border-t p-4">
                     <Button variant="outline" size="sm" onClick={() => window.print()}>
                       Print Receipt
                     </Button>
+                    
+                    {canCancel(order) && !hasActiveAction(order, "cancel") && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-200">
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel Order
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to cancel this order? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>No, Keep Order</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setActionType("cancel");
+                                setIsActionDialogOpen(true);
+                              }}
+                            >
+                              Yes, Cancel Order
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                    
+                    {canReturn(order) && !hasActiveAction(order, "return") && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setActionType("return");
+                          setIsActionDialogOpen(true);
+                        }}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Return Item
+                      </Button>
+                    )}
+                    
+                    {canRefund(order) && !hasActiveAction(order, "refund") && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setActionType("refund");
+                          setIsActionDialogOpen(true);
+                        }}
+                      >
+                        <IndianRupee className="h-4 w-4 mr-2" />
+                        Request Refund
+                      </Button>
+                    )}
+                    
                     {order.status === "delivered" && (
                       <Button variant="outline" size="sm" className="text-green-600 border-green-200">
                         <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -331,6 +631,65 @@ const UserOrders = () => {
           )}
         </div>
       </main>
+
+      {/* Action Dialog (Cancel/Return/Refund) */}
+      <Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === "cancel" 
+                ? "Cancel Order" 
+                : actionType === "return" 
+                  ? "Return Items" 
+                  : "Request Refund"}
+            </DialogTitle>
+            <DialogDescription>
+              {actionType === "cancel" 
+                ? "Please provide a reason for cancelling this order."
+                : actionType === "return"
+                  ? "Please provide details about why you're returning these items."
+                  : "Please explain why you're requesting a refund."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="reason">Reason</label>
+              <Textarea
+                id="reason"
+                placeholder="Enter your reason here..."
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+            
+            <div className="bg-yellow-50 p-3 rounded-md text-sm flex gap-2 text-yellow-800 border border-yellow-200">
+              <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+              <div>
+                {actionType === "cancel" 
+                  ? "Cancellation is only possible for pending orders. Once shipped, you'll need to return the items."
+                  : actionType === "return"
+                    ? "Returns are only accepted within 14 days of delivery and items must be in original condition."
+                    : "Refund requests are processed within 7-10 business days after approval."}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsActionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleOrderAction}
+              disabled={!actionReason.trim()}
+            >
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

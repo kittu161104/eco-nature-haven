@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -92,70 +91,14 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       return;
     }
     
-    setTimeout(() => {
-      // Create order in localStorage for admin to view and for My Orders
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      const orderId = `ORD-${Date.now().toString().slice(-8)}`;
-      
-      const newOrder = {
-        id: orders.length + 1,
-        orderNumber: orderId,
-        userId: user.id,
-        customer: user.name,
-        date: new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        total: calculateTotal(),
-        status: "pending" as const,
-        items: cartItems.map(item => ({
-          id: item.id,
-          productId: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image
-        })),
-        shippingAddress: {
-          name: user.name,
-          address: "123 Main Street",
-          city: "Mumbai",
-          state: "Maharashtra",
-          zip: "400001",
-          country: "India"
-        },
-        paymentMethod: "Credit Card"
-      };
-      
-      orders.push(newOrder);
-      localStorage.setItem("orders", JSON.stringify(orders));
-      
-      // Clear cart after successful checkout
-      setCartItems([]);
-      localStorage.setItem("cart", JSON.stringify([]));
-      
-      // Close modal
-      onClose();
-      
-      // Navigate to Orders page with success message
-      navigate("/orders");
-      
-      // Show success toast
-      toast({
-        title: "Order placed successfully!",
-        description: `Your order #${orderId} has been placed.`,
-      });
-      
-      // Dispatch event to notify of order creation
-      window.dispatchEvent(new CustomEvent('order-created', { 
-        detail: { orderId: newOrder.id }
-      }));
-      
-      setLoading(false);
-    }, 1500);
+    // Close modal and navigate to payment page
+    onClose();
+    navigate("/payment", { 
+      state: { 
+        cartItems,
+        total: calculateTotal()
+      } 
+    });
   };
 
   return (
