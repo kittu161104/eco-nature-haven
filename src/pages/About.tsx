@@ -7,6 +7,26 @@ import { Link } from "react-router-dom";
 import CTASection from "@/components/CTASection";
 import { Leaf, Heart, Users, Globe } from "lucide-react";
 
+interface TeamMember {
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+}
+
+interface Value {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+interface VisitInfo {
+  address: string;
+  hours: string;
+  description: string;
+  image: string;
+}
+
 const defaultValues = [
   {
     icon: Leaf,
@@ -51,14 +71,56 @@ const defaultTeam = [
   },
 ];
 
+// Helper function to get the correct icon component
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case "Leaf": return Leaf;
+    case "Heart": return Heart;
+    case "Users": return Users;
+    case "Globe": return Globe;
+    default: return Leaf;
+  }
+};
+
 const About = () => {
   const [content, setContent] = useState<string | null>(null);
+  const [missionContent, setMissionContent] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultTeam);
+  const [values, setValues] = useState<any[]>(defaultValues);
+  const [visitInfo, setVisitInfo] = useState<VisitInfo | null>(null);
   
   // Load content from localStorage if available
   useEffect(() => {
     const savedContent = localStorage.getItem('page_about');
+    const savedMission = localStorage.getItem('about_mission');
+    const savedTeam = localStorage.getItem('about_team');
+    const savedValues = localStorage.getItem('about_values');
+    const savedVisit = localStorage.getItem('about_visit');
+    
     if (savedContent) {
       setContent(savedContent);
+    }
+    
+    if (savedMission) {
+      setMissionContent(savedMission);
+    }
+    
+    if (savedTeam) {
+      setTeamMembers(JSON.parse(savedTeam));
+    }
+    
+    if (savedValues) {
+      const parsedValues = JSON.parse(savedValues);
+      // Transform the values to include actual icon components
+      const transformedValues = parsedValues.map((value: Value) => ({
+        ...value,
+        icon: getIconComponent(value.icon)
+      }));
+      setValues(transformedValues);
+    }
+    
+    if (savedVisit) {
+      setVisitInfo(JSON.parse(savedVisit));
     }
   }, []);
   
@@ -93,10 +155,6 @@ const About = () => {
     );
   }
   
-  // Fallback to default About page
-  const values = defaultValues;
-  const team = defaultTeam;
-
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -121,15 +179,21 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="section-title">Our Mission</h2>
-                <p className="text-gray-600 mb-6">
-                  Founded in 2015, Natural Green began with a simple idea: to create a plant nursery that puts sustainability and plant health first. What started as a small backyard greenhouse has grown into a thriving nursery dedicated to providing healthy, sustainably grown plants and expert gardening advice.
-                </p>
-                <p className="text-gray-600 mb-6">
-                  Our mission is to inspire and enable sustainable living through plants. We believe that every plant we sell has the potential to make homes healthier, gardens more vibrant, and our planet a little greener.
-                </p>
-                <p className="text-gray-600">
-                  We're committed to sustainable growing practices, plastic-free packaging, and supporting local conservation efforts. When you shop with us, you're not just buying plants – you're supporting a vision of a greener, more sustainable future.
-                </p>
+                {missionContent ? (
+                  <div className="text-gray-600 space-y-4" dangerouslySetInnerHTML={{ __html: missionContent.replace(/\n/g, '<br>') }} />
+                ) : (
+                  <>
+                    <p className="text-gray-600 mb-6">
+                      Founded in 2015, Natural Green began with a simple idea: to create a plant nursery that puts sustainability and plant health first. What started as a small backyard greenhouse has grown into a thriving nursery dedicated to providing healthy, sustainably grown plants and expert gardening advice.
+                    </p>
+                    <p className="text-gray-600 mb-6">
+                      Our mission is to inspire and enable sustainable living through plants. We believe that every plant we sell has the potential to make homes healthier, gardens more vibrant, and our planet a little greener.
+                    </p>
+                    <p className="text-gray-600">
+                      We're committed to sustainable growing practices, plastic-free packaging, and supporting local conservation efforts. When you shop with us, you're not just buying plants – you're supporting a vision of a greener, more sustainable future.
+                    </p>
+                  </>
+                )}
               </div>
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img 
@@ -177,7 +241,7 @@ const About = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {team.map((member, index) => (
+              {teamMembers.map((member, index) => (
                 <div key={index} className="bg-white rounded-lg overflow-hidden shadow-sm">
                   <img 
                     src={member.image} 
@@ -201,28 +265,46 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="section-title">Visit Our Nursery</h2>
-                <p className="text-gray-600 mb-6">
-                  We'd love to welcome you to our physical location where you can explore our full collection of plants, get personalized advice from our experts, and experience our sustainable nursery practices firsthand.
-                </p>
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Address</h4>
-                    <p className="text-gray-600">123 Green Avenue, Eco City, EC 12345</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">Hours</h4>
-                    <p className="text-gray-600">Monday - Friday: 9am - 6pm</p>
-                    <p className="text-gray-600">Saturday: 8am - 5pm</p>
-                    <p className="text-gray-600">Sunday: 10am - 4pm</p>
-                  </div>
-                </div>
+                {visitInfo ? (
+                  <>
+                    <p className="text-gray-600 mb-6">{visitInfo.description}</p>
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Address</h4>
+                        <p className="text-gray-600">{visitInfo.address}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Hours</h4>
+                        <div className="text-gray-600" dangerouslySetInnerHTML={{ __html: visitInfo.hours.replace(/\n/g, '<br>') }} />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-600 mb-6">
+                      We'd love to welcome you to our physical location where you can explore our full collection of plants, get personalized advice from our experts, and experience our sustainable nursery practices firsthand.
+                    </p>
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Address</h4>
+                        <p className="text-gray-600">123 Green Avenue, Eco City, EC 12345</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Hours</h4>
+                        <p className="text-gray-600">Monday - Friday: 9am - 6pm</p>
+                        <p className="text-gray-600">Saturday: 8am - 5pm</p>
+                        <p className="text-gray-600">Sunday: 10am - 4pm</p>
+                      </div>
+                    </div>
+                  </>
+                )}
                 <Button asChild className="bg-eco-600 hover:bg-eco-700">
                   <Link to="/contact">Contact Us</Link>
                 </Button>
               </div>
               <div className="rounded-lg overflow-hidden shadow-lg">
                 <img 
-                  src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80" 
+                  src={visitInfo?.image || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80"} 
                   alt="Interior of our plant nursery"
                   className="w-full h-full object-cover"
                 />
