@@ -54,6 +54,52 @@ const applyStoredSettings = () => {
   }
 };
 
+// Component to initialize empty data structures if needed
+const InitializeStoreData = () => {
+  useEffect(() => {
+    // Initialize products if empty
+    if (!localStorage.getItem("products")) {
+      localStorage.setItem("products", JSON.stringify([]));
+    }
+    
+    // Initialize posts if empty
+    if (!localStorage.getItem("posts")) {
+      localStorage.setItem("posts", JSON.stringify([]));
+    }
+    
+    // Initialize orders if empty
+    if (!localStorage.getItem("orders")) {
+      localStorage.setItem("orders", JSON.stringify([]));
+    }
+    
+    // Initialize customers if empty
+    if (!localStorage.getItem("customers")) {
+      localStorage.setItem("customers", JSON.stringify([]));
+    }
+    
+    // Initialize about page content if empty
+    if (!localStorage.getItem("aboutContent")) {
+      localStorage.setItem("aboutContent", JSON.stringify({
+        about: "Welcome to our nursery!",
+        mission: "Our mission is to provide high-quality plants and gardening supplies.",
+        values: "We value sustainability, quality, and customer satisfaction.",
+        team: [
+          {
+            id: "1",
+            name: "Admin",
+            role: "Owner",
+            bio: "Add team member details from the admin panel.",
+            image: "/placeholder.svg"
+          }
+        ],
+        visit: "Visit our nursery information. Edit from admin panel."
+      }));
+    }
+  }, []);
+  
+  return null;
+};
+
 const AppContent = () => {
   useEffect(() => {
     // Apply settings on initial load
@@ -74,34 +120,37 @@ const AppContent = () => {
   }, []);
   
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Index />} />
-      <Route path="/shop" element={<Shop />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:id" element={<BlogDetail />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/account" element={<Account />} />
-      <Route path="/orders" element={<UserOrders />} />
-      <Route path="/payment" element={<Payment />} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="posts" element={<Posts />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="pages" element={<Pages />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
-      
-      {/* Catch-all Route */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      <InitializeStoreData />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Index />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/orders" element={<UserOrders />} />
+        <Route path="/payment" element={<Payment />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="posts" element={<Posts />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="pages" element={<Pages />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        
+        {/* Catch-all Route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 };
 

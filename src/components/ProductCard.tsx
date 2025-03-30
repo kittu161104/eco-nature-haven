@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Leaf } from "lucide-react";
 
 export interface ProductProps {
   id: string;
@@ -20,6 +20,7 @@ export interface ProductProps {
 const ProductCard = ({ product }: { product: ProductProps }) => {
   const [isWishlist, setIsWishlist] = useState(false);
   const { toast } = useToast();
+  const defaultImageUrl = "/placeholder.svg";
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -93,11 +94,21 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
       
       {/* Product image */}
       <Link to={`/product/${product.id}`} className="block relative pt-[100%]">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-        />
+        {product.image ? (
+          <img 
+            src={product.image || defaultImageUrl} 
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = defaultImageUrl;
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-100">
+            <Leaf className="h-12 w-12 text-gray-300" />
+          </div>
+        )}
       </Link>
       
       {/* Product info */}
@@ -146,7 +157,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
         </div>
 
         {/* Tags */}
-        {product.tags.length > 0 && (
+        {product.tags && product.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
             {product.tags.map((tag, index) => (
               <span 

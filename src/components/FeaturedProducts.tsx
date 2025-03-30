@@ -43,8 +43,8 @@ const FeaturedProducts = () => {
   }, []);
 
   const filteredProducts = activeCategory === "All"
-    ? products
-    : products.filter(product => product.category === activeCategory);
+    ? products.slice(0, 8) // Show only first 8 products on homepage
+    : products.filter(product => product.category === activeCategory).slice(0, 8);
 
   return (
     <section className="py-16 bg-eco-50 bg-opacity-70">
@@ -93,13 +93,20 @@ const FeaturedProducts = () => {
             <Leaf className="h-16 w-16 text-eco-600 mx-auto mb-4 opacity-70" />
             <h3 className="text-xl font-medium mb-2">No products available</h3>
             <p className="text-gray-600 mb-6">
-              There are no products to display at this time. Please check back later or contact the administrator.
+              {products.length === 0 
+                ? "There are no products to display at this time. Please check back later."
+                : `No products found in the "${activeCategory}" category.`}
             </p>
+            {activeCategory !== "All" && (
+              <Button onClick={() => setActiveCategory("All")}>
+                View All Categories
+              </Button>
+            )}
           </div>
         )}
 
         {/* View all button */}
-        {products.length > 0 && (
+        {products.length > 8 && (
           <div className="text-center mt-10">
             <Button asChild className="bg-eco-600 hover:bg-eco-700">
               <Link to="/shop">View All Products</Link>

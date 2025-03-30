@@ -48,6 +48,17 @@ const BlogDetail = () => {
     };
 
     loadPost();
+    
+    // Listen for updates to blog posts
+    const handleBlogUpdates = () => {
+      loadPost();
+    };
+    
+    window.addEventListener('posts-updated', handleBlogUpdates);
+    
+    return () => {
+      window.removeEventListener('posts-updated', handleBlogUpdates);
+    };
   }, [id]);
 
   if (loading) {

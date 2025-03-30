@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,147 +10,64 @@ import { Slider } from "@/components/ui/slider";
 import { ProductProps } from "@/components/ProductCard";
 import ProductCard from "@/components/ProductCard";
 import { Search, Leaf, Filter, X } from "lucide-react";
-
-// Sample products (using the same data from FeaturedProducts for now)
-const sampleProducts: ProductProps[] = [
-  {
-    id: "1",
-    name: "Peace Lily",
-    description: "A beautiful indoor plant that purifies the air and requires minimal care.",
-    price: 29.99,
-    image: "https://images.unsplash.com/photo-1593482892290-f54927ae2bb2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Air purifying", "Low light"],
-    inStock: true,
-  },
-  {
-    id: "2",
-    name: "Snake Plant",
-    description: "A hardy indoor plant that thrives with minimal attention. Perfect for beginners.",
-    price: 24.99,
-    discountPrice: 19.99,
-    image: "https://images.unsplash.com/photo-1620127252536-03bdfcf6d5c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Air purifying", "Low maintenance"],
-    inStock: true,
-  },
-  {
-    id: "3",
-    name: "Lavender Plant",
-    description: "A fragrant outdoor plant that attracts beneficial pollinators to your garden.",
-    price: 15.99,
-    image: "https://images.unsplash.com/photo-1528092744838-b91de0a10615?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Outdoor",
-    tags: ["Fragrant", "Pollinators"],
-    inStock: true,
-  },
-  {
-    id: "4",
-    name: "Rosemary Herb",
-    description: "A versatile culinary herb with a delightful aroma, perfect for cooking.",
-    price: 12.99,
-    image: "https://images.unsplash.com/photo-1515586000433-45406d8e6662?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Herbs",
-    tags: ["Culinary", "Fragrant"],
-    inStock: true,
-  },
-  {
-    id: "5",
-    name: "Aloe Vera",
-    description: "A succulent with healing properties, ideal for treating minor burns and skin irritations.",
-    price: 18.99,
-    image: "https://images.unsplash.com/photo-1596547609652-9cf5d8c3a26e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Succulents",
-    tags: ["Medicinal", "Low maintenance"],
-    inStock: false,
-  },
-  {
-    id: "6",
-    name: "Fiddle Leaf Fig",
-    description: "A popular decorative indoor plant with large, glossy violin-shaped leaves.",
-    price: 49.99,
-    discountPrice: 39.99,
-    image: "https://images.unsplash.com/photo-1613733895930-53ad1a53d907?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Decorative", "Statement plant"],
-    inStock: true,
-  },
-  {
-    id: "7",
-    name: "Echeveria Succulent",
-    description: "A beautiful rosette-forming succulent with blue-green leaves.",
-    price: 14.99,
-    image: "https://images.unsplash.com/photo-1509587584298-0f3b3a3a1797?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Succulents",
-    tags: ["Drought tolerant", "Low maintenance"],
-    inStock: true,
-  },
-  {
-    id: "8",
-    name: "Basil Plant",
-    description: "An essential culinary herb with aromatic leaves, perfect for Italian cuisine.",
-    price: 9.99,
-    image: "https://images.unsplash.com/photo-1582556135623-653d934f2707?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Herbs",
-    tags: ["Culinary", "Annual"],
-    inStock: true,
-  },
-  {
-    id: "9",
-    name: "Monstera Deliciosa",
-    description: "A popular tropical plant with distinctive split leaves, also known as Swiss Cheese Plant.",
-    price: 34.99,
-    image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Tropical", "Statement plant"],
-    inStock: true,
-  },
-  {
-    id: "10",
-    name: "Mint Plant",
-    description: "A refreshing herb perfect for teas, cocktails, and culinary creations.",
-    price: 8.99,
-    image: "https://images.unsplash.com/photo-1628556270448-4d4e4148e0b9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Herbs",
-    tags: ["Culinary", "Fragrant"],
-    inStock: true,
-  },
-  {
-    id: "11",
-    name: "Boston Fern",
-    description: "A classic air-purifying fern with delicate, arching fronds.",
-    price: 22.99,
-    image: "https://images.unsplash.com/photo-1597055181979-4ea68359aefa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Humid loving", "Air purifying"],
-    inStock: true,
-  },
-  {
-    id: "12",
-    name: "Pothos",
-    description: "An incredibly adaptable trailing plant, perfect for hanging baskets or shelves.",
-    price: 17.99,
-    discountPrice: 14.99,
-    image: "https://images.unsplash.com/photo-1507746212228-2d3645cbeb56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    category: "Indoor",
-    tags: ["Air purifying", "Low light"],
-    inStock: true,
-  },
-];
-
-const categories = ["Indoor", "Outdoor", "Succulents", "Herbs"];
-const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
+import { useToast } from "@/hooks/use-toast";
 
 const Shop = () => {
+  const [products, setProducts] = useState<ProductProps[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([0, 50]);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortBy, setSortBy] = useState("Featured");
   const [showOnlyInStock, setShowOnlyInStock] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  
+  const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"];
+
+  // Load products from localStorage
+  useEffect(() => {
+    const loadProducts = () => {
+      setLoading(true);
+      const storedProducts = localStorage.getItem("products");
+      if (storedProducts) {
+        const parsedProducts = JSON.parse(storedProducts);
+        setProducts(parsedProducts);
+        
+        // Extract unique categories
+        const uniqueCategories = [...new Set(parsedProducts.map((p: ProductProps) => p.category))] as string[];
+        setCategories(uniqueCategories);
+        
+        // Set max price range based on product prices
+        if (parsedProducts.length > 0) {
+          const maxPrice = Math.max(...parsedProducts.map((p: ProductProps) => p.price));
+          setPriceRange([0, Math.ceil(maxPrice / 100) * 100]);
+        }
+      } else {
+        setProducts([]);
+        setCategories([]);
+      }
+      setLoading(false);
+    };
+    
+    // Initial load
+    loadProducts();
+    
+    // Set up a listener for product updates from admin panel
+    const handleProductUpdates = () => {
+      loadProducts();
+    };
+    
+    window.addEventListener('products-updated', handleProductUpdates);
+    
+    return () => {
+      window.removeEventListener('products-updated', handleProductUpdates);
+    };
+  }, []);
 
   // Filter products based on selected filters
-  const filteredProducts = sampleProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     // Search term filter
     if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
         !product.description.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -187,7 +104,7 @@ const Shop = () => {
         return bPrice - aPrice;
       case "Newest":
         // This would normally use a timestamp, but for this demo we'll use ID as a proxy
-        return parseInt(b.id) - parseInt(a.id);
+        return parseInt(b.id.replace(/\D/g, '')) - parseInt(a.id.replace(/\D/g, ''));
       default: // Featured - keep original order
         return 0;
     }
@@ -268,46 +185,48 @@ const Shop = () => {
                 </div>
                 
                 {/* Categories */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Categories</h4>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <div key={category} className="flex items-center">
-                        <Checkbox 
-                          id={`category-mobile-${category}`} 
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedCategories([...selectedCategories, category]);
-                            } else {
-                              setSelectedCategories(selectedCategories.filter((c) => c !== category));
-                            }
-                          }}
-                        />
-                        <Label 
-                          htmlFor={`category-mobile-${category}`} 
-                          className="ml-2 text-sm font-normal cursor-pointer"
-                        >
-                          {category}
-                        </Label>
-                      </div>
-                    ))}
+                {categories.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Categories</h4>
+                    <div className="space-y-2">
+                      {categories.map((category) => (
+                        <div key={category} className="flex items-center">
+                          <Checkbox 
+                            id={`category-mobile-${category}`} 
+                            checked={selectedCategories.includes(category)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedCategories([...selectedCategories, category]);
+                              } else {
+                                setSelectedCategories(selectedCategories.filter((c) => c !== category));
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`category-mobile-${category}`} 
+                            className="ml-2 text-sm font-normal cursor-pointer"
+                          >
+                            {category}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Price Range */}
                 <div className="mb-6">
                   <h4 className="font-medium mb-3">Price Range</h4>
                   <Slider
-                    defaultValue={priceRange}
-                    max={100}
-                    step={5}
+                    value={priceRange}
+                    max={priceRange[1]}
+                    step={10}
                     onValueChange={setPriceRange}
                     className="mb-2"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
                   </div>
                 </div>
                 
@@ -335,7 +254,7 @@ const Shop = () => {
                   className="w-full mt-6"
                   onClick={() => {
                     setSelectedCategories([]);
-                    setPriceRange([0, 50]);
+                    setPriceRange([0, priceRange[1]]);
                     setShowOnlyInStock(false);
                     setSearchTerm("");
                   }}
@@ -354,46 +273,48 @@ const Shop = () => {
                 </h3>
                 
                 {/* Categories */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Categories</h4>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <div key={category} className="flex items-center">
-                        <Checkbox 
-                          id={`category-${category}`} 
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedCategories([...selectedCategories, category]);
-                            } else {
-                              setSelectedCategories(selectedCategories.filter((c) => c !== category));
-                            }
-                          }}
-                        />
-                        <Label 
-                          htmlFor={`category-${category}`} 
-                          className="ml-2 text-sm font-normal cursor-pointer"
-                        >
-                          {category}
-                        </Label>
-                      </div>
-                    ))}
+                {categories.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-3">Categories</h4>
+                    <div className="space-y-2">
+                      {categories.map((category) => (
+                        <div key={category} className="flex items-center">
+                          <Checkbox 
+                            id={`category-${category}`} 
+                            checked={selectedCategories.includes(category)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedCategories([...selectedCategories, category]);
+                              } else {
+                                setSelectedCategories(selectedCategories.filter((c) => c !== category));
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`category-${category}`} 
+                            className="ml-2 text-sm font-normal cursor-pointer"
+                          >
+                            {category}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Price Range */}
                 <div className="mb-6">
                   <h4 className="font-medium mb-3">Price Range</h4>
                   <Slider
-                    defaultValue={priceRange}
-                    max={100}
-                    step={5}
+                    value={priceRange}
+                    max={priceRange[1]}
+                    step={10}
                     onValueChange={setPriceRange}
                     className="mb-2"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
                   </div>
                 </div>
                 
@@ -421,7 +342,7 @@ const Shop = () => {
                   className="w-full mt-6"
                   onClick={() => {
                     setSelectedCategories([]);
-                    setPriceRange([0, 50]);
+                    setPriceRange([0, priceRange[1]]);
                     setShowOnlyInStock(false);
                     setSearchTerm("");
                   }}
@@ -433,7 +354,11 @@ const Shop = () => {
             
             {/* Product Grid */}
             <div className="flex-grow">
-              {sortedProducts.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-pulse">Loading products...</div>
+                </div>
+              ) : sortedProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sortedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
@@ -444,19 +369,24 @@ const Shop = () => {
                   <Leaf className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-1">No products found</h3>
                   <p className="text-gray-600 mb-4">
-                    Try adjusting your search or filter criteria
+                    {products.length === 0 
+                      ? "No products available in our store. Please check back later!"
+                      : "Try adjusting your search or filter criteria"
+                    }
                   </p>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedCategories([]);
-                      setPriceRange([0, 50]);
-                      setShowOnlyInStock(false);
-                      setSearchTerm("");
-                    }}
-                  >
-                    Clear All Filters
-                  </Button>
+                  {products.length > 0 && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedCategories([]);
+                        setPriceRange([0, priceRange[1]]);
+                        setShowOnlyInStock(false);
+                        setSearchTerm("");
+                      }}
+                    >
+                      Clear All Filters
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

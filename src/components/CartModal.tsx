@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -36,10 +37,27 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
 
   // Load cart items from localStorage
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
-    }
+    const loadCart = () => {
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        setCartItems(JSON.parse(storedCart));
+      } else {
+        setCartItems([]);
+      }
+    };
+
+    loadCart();
+    
+    // Set up event listener for cart updates
+    const handleCartUpdates = () => {
+      loadCart();
+    };
+    
+    window.addEventListener('cart-updated', handleCartUpdates);
+    
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdates);
+    };
   }, [isOpen]);
 
   const updateCart = (updatedCart: CartItem[]) => {
@@ -128,7 +146,15 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                 <div key={item.id} className="flex items-center gap-3 py-3 border-b">
                   <div className="h-16 w-16 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover rounded" />
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="h-full w-full object-cover rounded"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/placeholder.svg";
+                        }}
+                      />
                     ) : (
                       <Leaf className="h-8 w-8 text-gray-400" />
                     )}
