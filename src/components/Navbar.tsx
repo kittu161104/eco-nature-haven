@@ -8,13 +8,13 @@ import CartModal from "@/components/CartModal";
 import SearchModal from "@/components/SearchModal";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "./ui/badge";
 
 const Navbar = () => {
   const location = useLocation();
   const { isAuthenticated, isAdmin } = useAuth();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
