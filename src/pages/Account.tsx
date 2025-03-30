@@ -121,6 +121,9 @@ const Account = () => {
     return null;
   }
 
+  // Default creation date if not available
+  const creationDate = new Date().toISOString();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -150,7 +153,7 @@ const Account = () => {
                     </div>
                     <div className="flex items-center text-muted-foreground mt-1">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>Member since {format(new Date(user.createdAt || new Date()), 'MMMM dd, yyyy')}</span>
+                      <span>Member since {format(new Date(creationDate), 'MMMM dd, yyyy')}</span>
                     </div>
                   </div>
                 </div>

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Leaf, Trash, MinusCircle, PlusCircle, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CartItem {
   id: string;
@@ -30,6 +31,7 @@ interface CartModalProps {
 const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -79,31 +81,57 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const handleCheckout = () => {
     setLoading(true);
     
-    // Create order in localStorage for admin to view
-    const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const newOrder = {
-      id: Math.max(...orders.map((o: any) => o.id || 0), 0) + 1,
-      orderNumber: `ORD-${Date.now().toString().slice(-8)}`,
-      customer: "Guest Customer",
-      date: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      total: calculateTotal(),
-      status: "pending" as const,
-      items: cartItems.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      }))
-    };
-    
-    orders.push(newOrder);
-    localStorage.setItem("orders", JSON.stringify(orders));
+    // Redirect non-logged in users to login
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please login to complete your purchase",
+      });
+      onClose();
+      navigate("/login");
+      return;
+    }
     
     setTimeout(() => {
-      setLoading(false);
+      // Create order in localStorage for admin to view and for My Orders
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const orderId = `ORD-${Date.now().toString().slice(-8)}`;
+      
+      const newOrder = {
+        id: orders.length + 1,
+        orderNumber: orderId,
+        userId: user.id,
+        customer: user.name,
+        date: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        total: calculateTotal(),
+        status: "pending" as const,
+        items: cartItems.map(item => ({
+          id: item.id,
+          productId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image
+        })),
+        shippingAddress: {
+          name: user.name,
+          address: "123 Main Street",
+          city: "Mumbai",
+          state: "Maharashtra",
+          zip: "400001",
+          country: "India"
+        },
+        paymentMethod: "Credit Card"
+      };
+      
+      orders.push(newOrder);
+      localStorage.setItem("orders", JSON.stringify(orders));
       
       // Clear cart after successful checkout
       setCartItems([]);
@@ -112,15 +140,22 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       // Close modal
       onClose();
       
+      // Navigate to Orders page with success message
+      navigate("/orders");
+      
       // Show success toast
       toast({
         title: "Order placed successfully!",
-        description: `Your order #${newOrder.orderNumber} has been placed.`,
+        description: `Your order #${orderId} has been placed.`,
       });
       
-      // Navigate to a thank you page or back to shop
-      navigate("/shop");
-    }, 2000);
+      // Dispatch event to notify of order creation
+      window.dispatchEvent(new CustomEvent('order-created', { 
+        detail: { orderId: newOrder.id }
+      }));
+      
+      setLoading(false);
+    }, 1500);
   };
 
   return (

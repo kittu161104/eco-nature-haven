@@ -122,6 +122,25 @@ const UserOrders = () => {
     };
 
     fetchOrders();
+    
+    // Listen for new orders created via checkout
+    const handleOrderCreated = () => {
+      fetchOrders();
+    };
+    
+    window.addEventListener('order-created', handleOrderCreated);
+    
+    // Listen for order status changes from admin panel
+    const handleOrderUpdated = () => {
+      fetchOrders();
+    };
+    
+    window.addEventListener('orders-updated', handleOrderUpdated);
+    
+    return () => {
+      window.removeEventListener('order-created', handleOrderCreated);
+      window.removeEventListener('orders-updated', handleOrderUpdated);
+    };
   }, [user, toast]);
 
   // Helper function to get status badge
@@ -172,7 +191,7 @@ const UserOrders = () => {
                       <div>
                         <CardTitle className="flex items-center">
                           <Package className="h-5 w-5 mr-2 text-eco-600" />
-                          Order #{order.id.slice(-8)}
+                          Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}
                         </CardTitle>
                         <CardDescription className="mt-1">
                           <div className="flex items-center gap-4">

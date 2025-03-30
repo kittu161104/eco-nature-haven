@@ -53,10 +53,26 @@ const Orders = () => {
 
   // Load orders from localStorage or start with empty array
   useEffect(() => {
-    const savedOrders = localStorage.getItem("orders");
-    if (savedOrders) {
-      setOrders(JSON.parse(savedOrders));
-    }
+    const loadOrders = () => {
+      const savedOrders = localStorage.getItem("orders");
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
+      }
+    };
+    
+    // Initial load
+    loadOrders();
+    
+    // Listen for order creation events
+    const handleOrderCreated = () => {
+      loadOrders();
+    };
+    
+    window.addEventListener('order-created', handleOrderCreated);
+    
+    return () => {
+      window.removeEventListener('order-created', handleOrderCreated);
+    };
   }, []);
 
   const handleViewOrder = (order: Order) => {
@@ -71,6 +87,9 @@ const Orders = () => {
     setOrders(updatedOrders);
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
     
+    // Dispatch event for real-time updates
+    window.dispatchEvent(new CustomEvent('orders-updated'));
+    
     toast({
       title: "Order status updated",
       description: `Order #${orderId} has been marked as ${newStatus}`,
@@ -79,8 +98,8 @@ const Orders = () => {
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = 
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+      order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     
@@ -168,7 +187,7 @@ const Orders = () => {
                       {order.date}
                     </div>
                   </TableCell>
-                  <TableCell>${order.total.toFixed(2)}</TableCell>
+                  <TableCell>₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(order.status)}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -252,9 +271,9 @@ const Orders = () => {
                       <TableRow key={index}>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.quantity}</TableCell>
-                        <TableCell>${item.price.toFixed(2)}</TableCell>
+                        <TableCell>₹{item.price.toFixed(2)}</TableCell>
                         <TableCell className="text-right">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -263,7 +282,7 @@ const Orders = () => {
                         Total
                       </TableCell>
                       <TableCell className="text-right font-bold">
-                        ${selectedOrder.total.toFixed(2)}
+                        ₹{selectedOrder.total.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   </TableBody>

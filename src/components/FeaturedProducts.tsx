@@ -11,19 +11,35 @@ const FeaturedProducts = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  // Load products from localStorage
+  // Load products from localStorage and set up a listener for changes
   useEffect(() => {
-    const storedProducts = localStorage.getItem("products");
-    if (storedProducts) {
-      const parsedProducts = JSON.parse(storedProducts);
-      setProducts(parsedProducts);
+    const loadProducts = () => {
+      const storedProducts = localStorage.getItem("products");
+      if (storedProducts) {
+        const parsedProducts = JSON.parse(storedProducts);
+        setProducts(parsedProducts);
+        
+        // Extract unique categories
+        const uniqueCategories = ["All", ...new Set(parsedProducts.map((p: ProductProps) => p.category))] as string[];
+        setCategories(uniqueCategories);
+      }
       
-      // Extract unique categories
-      const uniqueCategories = ["All", ...new Set(parsedProducts.map((p: ProductProps) => p.category))] as string[];
-      setCategories(uniqueCategories);
-    }
+      setLoading(false);
+    };
     
-    setLoading(false);
+    // Initial load
+    loadProducts();
+    
+    // Set up a listener for product updates from admin panel
+    const handleProductUpdates = () => {
+      loadProducts();
+    };
+    
+    window.addEventListener('products-updated', handleProductUpdates);
+    
+    return () => {
+      window.removeEventListener('products-updated', handleProductUpdates);
+    };
   }, []);
 
   const filteredProducts = activeCategory === "All"
