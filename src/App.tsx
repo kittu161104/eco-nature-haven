@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,13 +25,10 @@ import Settings from "./pages/admin/Settings";
 import Account from "./pages/Account";
 import UserOrders from "./pages/UserOrders";
 import Payment from "./pages/Payment";
-
-// Add CSS class for container
-import "./index.css";
+import ProductDetail from "./pages/ProductDetail";
 
 const queryClient = new QueryClient();
 
-// Function to apply stored settings
 const applyStoredSettings = () => {
   const storedAppearanceSettings = localStorage.getItem("appearanceSettings");
   
@@ -43,7 +39,6 @@ const applyStoredSettings = () => {
       document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
     }
     
-    // Apply other settings if needed
     if (appearanceSettings.primaryColor) {
       document.documentElement.style.setProperty('--eco-600', appearanceSettings.primaryColor);
     }
@@ -54,30 +49,24 @@ const applyStoredSettings = () => {
   }
 };
 
-// Component to initialize empty data structures if needed
 const InitializeStoreData = () => {
   useEffect(() => {
-    // Initialize products if empty
     if (!localStorage.getItem("products")) {
       localStorage.setItem("products", JSON.stringify([]));
     }
     
-    // Initialize posts if empty
     if (!localStorage.getItem("posts")) {
       localStorage.setItem("posts", JSON.stringify([]));
     }
     
-    // Initialize orders if empty
     if (!localStorage.getItem("orders")) {
       localStorage.setItem("orders", JSON.stringify([]));
     }
     
-    // Initialize customers if empty
     if (!localStorage.getItem("customers")) {
       localStorage.setItem("customers", JSON.stringify([]));
     }
     
-    // Initialize about page content if empty
     if (!localStorage.getItem("aboutContent")) {
       localStorage.setItem("aboutContent", JSON.stringify({
         about: "Welcome to our nursery!",
@@ -102,10 +91,8 @@ const InitializeStoreData = () => {
 
 const AppContent = () => {
   useEffect(() => {
-    // Apply settings on initial load
     applyStoredSettings();
     
-    // Listen for settings changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "appearanceSettings") {
         applyStoredSettings();
@@ -123,9 +110,9 @@ const AppContent = () => {
     <>
       <InitializeStoreData />
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Index />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/about" element={<About />} />
@@ -136,7 +123,6 @@ const AppContent = () => {
         <Route path="/orders" element={<UserOrders />} />
         <Route path="/payment" element={<Payment />} />
         
-        {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
@@ -147,7 +133,6 @@ const AppContent = () => {
           <Route path="settings" element={<Settings />} />
         </Route>
         
-        {/* Catch-all Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

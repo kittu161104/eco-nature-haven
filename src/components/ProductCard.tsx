@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useWishlist } from "@/hooks/useWishlist";
 import { ShoppingCart, Heart, Leaf } from "lucide-react";
 
 export interface ProductProps {
@@ -20,15 +21,24 @@ export interface ProductProps {
 const ProductCard = ({ product }: { product: ProductProps }) => {
   const [isWishlist, setIsWishlist] = useState(false);
   const { toast } = useToast();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const defaultImageUrl = "/placeholder.svg";
 
-  const toggleWishlist = (e: React.MouseEvent) => {
+  // Check if product is in wishlist on initial load
+  useEffect(() => {
+    setIsWishlist(isInWishlist(product.id));
+  }, [product.id, isInWishlist]);
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlist(!isWishlist);
+    
+    const newState = toggleWishlist(product.id);
+    setIsWishlist(newState);
+    
     toast({
-      title: isWishlist ? "Removed from wishlist" : "Added to wishlist",
-      description: isWishlist ? `${product.name} removed from your wishlist` : `${product.name} added to your wishlist`,
+      title: newState ? "Added to wishlist" : "Removed from wishlist",
+      description: newState ? `${product.name} added to your wishlist` : `${product.name} removed from your wishlist`,
     });
   };
 
@@ -86,7 +96,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
       {/* Wishlist button */}
       <button 
         className="absolute top-2 right-2 z-10 bg-white p-1.5 rounded-full shadow-sm opacity-70 hover:opacity-100 transition-opacity"
-        onClick={toggleWishlist}
+        onClick={handleToggleWishlist}
         aria-label={isWishlist ? "Remove from wishlist" : "Add to wishlist"}
       >
         <Heart className={`h-4 w-4 ${isWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
