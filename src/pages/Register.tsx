@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -18,11 +19,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Leaf, Loader2 } from "lucide-react";
+import { Leaf, Loader2, Smartphone } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
+  mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -43,6 +45,7 @@ const Register = () => {
     defaultValues: {
       name: "",
       email: "",
+      mobileNumber: "",
       password: "",
       confirmPassword: "",
     },
@@ -52,7 +55,7 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      await register(data.name, data.email, data.password);
+      await register(data.name, data.email, data.password, data.mobileNumber);
       // Register function already handles navigation and toast messages
     } catch (error) {
       // Error handling is done in register function
@@ -110,6 +113,30 @@ const Register = () => {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input placeholder="your.email@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="mobileNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile Number</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center space-x-2">
+                        <Smartphone className="h-5 w-5 text-gray-400" />
+                        <Input 
+                          placeholder="10-digit mobile number" 
+                          {...field} 
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            field.onChange(value);
+                          }}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

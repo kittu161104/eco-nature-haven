@@ -9,7 +9,6 @@ interface User {
   email: string;
   role: "admin" | "customer";
   phoneNumber?: string;
-  phoneVerified?: boolean;
   createdAt: string;
   lastLogin: string;
 }
@@ -20,9 +19,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  updatePhoneNumber: (phoneNumber: string) => Promise<void>;
-  needsPhoneVerification: boolean;
+  register: (name: string, email: string, password: string, mobileNumber?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,8 +29,6 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
-  updatePhoneNumber: async () => {},
-  needsPhoneVerification: false,
 });
 
 export const useAuth = () => {
@@ -44,7 +39,6 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [needsPhoneVerification, setNeedsPhoneVerification] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -58,11 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       setIsAuthenticated(true);
-      
-      // Check if phone verification is needed
-      if (parsedUser.email.endsWith('@gmail.com') && !parsedUser.phoneVerified) {
-        setNeedsPhoneVerification(true);
-      }
     }
   }, []);
 
@@ -100,13 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
       setIsAuthenticated(true);
       
-      // Check if phone verification is needed
-      if (updatedUser.email.endsWith('@gmail.com') && !updatedUser.phoneVerified) {
-        setNeedsPhoneVerification(true);
-      } else {
-        setNeedsPhoneVerification(false);
-      }
-      
       // Store user in localStorage
       localStorage.setItem("user", JSON.stringify(updatedUser));
       
@@ -136,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, mobileNumber?: string) => {
     // Simple validation
     if (!name || !email || !password) {
       throw new Error("All fields are required");
@@ -171,9 +153,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         role,
+        phoneNumber: mobileNumber || "",
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
-        phoneVerified: false
       };
       
       // Save user
@@ -186,16 +168,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(userWithoutPassword));
       
-      // Check if phone verification is needed
-      if (email.endsWith('@gmail.com')) {
-        setNeedsPhoneVerification(true);
-      }
-      
       // Show success toast
       toast({
         title: "Registration successful",
         description: `Welcome, ${name}!`,
       });
+      
+      // Add to customers if role is customer
+      if (role === "customer") {
+        const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+        const newCustomer = {
+          id: parseInt(newUser.id),
+          name: newUser.name,
+          email: newUser.email,
+          phone: mobileNumber || "",
+          orders: 0,
+          totalSpent: 0,
+          lastOrder: null,
+          status: "active"
+        };
+        
+        customers.push(newCustomer);
+        localStorage.setItem("customers", JSON.stringify(customers));
+      }
       
       // Redirect based on role
       if (role === "admin") {
@@ -217,84 +212,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updatePhoneNumber = async (phoneNumber: string) => {
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-    
-    try {
-      // Update user in state
-      const updatedUser = {
-        ...user,
-        phoneNumber,
-        phoneVerified: true
-      };
-      
-      setUser(updatedUser);
-      setNeedsPhoneVerification(false);
-      
-      // Update user in localStorage
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      
-      // Update in users array
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const updatedUsers = users.map((u: any) => 
-        u.id === user.id 
-          ? { ...u, phoneNumber, phoneVerified: true } 
-          : u
-      );
-      
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      
-      // Add to customers if not already there
-      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-      const existingCustomer = customers.find((c: any) => c.email === user.email);
-      
-      if (!existingCustomer && user.role === "customer") {
-        const newCustomer = {
-          id: parseInt(user.id),
-          name: user.name,
-          email: user.email,
-          phone: phoneNumber,
-          orders: 0,
-          totalSpent: 0,
-          lastOrder: null,
-          status: "active"
-        };
-        
-        customers.push(newCustomer);
-        localStorage.setItem("customers", JSON.stringify(customers));
-      } else if (existingCustomer) {
-        const updatedCustomers = customers.map((c: any) => 
-          c.email === user.email 
-            ? { ...c, phone: phoneNumber } 
-            : c
-        );
-        
-        localStorage.setItem("customers", JSON.stringify(updatedCustomers));
-      }
-      
-      toast({
-        title: "Phone Verified",
-        description: "Your phone number has been verified successfully",
-      });
-      
-    } catch (error) {
-      console.error("Error updating phone number:", error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Failed to update phone number. Please try again.",
-      });
-      
-      throw new Error("Failed to update phone number");
-    }
-  };
-
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    setNeedsPhoneVerification(false);
     localStorage.removeItem("user");
     
     toast({
@@ -312,9 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin, 
       login, 
       logout, 
-      register, 
-      updatePhoneNumber,
-      needsPhoneVerification
+      register
     }}>
       {children}
     </AuthContext.Provider>
