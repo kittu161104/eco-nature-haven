@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import PhoneVerificationPrompt from "@/components/PhoneVerificationPrompt";
 
 // Eager load critical components
 import Index from "./pages/Index";
@@ -156,6 +157,7 @@ const AppContent = () => {
   return (
     <>
       <InitializeStoreData />
+      <PhoneVerificationPrompt />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<Index />} />

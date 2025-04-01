@@ -8,6 +8,10 @@ interface User {
   name: string;
   email: string;
   role: "admin" | "customer";
+  phoneNumber?: string;
+  phoneVerified?: boolean;
+  createdAt: string;
+  lastLogin: string;
 }
 
 interface AuthContextType {
@@ -17,6 +21,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (name: string, email: string, password: string) => Promise<void>;
+  updatePhoneNumber: (phoneNumber: string) => Promise<void>;
+  needsPhoneVerification: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -26,6 +32,8 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
+  updatePhoneNumber: async () => {},
+  needsPhoneVerification: false,
 });
 
 export const useAuth = () => {
@@ -36,6 +44,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [needsPhoneVerification, setNeedsPhoneVerification] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -49,6 +58,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       setIsAuthenticated(true);
+      
+      // Check if phone verification is needed
+      if (parsedUser.email.endsWith('@gmail.com') && !parsedUser.phoneVerified) {
+        setNeedsPhoneVerification(true);
+      }
     }
   }, []);
 
@@ -70,21 +84,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Create user object without password
       const { password: _, ...userWithoutPassword } = foundUser;
       
+      // Add last login timestamp
+      const updatedUser = {
+        ...userWithoutPassword,
+        lastLogin: new Date().toISOString()
+      };
+      
+      // Update user in localStorage
+      const updatedUsers = users.map((u: any) => 
+        u.id === updatedUser.id ? { ...u, lastLogin: updatedUser.lastLogin } : u
+      );
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      
       // Set auth state
-      setUser(userWithoutPassword);
+      setUser(updatedUser);
       setIsAuthenticated(true);
       
+      // Check if phone verification is needed
+      if (updatedUser.email.endsWith('@gmail.com') && !updatedUser.phoneVerified) {
+        setNeedsPhoneVerification(true);
+      } else {
+        setNeedsPhoneVerification(false);
+      }
+      
       // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
       
       // Show success toast
       toast({
         title: "Login successful",
-        description: `Welcome back, ${userWithoutPassword.name}!`,
+        description: `Welcome back, ${updatedUser.name}!`,
       });
       
       // Redirect based on user role
-      if (userWithoutPassword.role === "admin") {
+      if (updatedUser.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
@@ -139,6 +172,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
         role,
         createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        phoneVerified: false
       };
       
       // Save user
@@ -150,6 +185,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(userWithoutPassword);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+      
+      // Check if phone verification is needed
+      if (email.endsWith('@gmail.com')) {
+        setNeedsPhoneVerification(true);
+      }
       
       // Show success toast
       toast({
@@ -177,9 +217,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updatePhoneNumber = async (phoneNumber: string) => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+    
+    try {
+      // Update user in state
+      const updatedUser = {
+        ...user,
+        phoneNumber,
+        phoneVerified: true
+      };
+      
+      setUser(updatedUser);
+      setNeedsPhoneVerification(false);
+      
+      // Update user in localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      // Update in users array
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const updatedUsers = users.map((u: any) => 
+        u.id === user.id 
+          ? { ...u, phoneNumber, phoneVerified: true } 
+          : u
+      );
+      
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      
+      // Add to customers if not already there
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      const existingCustomer = customers.find((c: any) => c.email === user.email);
+      
+      if (!existingCustomer && user.role === "customer") {
+        const newCustomer = {
+          id: parseInt(user.id),
+          name: user.name,
+          email: user.email,
+          phone: phoneNumber,
+          orders: 0,
+          totalSpent: 0,
+          lastOrder: null,
+          status: "active"
+        };
+        
+        customers.push(newCustomer);
+        localStorage.setItem("customers", JSON.stringify(customers));
+      } else if (existingCustomer) {
+        const updatedCustomers = customers.map((c: any) => 
+          c.email === user.email 
+            ? { ...c, phone: phoneNumber } 
+            : c
+        );
+        
+        localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+      }
+      
+      toast({
+        title: "Phone Verified",
+        description: "Your phone number has been verified successfully",
+      });
+      
+    } catch (error) {
+      console.error("Error updating phone number:", error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Failed to update phone number. Please try again.",
+      });
+      
+      throw new Error("Failed to update phone number");
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    setNeedsPhoneVerification(false);
     localStorage.removeItem("user");
     
     toast({
@@ -191,7 +306,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, isAdmin, login, logout, register }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      isAdmin, 
+      login, 
+      logout, 
+      register, 
+      updatePhoneNumber,
+      needsPhoneVerification
+    }}>
       {children}
     </AuthContext.Provider>
   );

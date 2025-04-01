@@ -74,3 +74,21 @@ export async function retryOperation<T>(
   
   throw lastError || new Error("Operation failed after multiple retries");
 }
+
+// Format phone number for display
+export function formatPhoneNumber(phoneNumber: string): string {
+  // Basic formatting for 10-digit US numbers
+  if (phoneNumber.length === 10) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6)}`;
+  }
+  
+  // For international numbers or other formats
+  return phoneNumber;
+}
+
+// Validate phone number (basic validation)
+export function isValidPhoneNumber(phoneNumber: string): boolean {
+  // This is a simple validation for 10-digit numbers
+  // For production, use a more robust validation or a library
+  return /^\d{10}$/.test(phoneNumber);
+}
