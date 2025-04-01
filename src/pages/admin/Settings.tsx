@@ -15,7 +15,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Save, Leaf, RefreshCw } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Save, Leaf, RefreshCw, Plus, Trash } from "lucide-react";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -44,11 +45,34 @@ const Settings = () => {
     backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
   });
 
+  const [footerSettings, setFooterSettings] = useState({
+    companyName: "Natural Green",
+    address: "123 Green Avenue, Eco City, EC 12345",
+    phone: "+91 9876543210",
+    email: "info@naturalgreen.com",
+    description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
+    socialLinks: [
+      { name: "facebook", url: "#" },
+      { name: "instagram", url: "#" },
+      { name: "twitter", url: "#" },
+      { name: "pinterest", url: "#" }
+    ],
+    quickLinks: [
+      { name: "Shop Plants", url: "/shop" },
+      { name: "Gardening Blog", url: "/blog" },
+      { name: "About Us", url: "/about" },
+      { name: "Sustainability", url: "/sustainability" },
+      { name: "FAQ", url: "/faq" }
+    ],
+    newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
+  });
+
   // Load settings on mount
   useEffect(() => {
     const storedGeneralSettings = localStorage.getItem("generalSettings");
     const storedEmailSettings = localStorage.getItem("emailSettings");
     const storedAppearanceSettings = localStorage.getItem("appearanceSettings");
+    const storedFooterSettings = localStorage.getItem("footerSettings");
     
     if (storedGeneralSettings) {
       setGeneralSettings(JSON.parse(storedGeneralSettings));
@@ -60,6 +84,10 @@ const Settings = () => {
     
     if (storedAppearanceSettings) {
       setAppearanceSettings(JSON.parse(storedAppearanceSettings));
+    }
+
+    if (storedFooterSettings) {
+      setFooterSettings(JSON.parse(storedFooterSettings));
     }
   }, []);
 
@@ -101,11 +129,72 @@ const Settings = () => {
     });
   };
 
+  const handleFooterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFooterSettings({
+      ...footerSettings,
+      [name]: value,
+    });
+  };
+
+  const handleSocialLinkChange = (index: number, field: 'name' | 'url', value: string) => {
+    const updatedLinks = [...footerSettings.socialLinks];
+    updatedLinks[index] = {
+      ...updatedLinks[index],
+      [field]: value
+    };
+    setFooterSettings({
+      ...footerSettings,
+      socialLinks: updatedLinks
+    });
+  };
+
+  const handleQuickLinkChange = (index: number, field: 'name' | 'url', value: string) => {
+    const updatedLinks = [...footerSettings.quickLinks];
+    updatedLinks[index] = {
+      ...updatedLinks[index],
+      [field]: value
+    };
+    setFooterSettings({
+      ...footerSettings,
+      quickLinks: updatedLinks
+    });
+  };
+
+  const addSocialLink = () => {
+    setFooterSettings({
+      ...footerSettings,
+      socialLinks: [...footerSettings.socialLinks, { name: "", url: "#" }]
+    });
+  };
+
+  const removeSocialLink = (index: number) => {
+    setFooterSettings({
+      ...footerSettings,
+      socialLinks: footerSettings.socialLinks.filter((_, i) => i !== index)
+    });
+  };
+
+  const addQuickLink = () => {
+    setFooterSettings({
+      ...footerSettings,
+      quickLinks: [...footerSettings.quickLinks, { name: "", url: "/" }]
+    });
+  };
+
+  const removeQuickLink = (index: number) => {
+    setFooterSettings({
+      ...footerSettings,
+      quickLinks: footerSettings.quickLinks.filter((_, i) => i !== index)
+    });
+  };
+
   const handleSaveSettings = () => {
     // Save settings to localStorage
     localStorage.setItem("generalSettings", JSON.stringify(generalSettings));
     localStorage.setItem("emailSettings", JSON.stringify(emailSettings));
     localStorage.setItem("appearanceSettings", JSON.stringify(appearanceSettings));
+    localStorage.setItem("footerSettings", JSON.stringify(footerSettings));
     
     // Apply background image directly
     document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
@@ -142,6 +231,28 @@ const Settings = () => {
       productsPerPage: "12",
       backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
     });
+
+    setFooterSettings({
+      companyName: "Natural Green",
+      address: "123 Green Avenue, Eco City, EC 12345",
+      phone: "+91 9876543210",
+      email: "info@naturalgreen.com",
+      description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
+      socialLinks: [
+        { name: "facebook", url: "#" },
+        { name: "instagram", url: "#" },
+        { name: "twitter", url: "#" },
+        { name: "pinterest", url: "#" }
+      ],
+      quickLinks: [
+        { name: "Shop Plants", url: "/shop" },
+        { name: "Gardening Blog", url: "/blog" },
+        { name: "About Us", url: "/about" },
+        { name: "Sustainability", url: "/sustainability" },
+        { name: "FAQ", url: "/faq" }
+      ],
+      newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
+    });
     
     toast({
       title: "Settings reset",
@@ -150,277 +261,419 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-eco-800">Settings</h1>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={handleReset}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reset
-          </Button>
-          <Button onClick={handleSaveSettings}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button>
+    <ScrollArea className="h-[calc(100vh-120px)]">
+      <div className="space-y-6 p-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-eco-800">Settings</h1>
+          <div className="space-x-2">
+            <Button variant="outline" onClick={handleReset}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="general" className="space-y-6 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="storeName">Store Name</Label>
-              <Input
-                id="storeName"
-                name="storeName"
-                value={generalSettings.storeName}
-                onChange={handleGeneralChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="storeEmail">Store Email</Label>
-              <Input
-                id="storeEmail"
-                name="storeEmail"
-                type="email"
-                value={generalSettings.storeEmail}
-                onChange={handleGeneralChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="storePhone">Store Phone</Label>
-              <Input
-                id="storePhone"
-                name="storePhone"
-                value={generalSettings.storePhone}
-                onChange={handleGeneralChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Select 
-                value={generalSettings.currency} 
-                onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
-              >
-                <SelectTrigger id="currency">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="INR">INR (₹)</SelectItem>
-                  <SelectItem value="USD">USD ($)</SelectItem>
-                  <SelectItem value="EUR">EUR (€)</SelectItem>
-                  <SelectItem value="GBP">GBP (£)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="taxRate">Tax Rate (%)</Label>
-              <Input
-                id="taxRate"
-                name="taxRate"
-                type="number"
-                min="0"
-                step="0.01"
-                value={generalSettings.taxRate}
-                onChange={handleGeneralChange}
-              />
-            </div>
-          </div>
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="footer">Footer</TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-2">
-            <Label htmlFor="storeAddress">Store Address</Label>
-            <Textarea
-              id="storeAddress"
-              name="storeAddress"
-              value={generalSettings.storeAddress}
-              onChange={handleGeneralChange}
-              rows={3}
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="email" className="space-y-6 pt-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="enableOrderConfirmation">Order Confirmation Emails</Label>
-                <p className="text-sm text-muted-foreground">
-                  Send an email when a customer places an order
-                </p>
+          <TabsContent value="general" className="space-y-6 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="storeName">Store Name</Label>
+                <Input
+                  id="storeName"
+                  name="storeName"
+                  value={generalSettings.storeName}
+                  onChange={handleGeneralChange}
+                />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="storeEmail">Store Email</Label>
+                <Input
+                  id="storeEmail"
+                  name="storeEmail"
+                  type="email"
+                  value={generalSettings.storeEmail}
+                  onChange={handleGeneralChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="storePhone">Store Phone</Label>
+                <Input
+                  id="storePhone"
+                  name="storePhone"
+                  value={generalSettings.storePhone}
+                  onChange={handleGeneralChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select 
+                  value={generalSettings.currency} 
+                  onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
+                  disabled // Currency is fixed to INR as requested
+                >
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="INR">INR (₹)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                <Input
+                  id="taxRate"
+                  name="taxRate"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={generalSettings.taxRate}
+                  onChange={handleGeneralChange}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="storeAddress">Store Address</Label>
+              <Textarea
+                id="storeAddress"
+                name="storeAddress"
+                value={generalSettings.storeAddress}
+                onChange={handleGeneralChange}
+                rows={3}
+              />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="email" className="space-y-6 pt-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="enableOrderConfirmation">Order Confirmation Emails</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send an email when a customer places an order
+                  </p>
+                </div>
+                <Switch
+                  id="enableOrderConfirmation"
+                  checked={emailSettings.enableOrderConfirmation}
+                  onCheckedChange={(checked) => handleEmailToggle("enableOrderConfirmation", checked)}
+                />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="enableShippingNotifications">Shipping Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send an email when an order ships
+                  </p>
+                </div>
+                <Switch
+                  id="enableShippingNotifications"
+                  checked={emailSettings.enableShippingNotifications}
+                  onCheckedChange={(checked) => handleEmailToggle("enableShippingNotifications", checked)}
+                />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="enableMarketingEmails">Marketing Emails</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send promotional emails and newsletters
+                  </p>
+                </div>
+                <Switch
+                  id="enableMarketingEmails"
+                  checked={emailSettings.enableMarketingEmails}
+                  onCheckedChange={(checked) => handleEmailToggle("enableMarketingEmails", checked)}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2 pt-4">
+              <Label htmlFor="footerText">Email Footer Text</Label>
+              <Textarea
+                id="footerText"
+                name="footerText"
+                value={emailSettings.footerText}
+                onChange={handleEmailChange}
+                rows={4}
+              />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="appearance" className="space-y-6 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="primaryColor">Primary Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="primaryColor"
+                    name="primaryColor"
+                    type="color"
+                    value={appearanceSettings.primaryColor}
+                    onChange={handleAppearanceChange}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    value={appearanceSettings.primaryColor}
+                    onChange={handleAppearanceChange}
+                    name="primaryColor"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="secondaryColor">Secondary Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="secondaryColor"
+                    name="secondaryColor"
+                    type="color"
+                    value={appearanceSettings.secondaryColor}
+                    onChange={handleAppearanceChange}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    value={appearanceSettings.secondaryColor}
+                    onChange={handleAppearanceChange}
+                    name="secondaryColor"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="logoUrl">Logo URL</Label>
+                <Input
+                  id="logoUrl"
+                  name="logoUrl"
+                  placeholder="https://example.com/logo.png"
+                  value={appearanceSettings.logoUrl}
+                  onChange={handleAppearanceChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="backgroundImage">Background Image URL</Label>
+                <Input
+                  id="backgroundImage"
+                  name="backgroundImage"
+                  placeholder="https://example.com/background.jpg"
+                  value={appearanceSettings.backgroundImage}
+                  onChange={handleAppearanceChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="productsPerPage">Products Per Page</Label>
+                <Select 
+                  value={appearanceSettings.productsPerPage}
+                  onValueChange={(value) => setAppearanceSettings({...appearanceSettings, productsPerPage: value})}
+                >
+                  <SelectTrigger id="productsPerPage">
+                    <SelectValue placeholder="Select number" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="8">8 products</SelectItem>
+                    <SelectItem value="12">12 products</SelectItem>
+                    <SelectItem value="16">16 products</SelectItem>
+                    <SelectItem value="24">24 products</SelectItem>
+                    <SelectItem value="36">36 products</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 pt-4">
               <Switch
-                id="enableOrderConfirmation"
-                checked={emailSettings.enableOrderConfirmation}
-                onCheckedChange={(checked) => handleEmailToggle("enableOrderConfirmation", checked)}
+                id="enableDarkMode"
+                checked={appearanceSettings.enableDarkMode}
+                onCheckedChange={(checked) => handleAppearanceToggle("enableDarkMode", checked)}
               />
+              <Label htmlFor="enableDarkMode">Enable Dark Mode</Label>
             </div>
             
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="enableShippingNotifications">Shipping Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Send an email when an order ships
-                </p>
+            <div className="p-4 border rounded-lg mt-6">
+              <div className="flex items-center mb-2">
+                <Leaf className="h-5 w-5 text-eco-600 mr-2" />
+                <span className="font-medium">Theme Preview</span>
               </div>
-              <Switch
-                id="enableShippingNotifications"
-                checked={emailSettings.enableShippingNotifications}
-                onCheckedChange={(checked) => handleEmailToggle("enableShippingNotifications", checked)}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="enableMarketingEmails">Marketing Emails</Label>
-                <p className="text-sm text-muted-foreground">
-                  Send promotional emails and newsletters
-                </p>
-              </div>
-              <Switch
-                id="enableMarketingEmails"
-                checked={emailSettings.enableMarketingEmails}
-                onCheckedChange={(checked) => handleEmailToggle("enableMarketingEmails", checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2 pt-4">
-            <Label htmlFor="footerText">Email Footer Text</Label>
-            <Textarea
-              id="footerText"
-              name="footerText"
-              value={emailSettings.footerText}
-              onChange={handleEmailChange}
-              rows={4}
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="appearance" className="space-y-6 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="primaryColor">Primary Color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="primaryColor"
-                  name="primaryColor"
-                  type="color"
-                  value={appearanceSettings.primaryColor}
-                  onChange={handleAppearanceChange}
-                  className="w-12 h-10 p-1"
-                />
-                <Input
-                  value={appearanceSettings.primaryColor}
-                  onChange={handleAppearanceChange}
-                  name="primaryColor"
-                />
+              <div className="bg-gray-100 p-4 rounded border">
+                <div 
+                  className="h-8 rounded" 
+                  style={{ backgroundColor: appearanceSettings.primaryColor }}
+                ></div>
+                <div 
+                  className="h-8 rounded mt-2" 
+                  style={{ backgroundColor: appearanceSettings.secondaryColor }}
+                ></div>
+                <div className="h-32 mt-2 rounded bg-cover bg-center" style={{ backgroundImage: `url(${appearanceSettings.backgroundImage})` }}></div>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="secondaryColor">Secondary Color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="secondaryColor"
-                  name="secondaryColor"
-                  type="color"
-                  value={appearanceSettings.secondaryColor}
-                  onChange={handleAppearanceChange}
-                  className="w-12 h-10 p-1"
-                />
-                <Input
-                  value={appearanceSettings.secondaryColor}
-                  onChange={handleAppearanceChange}
-                  name="secondaryColor"
+          </TabsContent>
+
+          <TabsContent value="footer" className="space-y-6 pt-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input
+                    id="companyName"
+                    name="companyName"
+                    value={footerSettings.companyName}
+                    onChange={handleFooterChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Company Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={footerSettings.email}
+                    onChange={handleFooterChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Company Phone</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    value={footerSettings.phone}
+                    onChange={handleFooterChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="address">Company Address</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    value={footerSettings.address}
+                    onChange={handleFooterChange}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Company Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={footerSettings.description}
+                  onChange={handleFooterChange}
+                  rows={3}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newsletterText">Newsletter Text</Label>
+                <Textarea
+                  id="newsletterText"
+                  name="newsletterText"
+                  value={footerSettings.newsletterText}
+                  onChange={handleFooterChange}
+                  rows={2}
+                />
+              </div>
+
+              <Separator className="my-6" />
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label>Social Links</Label>
+                  <Button type="button" size="sm" variant="outline" onClick={addSocialLink}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Link
+                  </Button>
+                </div>
+                
+                {footerSettings.socialLinks.map((link, index) => (
+                  <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                    <Input
+                      placeholder="Name (facebook, twitter, etc)"
+                      value={link.name}
+                      onChange={(e) => handleSocialLinkChange(index, 'name', e.target.value)}
+                    />
+                    <Input
+                      placeholder="URL"
+                      value={link.url}
+                      onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeSocialLink(index)}
+                      className="text-red-500"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <Separator className="my-6" />
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label>Quick Links</Label>
+                  <Button type="button" size="sm" variant="outline" onClick={addQuickLink}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Link
+                  </Button>
+                </div>
+                
+                {footerSettings.quickLinks.map((link, index) => (
+                  <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                    <Input
+                      placeholder="Link Text"
+                      value={link.name}
+                      onChange={(e) => handleQuickLinkChange(index, 'name', e.target.value)}
+                    />
+                    <Input
+                      placeholder="URL"
+                      value={link.url}
+                      onChange={(e) => handleQuickLinkChange(index, 'url', e.target.value)}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeQuickLink(index)}
+                      className="text-red-500"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="logoUrl">Logo URL</Label>
-              <Input
-                id="logoUrl"
-                name="logoUrl"
-                placeholder="https://example.com/logo.png"
-                value={appearanceSettings.logoUrl}
-                onChange={handleAppearanceChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="backgroundImage">Background Image URL</Label>
-              <Input
-                id="backgroundImage"
-                name="backgroundImage"
-                placeholder="https://example.com/background.jpg"
-                value={appearanceSettings.backgroundImage}
-                onChange={handleAppearanceChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="productsPerPage">Products Per Page</Label>
-              <Select 
-                value={appearanceSettings.productsPerPage}
-                onValueChange={(value) => setAppearanceSettings({...appearanceSettings, productsPerPage: value})}
-              >
-                <SelectTrigger id="productsPerPage">
-                  <SelectValue placeholder="Select number" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="8">8 products</SelectItem>
-                  <SelectItem value="12">12 products</SelectItem>
-                  <SelectItem value="16">16 products</SelectItem>
-                  <SelectItem value="24">24 products</SelectItem>
-                  <SelectItem value="36">36 products</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2 pt-4">
-            <Switch
-              id="enableDarkMode"
-              checked={appearanceSettings.enableDarkMode}
-              onCheckedChange={(checked) => handleAppearanceToggle("enableDarkMode", checked)}
-            />
-            <Label htmlFor="enableDarkMode">Enable Dark Mode</Label>
-          </div>
-          
-          <div className="p-4 border rounded-lg mt-6">
-            <div className="flex items-center mb-2">
-              <Leaf className="h-5 w-5 text-eco-600 mr-2" />
-              <span className="font-medium">Theme Preview</span>
-            </div>
-            <div className="bg-gray-100 p-4 rounded border">
-              <div 
-                className="h-8 rounded" 
-                style={{ backgroundColor: appearanceSettings.primaryColor }}
-              ></div>
-              <div 
-                className="h-8 rounded mt-2" 
-                style={{ backgroundColor: appearanceSettings.secondaryColor }}
-              ></div>
-              <div className="h-32 mt-2 rounded bg-cover bg-center" style={{ backgroundImage: `url(${appearanceSettings.backgroundImage})` }}></div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ScrollArea>
   );
 };
 

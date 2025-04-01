@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { enableModalScrolling } from "@/lib/utils";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -21,6 +22,13 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && contentRef.current) {
+      enableModalScrolling(contentRef.current);
+    }
+  }, [isOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +55,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[85vh]" ref={contentRef}>
         <DialogHeader>
           <DialogTitle>Search Products & Articles</DialogTitle>
         </DialogHeader>

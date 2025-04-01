@@ -92,3 +92,26 @@ export function isValidPhoneNumber(phoneNumber: string): boolean {
   // For production, use a more robust validation or a library
   return /^\d{10}$/.test(phoneNumber);
 }
+
+// Format currency to INR
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2
+  }).format(amount);
+}
+
+// Enable scrolling for modal content
+export function enableModalScrolling(modalContent: HTMLElement | null) {
+  if (!modalContent) return;
+  
+  // Calculate if content exceeds viewport height
+  const viewportHeight = window.innerHeight;
+  const contentHeight = modalContent.scrollHeight;
+  
+  if (contentHeight > viewportHeight * 0.8) {
+    modalContent.style.maxHeight = `${viewportHeight * 0.8}px`;
+    modalContent.style.overflowY = 'auto';
+  }
+}
