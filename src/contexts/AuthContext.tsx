@@ -8,7 +8,6 @@ interface User {
   name: string;
   email: string;
   role: "admin" | "customer";
-  phoneNumber?: string;
   createdAt: string;
   lastLogin: string;
 }
@@ -19,7 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string, mobileNumber?: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -118,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string, mobileNumber?: string) => {
+  const register = async (name: string, email: string, password: string) => {
     // Simple validation
     if (!name || !email || !password) {
       throw new Error("All fields are required");
@@ -153,7 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         role,
-        phoneNumber: mobileNumber || "",
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
       };
@@ -181,7 +179,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: parseInt(newUser.id),
           name: newUser.name,
           email: newUser.email,
-          phone: mobileNumber || "",
           orders: 0,
           totalSpent: 0,
           lastOrder: null,
