@@ -47,11 +47,11 @@ const FeaturedProducts = () => {
     : products.filter(product => product.category === activeCategory).slice(0, 8);
 
   return (
-    <section className="py-16 bg-eco-50 bg-opacity-70">
+    <section className="py-16 bg-eco-50 dark:bg-gray-900 bg-opacity-70 dark:bg-opacity-30">
       <div className="eco-container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-eco-800">Featured Plants</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-eco-800 dark:text-eco-300">Featured Plants</h2>
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Browse our selection of carefully curated plants for your home or garden
           </p>
         </div>
@@ -65,8 +65,8 @@ const FeaturedProducts = () => {
                 variant={activeCategory === category ? "default" : "outline"}
                 className={`
                   ${activeCategory === category 
-                    ? "bg-eco-600 hover:bg-eco-700" 
-                    : "text-gray-700 hover:text-eco-600 border-gray-200"
+                    ? "bg-eco-600 hover:bg-eco-700 text-white" 
+                    : "text-gray-700 dark:text-gray-300 hover:text-eco-600 border-gray-200 dark:border-gray-700"
                   }
                 `}
                 onClick={() => setActiveCategory(category)}
@@ -80,7 +80,7 @@ const FeaturedProducts = () => {
         {/* Products grid */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-pulse">Loading products...</div>
+            <div className="animate-pulse dark:text-gray-300">Loading products...</div>
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -89,10 +89,10 @@ const FeaturedProducts = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm p-8">
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
             <Leaf className="h-16 w-16 text-eco-600 mx-auto mb-4 opacity-70" />
-            <h3 className="text-xl font-medium mb-2">No products available</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-white">No products available</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               {products.length === 0 
                 ? "There are no products to display at this time. Please check back later."
                 : `No products found in the "${activeCategory}" category.`}

@@ -85,7 +85,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
   };
 
   return (
-    <div className="group relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <div className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
       {/* Discount badge */}
       {product.discountPrice && (
         <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -95,11 +95,11 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
       
       {/* Wishlist button */}
       <button 
-        className="absolute top-2 right-2 z-10 bg-white p-1.5 rounded-full shadow-sm opacity-70 hover:opacity-100 transition-opacity"
+        className="absolute top-2 right-2 z-10 bg-white dark:bg-gray-700 p-1.5 rounded-full shadow-sm opacity-70 hover:opacity-100 transition-opacity"
         onClick={handleToggleWishlist}
         aria-label={isWishlist ? "Remove from wishlist" : "Add to wishlist"}
       >
-        <Heart className={`h-4 w-4 ${isWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+        <Heart className={`h-4 w-4 ${isWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'}`} />
       </button>
       
       {/* Product image */}
@@ -115,8 +115,8 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
             }}
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-100">
-            <Leaf className="h-12 w-12 text-gray-300" />
+          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+            <Leaf className="h-12 w-12 text-gray-300 dark:text-gray-500" />
           </div>
         )}
       </Link>
@@ -128,11 +128,11 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
             {product.category}
           </span>
           <Link to={`/product/${product.id}`}>
-            <h3 className="font-medium text-gray-900 mt-1 hover:text-eco-600 transition-colors">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100 mt-1 hover:text-eco-600 transition-colors">
               {product.name}
             </h3>
           </Link>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
             {product.description}
           </p>
         </div>
@@ -142,11 +142,11 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
           <div>
             {product.discountPrice ? (
               <div className="flex items-center space-x-2">
-                <span className="font-medium text-lg text-gray-900">₹{product.discountPrice.toFixed(2)}</span>
-                <span className="text-sm text-gray-500 line-through">₹{product.price.toFixed(2)}</span>
+                <span className="font-medium text-lg text-gray-900 dark:text-white">₹{product.discountPrice.toFixed(2)}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 line-through">₹{product.price.toFixed(2)}</span>
               </div>
             ) : (
-              <span className="font-medium text-lg text-gray-900">₹{product.price.toFixed(2)}</span>
+              <span className="font-medium text-lg text-gray-900 dark:text-white">₹{product.price.toFixed(2)}</span>
             )}
           </div>
           <Button 
@@ -172,7 +172,7 @@ const ProductCard = ({ product }: { product: ProductProps }) => {
             {product.tags.map((tag, index) => (
               <span 
                 key={index} 
-                className="text-xs bg-eco-50 text-eco-800 px-1.5 py-0.5 rounded-sm"
+                className="text-xs bg-eco-50 dark:bg-eco-900 text-eco-800 dark:text-eco-100 px-1.5 py-0.5 rounded-sm"
               >
                 {tag}
               </span>

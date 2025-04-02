@@ -55,9 +55,9 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[85vh]" ref={contentRef}>
+      <DialogContent className="sm:max-w-md overflow-y-auto max-h-[85vh] bg-white dark:bg-gray-800 text-gray-900 dark:text-white" ref={contentRef}>
         <DialogHeader>
-          <DialogTitle>Search Products & Articles</DialogTitle>
+          <DialogTitle className="text-gray-900 dark:text-white">Search Products & Articles</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSearch} className="grid gap-4 py-4">
           <div className="flex items-center gap-2">
@@ -65,10 +65,10 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
               placeholder="Search for plants, gardening tools, articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="col-span-3"
+              className="col-span-3 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
               autoFocus
             />
-            <Button type="submit" disabled={isSearching}>
+            <Button type="submit" disabled={isSearching} className="bg-eco-600 hover:bg-eco-700 text-white">
               {isSearching ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -79,7 +79,7 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
           </div>
         </form>
         <DialogFooter className="sm:justify-start">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Try searching for plants, tools, or gardening tips
           </div>
         </DialogFooter>
