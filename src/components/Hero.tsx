@@ -23,7 +23,7 @@ const Hero = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 leading-tight">
-              Bring Nature's Beauty to Your Home
+              Natural Green Nursery
             </h1>
             
             <p className="text-xl text-eco-100 mb-8 max-w-xl">

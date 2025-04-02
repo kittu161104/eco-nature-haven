@@ -11,10 +11,10 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const { toast } = useToast();
   const [footerData, setFooterData] = useState({
-    companyName: "Natural Green",
+    companyName: "Natural Green Nursery",
     address: "123 Green Avenue, Eco City, EC 12345",
     phone: "+91 9876543210",
-    email: "info@naturalgreen.com",
+    email: "info@naturalgreennursery.com",
     description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
     socialLinks: [
       { name: "facebook", url: "#" },

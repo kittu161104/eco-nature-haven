@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ const Settings = () => {
   const { toast } = useToast();
   const [generalSettings, setGeneralSettings] = useState({
     storeName: "Natural Green Nursery",
-    storeEmail: "info@naturalgreen.com",
+    storeEmail: "info@naturalgreennursery.com",
     storePhone: "+91 9876543210",
     storeAddress: "123 Garden Street, Green City, India",
     currency: "INR",
@@ -46,10 +45,10 @@ const Settings = () => {
   });
 
   const [footerSettings, setFooterSettings] = useState({
-    companyName: "Natural Green",
+    companyName: "Natural Green Nursery",
     address: "123 Green Avenue, Eco City, EC 12345",
     phone: "+91 9876543210",
-    email: "info@naturalgreen.com",
+    email: "info@naturalgreennursery.com",
     description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
     socialLinks: [
       { name: "facebook", url: "#" },
@@ -67,7 +66,6 @@ const Settings = () => {
     newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
   });
 
-  // Load settings on mount
   useEffect(() => {
     const storedGeneralSettings = localStorage.getItem("generalSettings");
     const storedEmailSettings = localStorage.getItem("emailSettings");
@@ -190,13 +188,11 @@ const Settings = () => {
   };
 
   const handleSaveSettings = () => {
-    // Save settings to localStorage
     localStorage.setItem("generalSettings", JSON.stringify(generalSettings));
     localStorage.setItem("emailSettings", JSON.stringify(emailSettings));
     localStorage.setItem("appearanceSettings", JSON.stringify(appearanceSettings));
     localStorage.setItem("footerSettings", JSON.stringify(footerSettings));
     
-    // Apply background image directly
     document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
     
     toast({
@@ -206,10 +202,9 @@ const Settings = () => {
   };
 
   const handleReset = () => {
-    // Reset to default settings
     setGeneralSettings({
       storeName: "Natural Green Nursery",
-      storeEmail: "info@naturalgreen.com",
+      storeEmail: "info@naturalgreennursery.com",
       storePhone: "+91 9876543210",
       storeAddress: "123 Garden Street, Green City, India",
       currency: "INR",
@@ -233,10 +228,10 @@ const Settings = () => {
     });
 
     setFooterSettings({
-      companyName: "Natural Green",
+      companyName: "Natural Green Nursery",
       address: "123 Green Avenue, Eco City, EC 12345",
       phone: "+91 9876543210",
-      email: "info@naturalgreen.com",
+      email: "info@naturalgreennursery.com",
       description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
       socialLinks: [
         { name: "facebook", url: "#" },
@@ -323,7 +318,7 @@ const Settings = () => {
                 <Select 
                   value={generalSettings.currency} 
                   onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
-                  disabled // Currency is fixed to INR as requested
+                  disabled
                 >
                   <SelectTrigger id="currency">
                     <SelectValue placeholder="Select currency" />
