@@ -5,7 +5,7 @@ import { Leaf } from "lucide-react";
 
 const Hero = () => {
   return (
-    <div className="relative bg-gradient-to-br from-eco-900 to-eco-700 text-white overflow-hidden">
+    <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden">
       {/* Decorative leaves */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
         <div className="absolute -top-10 -left-10 w-40 h-40 border-r-2 border-b-2 border-eco-400 rounded-br-full"></div>
@@ -23,7 +23,7 @@ const Hero = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 leading-tight">
-              Natural Green Nursery
+              <span className="bg-gradient-to-r from-eco-400 to-eco-500 text-transparent bg-clip-text">Natural Green Nursery</span>
             </h1>
             
             <p className="text-xl text-eco-100 mb-8 max-w-xl">
@@ -33,7 +33,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-eco-500 hover:bg-eco-600 text-white font-medium"
+                className="bg-eco-500 hover:bg-eco-600 text-gray-900 font-medium"
                 asChild
               >
                 <Link to="/shop">

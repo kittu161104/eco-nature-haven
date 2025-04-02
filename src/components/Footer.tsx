@@ -59,18 +59,18 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-eco-900 text-white">
+    <footer className="bg-gray-900 text-white">
       <div className="eco-container py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <Leaf className="h-6 w-6 text-eco-400" />
-              <span className="font-serif font-bold text-xl text-white">
-                {footerData.companyName}
+              <span className="font-serif font-bold text-xl">
+                <span className="bg-gradient-to-r from-eco-400 to-eco-500 text-transparent bg-clip-text">{footerData.companyName}</span>
               </span>
             </Link>
-            <p className="text-eco-100 text-sm">
+            <p className="text-gray-300 text-sm">
               {footerData.description}
             </p>
             <div className="flex space-x-4">
@@ -78,7 +78,7 @@ const Footer = () => {
                 <a 
                   key={index}
                   href={link.url} 
-                  className="text-eco-100 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-eco-400 transition-colors"
                   aria-label={link.name}
                 >
                   {link.name === "facebook" && (
@@ -114,11 +114,11 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-serif font-bold text-lg mb-4">Quick Links</h3>
+            <h3 className="font-serif font-bold text-lg mb-4 text-eco-400">Quick Links</h3>
             <ul className="space-y-2">
               {footerData.quickLinks.map((link, index) => (
                 <li key={index}>
-                  <Link to={link.url} className="text-eco-100 hover:text-white transition-colors">
+                  <Link to={link.url} className="text-gray-300 hover:text-eco-400 transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -128,42 +128,42 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="font-serif font-bold text-lg mb-4">Contact Us</h3>
+            <h3 className="font-serif font-bold text-lg mb-4 text-eco-400">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <Home className="h-5 w-5 text-eco-400 shrink-0 mt-0.5" />
-                <span className="text-eco-100">
+                <span className="text-gray-300">
                   {footerData.address}
                 </span>
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-eco-400 shrink-0" />
-                <span className="text-eco-100">{footerData.phone}</span>
+                <span className="text-gray-300">{footerData.phone}</span>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-eco-400 shrink-0" />
-                <span className="text-eco-100">{footerData.email}</span>
+                <span className="text-gray-300">{footerData.email}</span>
               </li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-serif font-bold text-lg mb-4">Newsletter</h3>
-            <p className="text-eco-100 text-sm mb-4">
+            <h3 className="font-serif font-bold text-lg mb-4 text-eco-400">Newsletter</h3>
+            <p className="text-gray-300 text-sm mb-4">
               {footerData.newsletterText}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <Input
                 type="email"
                 placeholder="Your email address"
-                className="bg-eco-800 border-eco-700 text-white placeholder:text-eco-400"
+                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               <Button 
                 type="submit" 
-                className="w-full bg-eco-500 hover:bg-eco-600 text-white"
+                className="w-full bg-eco-500 hover:bg-eco-600 text-gray-900"
               >
                 Subscribe
               </Button>
@@ -171,7 +171,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-eco-800 text-center text-eco-400 text-sm">
+        <div className="mt-12 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
           <p>© {new Date().getFullYear()} {footerData.companyName}. All rights reserved.</p>
         </div>
       </div>

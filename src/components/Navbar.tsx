@@ -77,8 +77,8 @@ const Navbar = () => {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled
-          ? "bg-white/90 backdrop-blur-md shadow-sm"
-          : "bg-white/60 backdrop-blur-sm"
+          ? "bg-gray-900/90 backdrop-blur-md shadow-sm"
+          : "bg-gray-900/60 backdrop-blur-sm"
       }`}
     >
       <div className="eco-container">
@@ -86,8 +86,9 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-eco-700">
-                Natural<span className="text-eco-500">Green</span>
+              <h1 className="text-2xl font-bold">
+                <span className="bg-gradient-to-r from-eco-400 to-eco-500 text-transparent bg-clip-text">Natural</span>
+                <span className="text-eco-500">Green</span>
               </h1>
             </Link>
           </div>
@@ -99,10 +100,10 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-eco-600 ${
+                  className={`text-sm font-medium transition-colors hover:text-eco-400 ${
                     isActive(link.path)
-                      ? "text-eco-600 font-semibold"
-                      : "text-gray-600"
+                      ? "text-eco-400 font-semibold"
+                      : "text-gray-300"
                   }`}
                 >
                   {link.name}
@@ -116,7 +117,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-eco-800 hover:text-eco-600 hover:bg-eco-50"
+              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800"
               onClick={toggleSearch}
             >
               <Search className="h-5 w-5" />
@@ -125,7 +126,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-eco-800 hover:text-eco-600 hover:bg-eco-50 relative"
+              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 relative"
               onClick={toggleCart}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -146,21 +147,21 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-eco-800 hover:text-eco-600 hover:bg-eco-50 ml-1"
+                    className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 ml-1"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent>
+                <SheetContent className="bg-gray-900 text-white border-gray-800">
                   <div className="flex flex-col space-y-4 mt-8">
                     {navLinks.map((link) => (
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`text-sm font-medium transition-colors hover:text-eco-600 py-2 ${
+                        className={`text-sm font-medium transition-colors hover:text-eco-400 py-2 ${
                           isActive(link.path)
-                            ? "text-eco-600 font-semibold"
-                            : "text-gray-600"
+                            ? "text-eco-400 font-semibold"
+                            : "text-gray-300"
                         }`}
                       >
                         {link.name}
