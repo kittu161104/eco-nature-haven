@@ -10,467 +10,483 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Save, Plus, Trash } from "lucide-react";
-
-// Define the structure for team members
-interface TeamMember {
-  name: string;
-  role: string;
-  bio: string;
-  image: string;
-}
-
-// Define the structure for values
-interface Value {
-  title: string;
-  description: string;
-  icon: string;
-}
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Save, Plus, Trash, Info, Phone, MapPin, Clock, User, FileText, AlertTriangle } from "lucide-react";
 
 const Pages = () => {
-  const [aboutContent, setAboutContent] = useState("");
-  const [contactContent, setContactContent] = useState("");
-  const [missionContent, setMissionContent] = useState("");
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [values, setValues] = useState<Value[]>([]);
-  const [visitInfo, setVisitInfo] = useState({
-    address: "",
-    hours: "",
-    description: "",
-    image: ""
-  });
   const { toast } = useToast();
+  
+  // About Page States
+  const [aboutCompanyInfo, setAboutCompanyInfo] = useState({
+    companyName: "Natural Green Nursery",
+    foundedYear: "2015",
+    founderName: "Emily Johnson",
+    mission: "To inspire and enable sustainable living through plants. We believe that every plant we sell has the potential to make homes healthier, gardens more vibrant, and our planet a little greener.",
+    vision: "We envision a world where sustainable gardening is accessible to everyone, contributing to a greener and healthier planet for future generations."
+  });
+  
+  const [serviceRegions, setServiceRegions] = useState({
+    primaryRegions: "Andhra Pradesh & Telangana",
+    cities: "Hyderabad, Visakhapatnam, Vijayawada, Warangal, Guntur",
+    deliveryInfo: "Free delivery for orders above ₹500 within city limits. Nominal charges apply for other areas."
+  });
+  
+  // Contact Page States
+  const [contactInfo, setContactInfo] = useState({
+    phoneNumber: "+91 9876543210",
+    emailAddress: "info@naturalgreennursery.com",
+    businessHours: "Monday - Saturday: 9AM to 7PM\nSunday: 10AM to 5PM",
+    address: "123 Green Avenue, Jubilee Hills\nHyderabad, Telangana 500033",
+    mapLink: "https://maps.google.com/?q=17.4326,78.3855",
+    socialMedia: {
+      instagram: "naturalgreen_nursery",
+      facebook: "NaturalGreenNursery",
+      whatsapp: "+919876543210"
+    }
+  });
+
+  const [supportInfo, setSupportInfo] = useState({
+    customerSupportEmail: "support@naturalgreennursery.com",
+    customerSupportPhone: "+91 8765432109",
+    supportHours: "Monday - Friday: 9AM to 6PM",
+    faqLink: "/faq"
+  });
 
   // Load stored content on component mount
   useEffect(() => {
-    const savedAboutContent = localStorage.getItem("page_about");
-    const savedContactContent = localStorage.getItem("page_contact");
-    const savedMissionContent = localStorage.getItem("about_mission");
-    const savedTeamMembers = localStorage.getItem("about_team");
-    const savedValues = localStorage.getItem("about_values");
-    const savedVisitInfo = localStorage.getItem("about_visit");
-
-    if (savedAboutContent) {
-      setAboutContent(savedAboutContent);
+    const storedAboutCompanyInfo = localStorage.getItem("about_company_info");
+    const storedServiceRegions = localStorage.getItem("about_service_regions");
+    const storedContactInfo = localStorage.getItem("contact_info");
+    const storedSupportInfo = localStorage.getItem("contact_support_info");
+    
+    if (storedAboutCompanyInfo) {
+      setAboutCompanyInfo(JSON.parse(storedAboutCompanyInfo));
     }
-
-    if (savedContactContent) {
-      setContactContent(savedContactContent);
+    
+    if (storedServiceRegions) {
+      setServiceRegions(JSON.parse(storedServiceRegions));
     }
-
-    if (savedMissionContent) {
-      setMissionContent(savedMissionContent);
+    
+    if (storedContactInfo) {
+      setContactInfo(JSON.parse(storedContactInfo));
     }
-
-    if (savedTeamMembers) {
-      setTeamMembers(JSON.parse(savedTeamMembers));
-    } else {
-      // Default team members
-      setTeamMembers([
-        {
-          name: "Emily Johnson",
-          role: "Founder & Head Botanist",
-          bio: "With over 15 years of experience in plant cultivation, Emily founded Natural Green with a vision to make sustainable gardening accessible to all.",
-          image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          name: "David Chen",
-          role: "Sustainability Director",
-          bio: "David ensures all our operations meet the highest environmental standards. He oversees our eco-friendly initiatives and carbon offset program.",
-          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          name: "Maria Rodriguez",
-          role: "Plant Care Specialist",
-          bio: "Maria develops our detailed care guides and manages plant health throughout our nursery. She's passionate about helping everyone succeed with plants.",
-          image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-        }
-      ]);
-    }
-
-    if (savedValues) {
-      setValues(JSON.parse(savedValues));
-    } else {
-      // Default values
-      setValues([
-        {
-          title: "Sustainability",
-          description: "We're committed to environmental stewardship through sustainable growing practices, eco-friendly packaging, and reduced carbon footprint.",
-          icon: "Leaf"
-        },
-        {
-          title: "Quality",
-          description: "Every plant in our nursery is carefully grown and inspected to ensure it's healthy and ready to thrive in your home or garden.",
-          icon: "Heart"
-        },
-        {
-          title: "Community",
-          description: "We believe in building a community of plant lovers and providing education on sustainable gardening practices.",
-          icon: "Users"
-        },
-        {
-          title: "Planet-First",
-          description: "Our business decisions are made with the health of our planet in mind, from sourcing to shipping.",
-          icon: "Globe"
-        }
-      ]);
-    }
-
-    if (savedVisitInfo) {
-      setVisitInfo(JSON.parse(savedVisitInfo));
-    } else {
-      // Default visit info
-      setVisitInfo({
-        address: "123 Green Avenue, Eco City, EC 12345",
-        hours: "Monday - Friday: 9am - 6pm\nSaturday: 8am - 5pm\nSunday: 10am - 4pm",
-        description: "We'd love to welcome you to our physical location where you can explore our full collection of plants, get personalized advice from our experts, and experience our sustainable nursery practices firsthand.",
-        image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80"
-      });
+    
+    if (storedSupportInfo) {
+      setSupportInfo(JSON.parse(storedSupportInfo));
     }
   }, []);
 
-  const handleSaveAbout = () => {
-    localStorage.setItem("page_about", aboutContent);
-    toast({
-      title: "About page updated",
-      description: "The About page content has been saved successfully.",
+  const handleAboutCompanyChange = (field: keyof typeof aboutCompanyInfo, value: string) => {
+    setAboutCompanyInfo({
+      ...aboutCompanyInfo,
+      [field]: value
     });
   };
 
-  const handleSaveContact = () => {
-    localStorage.setItem("page_contact", contactContent);
-    toast({
-      title: "Contact page updated",
-      description: "The Contact page content has been saved successfully.",
+  const handleServiceRegionsChange = (field: keyof typeof serviceRegions, value: string) => {
+    setServiceRegions({
+      ...serviceRegions,
+      [field]: value
     });
   };
 
-  const handleSaveMission = () => {
-    localStorage.setItem("about_mission", missionContent);
-    toast({
-      title: "Mission section updated",
-      description: "The About page mission section has been saved successfully.",
+  const handleContactInfoChange = (field: string, value: string) => {
+    // Handle nested objects like socialMedia
+    if (field.includes('.')) {
+      const [parentField, childField] = field.split('.');
+      setContactInfo({
+        ...contactInfo,
+        [parentField]: {
+          ...contactInfo[parentField as keyof typeof contactInfo],
+          [childField]: value
+        }
+      });
+    } else {
+      setContactInfo({
+        ...contactInfo,
+        [field]: value
+      });
+    }
+  };
+
+  const handleSupportInfoChange = (field: keyof typeof supportInfo, value: string) => {
+    setSupportInfo({
+      ...supportInfo,
+      [field]: value
     });
   };
 
-  const handleTeamMemberChange = (index: number, field: keyof TeamMember, value: string) => {
-    const updatedTeamMembers = [...teamMembers];
-    updatedTeamMembers[index] = { ...updatedTeamMembers[index], [field]: value };
-    setTeamMembers(updatedTeamMembers);
-  };
-
-  const handleAddTeamMember = () => {
-    setTeamMembers([
-      ...teamMembers,
-      {
-        name: "",
-        role: "",
-        bio: "",
-        image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-      }
-    ]);
-  };
-
-  const handleRemoveTeamMember = (index: number) => {
-    const updatedTeamMembers = [...teamMembers];
-    updatedTeamMembers.splice(index, 1);
-    setTeamMembers(updatedTeamMembers);
-  };
-
-  const handleSaveTeam = () => {
-    localStorage.setItem("about_team", JSON.stringify(teamMembers));
+  const handleSaveAboutCompany = () => {
+    localStorage.setItem("about_company_info", JSON.stringify(aboutCompanyInfo));
     toast({
-      title: "Team section updated",
-      description: "The About page team section has been saved successfully.",
+      title: "Company information updated",
+      description: "About page company information has been saved successfully."
     });
   };
 
-  const handleValueChange = (index: number, field: keyof Value, value: string) => {
-    const updatedValues = [...values];
-    updatedValues[index] = { ...updatedValues[index], [field]: value };
-    setValues(updatedValues);
-  };
-
-  const handleSaveValues = () => {
-    localStorage.setItem("about_values", JSON.stringify(values));
+  const handleSaveServiceRegions = () => {
+    localStorage.setItem("about_service_regions", JSON.stringify(serviceRegions));
     toast({
-      title: "Values section updated",
-      description: "The About page values section has been saved successfully.",
+      title: "Service regions updated",
+      description: "Service region information has been saved successfully."
     });
   };
 
-  const handleVisitInfoChange = (field: keyof typeof visitInfo, value: string) => {
-    setVisitInfo({ ...visitInfo, [field]: value });
+  const handleSaveContactInfo = () => {
+    localStorage.setItem("contact_info", JSON.stringify(contactInfo));
+    toast({
+      title: "Contact information updated",
+      description: "Contact page information has been saved successfully."
+    });
   };
 
-  const handleSaveVisit = () => {
-    localStorage.setItem("about_visit", JSON.stringify(visitInfo));
+  const handleSaveSupportInfo = () => {
+    localStorage.setItem("contact_support_info", JSON.stringify(supportInfo));
     toast({
-      title: "Visit section updated",
-      description: "The About page visit section has been saved successfully.",
+      title: "Support information updated",
+      description: "Support information has been saved successfully."
     });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-eco-800">Static Pages</h1>
-      </div>
+    <ScrollArea className="h-[calc(100vh-120px)]">
+      <div className="space-y-6 p-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-eco-400">Manage Pages</h1>
+        </div>
 
-      <p className="text-gray-600">
-        Edit the content of your website's static pages here. Changes will be immediately visible on the customer-facing website.
-      </p>
-
-      <Tabs defaultValue="about" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="about">About Page</TabsTrigger>
-          <TabsTrigger value="mission">Our Mission</TabsTrigger>
-          <TabsTrigger value="values">Our Values</TabsTrigger>
-          <TabsTrigger value="team">Our Team</TabsTrigger>
-          <TabsTrigger value="contact">Contact Page</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="about" className="space-y-4 pt-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-eco-800">Edit About Page Content</h2>
-            <p className="text-gray-600">
-              This content will appear on the About page of your website. Use clear, concise language to tell your story and share your mission with customers.
-            </p>
-
-            <div className="space-y-2">
-              <label htmlFor="aboutContent" className="text-sm font-medium">
-                Page Content
-              </label>
-              <Textarea
-                id="aboutContent"
-                value={aboutContent}
-                onChange={(e) => setAboutContent(e.target.value)}
-                placeholder="Enter your About page content here..."
-                rows={15}
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <Button onClick={handleSaveAbout}>
-                <Save className="h-4 w-4 mr-2" />
-                Save About Page
-              </Button>
+        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-white">Page Content Manager</h3>
+              <p className="text-gray-400 text-sm">
+                Changes made here will be immediately reflected on your website. Fill in the information below to customize your About and Contact pages.
+              </p>
             </div>
           </div>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="mission" className="space-y-4 pt-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-eco-800">Edit Our Mission Section</h2>
-            <p className="text-gray-600">
-              This content will appear in the Mission section of the About page. Describe your company's mission and history.
-            </p>
+        <Tabs defaultValue="about" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800 text-gray-400">
+            <TabsTrigger value="about" className="data-[state=active]:bg-gray-700 data-[state=active]:text-eco-400">
+              About Page
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="data-[state=active]:bg-gray-700 data-[state=active]:text-eco-400">
+              Contact Page
+            </TabsTrigger>
+          </TabsList>
 
-            <div className="space-y-2">
-              <label htmlFor="missionContent" className="text-sm font-medium">
-                Mission Content
-              </label>
-              <Textarea
-                id="missionContent"
-                value={missionContent}
-                onChange={(e) => setMissionContent(e.target.value)}
-                placeholder="Enter your mission content here..."
-                rows={10}
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <Button onClick={handleSaveMission}>
-                <Save className="h-4 w-4 mr-2" />
-                Save Mission Section
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="values" className="space-y-4 pt-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-eco-800">Edit Our Values Section</h2>
-            <p className="text-gray-600">
-              Edit the values that define your company. These will appear in the Values section of the About page.
-            </p>
-
-            <div className="space-y-6">
-              {values.map((value, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-md space-y-3">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">Value {index + 1}</h3>
-                    {values.length > 1 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          const updatedValues = [...values];
-                          updatedValues.splice(index, 1);
-                          setValues(updatedValues);
-                        }}
-                        className="text-red-500 border-red-200 hover:bg-red-50"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Title</label>
-                      <Input
-                        value={value.title}
-                        onChange={(e) => handleValueChange(index, 'title', e.target.value)}
-                        placeholder="Value title"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Icon</label>
-                      <Input
-                        value={value.icon}
-                        onChange={(e) => handleValueChange(index, 'icon', e.target.value)}
-                        placeholder="Icon name (Leaf, Heart, Users, Globe, etc.)"
-                      />
-                    </div>
-                  </div>
-                  
+          <TabsContent value="about" className="space-y-6 pt-6">
+            <Card className="bg-gray-900 border-gray-800 text-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-eco-400">
+                  <Info className="h-5 w-5" />
+                  Company Information
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Basic information about your company that will appear on the About page
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Description</label>
-                    <Textarea
-                      value={value.description}
-                      onChange={(e) => handleValueChange(index, 'description', e.target.value)}
-                      placeholder="Value description"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              ))}
-              
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => {
-                  setValues([...values, { title: "", description: "", icon: "Star" }]);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Value
-                </Button>
-                
-                <Button onClick={handleSaveValues}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Values
-                </Button>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="team" className="space-y-4 pt-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-eco-800">Edit Our Team Section</h2>
-            <p className="text-gray-600">
-              Manage the team members that appear on the About page. Add, edit, or remove team members as needed.
-            </p>
-
-            <div className="space-y-6">
-              {teamMembers.map((member, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-md space-y-3">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">Team Member {index + 1}</h3>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleRemoveTeamMember(index)}
-                      className="text-red-500 border-red-200 hover:bg-red-50"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Name</label>
-                      <Input
-                        value={member.name}
-                        onChange={(e) => handleTeamMemberChange(index, 'name', e.target.value)}
-                        placeholder="Full name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Role</label>
-                      <Input
-                        value={member.role}
-                        onChange={(e) => handleTeamMemberChange(index, 'role', e.target.value)}
-                        placeholder="Job title"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Bio</label>
-                    <Textarea
-                      value={member.bio}
-                      onChange={(e) => handleTeamMemberChange(index, 'bio', e.target.value)}
-                      placeholder="Short bio"
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Image URL</label>
+                    <Label htmlFor="companyName">Company Name</Label>
                     <Input
-                      value={member.image}
-                      onChange={(e) => handleTeamMemberChange(index, 'image', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
+                      id="companyName"
+                      value={aboutCompanyInfo.companyName}
+                      onChange={(e) => handleAboutCompanyChange('companyName', e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="foundedYear">Founded Year</Label>
+                      <Input
+                        id="foundedYear"
+                        value={aboutCompanyInfo.foundedYear}
+                        onChange={(e) => handleAboutCompanyChange('foundedYear', e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="founderName">Founder Name</Label>
+                      <Input
+                        id="founderName"
+                        value={aboutCompanyInfo.founderName}
+                        onChange={(e) => handleAboutCompanyChange('founderName', e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="mission">Our Mission</Label>
+                  <Textarea
+                    id="mission"
+                    value={aboutCompanyInfo.mission}
+                    onChange={(e) => handleAboutCompanyChange('mission', e.target.value)}
+                    rows={3}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="vision">Our Vision</Label>
+                  <Textarea
+                    id="vision"
+                    value={aboutCompanyInfo.vision}
+                    onChange={(e) => handleAboutCompanyChange('vision', e.target.value)}
+                    rows={3}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Button onClick={handleSaveAboutCompany} className="bg-eco-600 hover:bg-eco-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Company Information
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="bg-gray-900 border-gray-800 text-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-eco-400">
+                  <MapPin className="h-5 w-5" />
+                  Service Regions
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Information about regions you serve
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primaryRegions">Primary Regions</Label>
+                  <Input
+                    id="primaryRegions"
+                    value={serviceRegions.primaryRegions}
+                    onChange={(e) => handleServiceRegionsChange('primaryRegions', e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="e.g., Andhra Pradesh & Telangana"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cities">Major Cities Served</Label>
+                  <Input
+                    id="cities"
+                    value={serviceRegions.cities}
+                    onChange={(e) => handleServiceRegionsChange('cities', e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="e.g., Hyderabad, Visakhapatnam, Vijayawada"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="deliveryInfo">Delivery Information</Label>
+                  <Textarea
+                    id="deliveryInfo"
+                    value={serviceRegions.deliveryInfo}
+                    onChange={(e) => handleServiceRegionsChange('deliveryInfo', e.target.value)}
+                    rows={2}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Button onClick={handleSaveServiceRegions} className="bg-eco-600 hover:bg-eco-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Service Regions
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-6 pt-6">
+            <Card className="bg-gray-900 border-gray-800 text-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-eco-400">
+                  <Phone className="h-5 w-5" />
+                  Contact Information
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  How customers can reach your business
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Input
+                      id="phoneNumber"
+                      value={contactInfo.phoneNumber}
+                      onChange={(e) => handleContactInfoChange('phoneNumber', e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emailAddress">Email Address</Label>
+                    <Input
+                      id="emailAddress"
+                      value={contactInfo.emailAddress}
+                      onChange={(e) => handleContactInfoChange('emailAddress', e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
                     />
                   </div>
                 </div>
-              ))}
-              
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={handleAddTeamMember}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Team Member
-                </Button>
                 
-                <Button onClick={handleSaveTeam}>
+                <div className="space-y-2">
+                  <Label htmlFor="businessHours">Business Hours</Label>
+                  <Textarea
+                    id="businessHours"
+                    value={contactInfo.businessHours}
+                    onChange={(e) => handleContactInfoChange('businessHours', e.target.value)}
+                    rows={2}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={contactInfo.address}
+                    onChange={(e) => handleContactInfoChange('address', e.target.value)}
+                    rows={2}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="mapLink">Google Maps Link</Label>
+                  <Input
+                    id="mapLink"
+                    value={contactInfo.mapLink}
+                    onChange={(e) => handleContactInfoChange('mapLink', e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="https://maps.google.com/?q=latitude,longitude"
+                  />
+                </div>
+                
+                <div className="space-y-3 pt-3">
+                  <Label>Social Media</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="instagram" className="text-sm">Instagram Handle</Label>
+                      <Input
+                        id="instagram"
+                        value={contactInfo.socialMedia.instagram}
+                        onChange={(e) => handleContactInfoChange('socialMedia.instagram', e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="username"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="facebook" className="text-sm">Facebook Handle</Label>
+                      <Input
+                        id="facebook"
+                        value={contactInfo.socialMedia.facebook}
+                        onChange={(e) => handleContactInfoChange('socialMedia.facebook', e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="pagename"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp" className="text-sm">WhatsApp Number</Label>
+                      <Input
+                        id="whatsapp"
+                        value={contactInfo.socialMedia.whatsapp}
+                        onChange={(e) => handleContactInfoChange('socialMedia.whatsapp', e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="+91xxxxxxxxxx"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Button onClick={handleSaveContactInfo} className="bg-eco-600 hover:bg-eco-700">
                   <Save className="h-4 w-4 mr-2" />
-                  Save Team
+                  Save Contact Information
                 </Button>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
+              </CardFooter>
+            </Card>
 
-        <TabsContent value="contact" className="space-y-4 pt-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-eco-800">Edit Contact Page Content</h2>
-            <p className="text-gray-600">
-              This content will appear on the Contact page of your website. Include important information like business hours, location, and additional contact methods.
-            </p>
-
-            <div className="space-y-2">
-              <label htmlFor="contactContent" className="text-sm font-medium">
-                Page Content
-              </label>
-              <Textarea
-                id="contactContent"
-                value={contactContent}
-                onChange={(e) => setContactContent(e.target.value)}
-                placeholder="Enter your Contact page content here..."
-                rows={15}
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <Button onClick={handleSaveContact}>
-                <Save className="h-4 w-4 mr-2" />
-                Save Contact Page
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+            <Card className="bg-gray-900 border-gray-800 text-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-eco-400">
+                  <User className="h-5 w-5" />
+                  Customer Support
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Information for customer inquiries and support
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customerSupportEmail">Support Email</Label>
+                    <Input
+                      id="customerSupportEmail"
+                      value={supportInfo.customerSupportEmail}
+                      onChange={(e) => handleSupportInfoChange('customerSupportEmail', e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerSupportPhone">Support Phone</Label>
+                    <Input
+                      id="customerSupportPhone"
+                      value={supportInfo.customerSupportPhone}
+                      onChange={(e) => handleSupportInfoChange('customerSupportPhone', e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="supportHours">Support Hours</Label>
+                  <Input
+                    id="supportHours"
+                    value={supportInfo.supportHours}
+                    onChange={(e) => handleSupportInfoChange('supportHours', e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="faqLink">FAQ Page Link</Label>
+                  <Input
+                    id="faqLink"
+                    value={supportInfo.faqLink}
+                    onChange={(e) => handleSupportInfoChange('faqLink', e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="/faq"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end">
+                <Button onClick={handleSaveSupportInfo} className="bg-eco-600 hover:bg-eco-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Support Information
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ScrollArea>
   );
 };
 

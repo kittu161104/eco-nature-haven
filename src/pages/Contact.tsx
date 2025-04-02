@@ -1,14 +1,39 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, Home, Clock } from "lucide-react";
+import CTASection from "@/components/CTASection";
+import { Phone, Mail, Clock, MapPin, Send, Instagram, Facebook, MessageSquare } from "lucide-react";
+
+interface ContactInfo {
+  phoneNumber: string;
+  emailAddress: string;
+  businessHours: string;
+  address: string;
+  mapLink: string;
+  socialMedia: {
+    instagram: string;
+    facebook: string;
+    whatsapp: string;
+  };
+}
+
+interface SupportInfo {
+  customerSupportEmail: string;
+  customerSupportPhone: string;
+  supportHours: string;
+  faqLink: string;
+}
 
 const Contact = () => {
+  const { toast } = useToast();
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [supportInfo, setSupportInfo] = useState<SupportInfo | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,427 +41,306 @@ const Contact = () => {
     subject: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [content, setContent] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const savedContent = localStorage.getItem('page_contact');
-    if (savedContent) {
-      setContent(savedContent);
-    }
-  }, []);
-
+  // Form handling
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted:", formData);
     
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Error",
-        description: "Please fill out all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Show success message
+    toast({
+      title: "Message Sent!",
+      description: "Thank you for contacting us. We'll get back to you soon.",
+    });
     
-    setIsSubmitting(true);
-    
-    setTimeout(() => {
-      toast({
-        title: "Message Sent!",
-        description: "We've received your message and will get back to you soon.",
-      });
-      
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-      
-      setIsSubmitting(false);
-    }, 1500);
+    // Reset form
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    });
   };
 
-  if (content) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <div className="bg-eco-100 py-12">
-            <div className="eco-container">
-              <div className="text-center">
-                <h1 className="text-3xl md:text-4xl font-serif font-bold text-eco-800 mb-4">
-                  Contact Us
-                </h1>
-              </div>
-            </div>
-          </div>
-          
-          <div className="eco-container py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-1">
-                <div className="bg-white p-6 rounded-lg shadow-sm h-full">
-                  <div className="prose prose-green">
-                    <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />
-                  </div>
-                  
-                  <div className="mt-8">
-                    <h3 className="font-medium text-gray-900 mb-3">Follow Us</h3>
-                    <div className="flex space-x-4">
-                      <a 
-                        href="#" 
-                        className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                        aria-label="Facebook"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                        </svg>
-                      </a>
-                      <a 
-                        href="#" 
-                        className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                        aria-label="Instagram"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg>
-                      </a>
-                      <a 
-                        href="#" 
-                        className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                        aria-label="Twitter"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                        </svg>
-                      </a>
-                      <a 
-                        href="#" 
-                        className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                        aria-label="Pinterest"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                          <path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"></path>
-                          <path d="M12 2v2"></path>
-                          <path d="M12 20v2"></path>
-                          <path d="M20 12h2"></path>
-                          <path d="M2 12h2"></path>
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h2 className="text-2xl font-serif font-bold text-eco-800 mb-6">
-                    Send Us a Message
-                  </h2>
-                  
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          placeholder="Your name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="Your email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone</Label>
-                        <Input
-                          id="phone"
-                          name="phone"
-                          placeholder="Your phone number"
-                          value={formData.phone}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          placeholder="Message subject"
-                          value={formData.subject}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Message <span className="text-red-500">*</span></Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        placeholder="Your message"
-                        rows={6}
-                        value={formData.message}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full md:w-auto bg-eco-600 hover:bg-eco-700"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Sending..." : "Send Message"}
-                    </Button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  // Load contact info from localStorage
+  useEffect(() => {
+    const savedContactInfo = localStorage.getItem('contact_info');
+    const savedSupportInfo = localStorage.getItem('contact_support_info');
+    
+    if (savedContactInfo) {
+      setContactInfo(JSON.parse(savedContactInfo));
+    } else {
+      // Default values if not set in admin
+      setContactInfo({
+        phoneNumber: "+91 9876543210",
+        emailAddress: "info@naturalgreennursery.com",
+        businessHours: "Monday - Saturday: 9AM to 7PM\nSunday: 10AM to 5PM",
+        address: "123 Green Avenue, Jubilee Hills\nHyderabad, Telangana 500033",
+        mapLink: "https://maps.google.com/?q=17.4326,78.3855",
+        socialMedia: {
+          instagram: "naturalgreen_nursery",
+          facebook: "NaturalGreenNursery",
+          whatsapp: "+919876543210"
+        }
+      });
+    }
+    
+    if (savedSupportInfo) {
+      setSupportInfo(JSON.parse(savedSupportInfo));
+    } else {
+      // Default values if not set in admin
+      setSupportInfo({
+        customerSupportEmail: "support@naturalgreennursery.com",
+        customerSupportPhone: "+91 8765432109",
+        supportHours: "Monday - Friday: 9AM to 6PM",
+        faqLink: "/faq"
+      });
+    }
+    
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-        <div className="bg-eco-100 py-12">
+        {/* Contact Hero */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20">
           <div className="eco-container">
-            <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-eco-800 mb-4">
-                Contact Us
+            <div className={`max-w-3xl mx-auto text-center transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">
+                Get In <span className="shimmer-text">Touch</span>
               </h1>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Have questions about plants, orders, or want to arrange a visit? We're here to help!
+              <p className="text-xl text-eco-100">
+                Have questions or need assistance? We're here to help you with all your plant needs.
               </p>
             </div>
           </div>
         </div>
-        
-        <div className="eco-container py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm h-full">
-                <h2 className="text-2xl font-serif font-bold text-eco-800 mb-6">
-                  Get In Touch
-                </h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start">
-                    <Mail className="h-5 w-5 text-eco-600 mt-1 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-gray-900">Email</h3>
-                      <p className="text-gray-600">info@naturalgreen.com</p>
-                      <p className="text-gray-600">support@naturalgreen.com</p>
+
+        {/* Contact Information */}
+        <section className="py-16">
+          <div className="eco-container">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-stagger">
+              <div className="bg-gray-800/70 backdrop-blur-md p-6 rounded-lg shadow-md border border-gray-700 text-center">
+                <div className="bg-eco-900/50 text-eco-400 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Phone className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold text-eco-400 mb-2">Call Us</h3>
+                <p className="text-gray-300 mb-2">Main Office:</p>
+                <p className="text-white text-lg font-medium mb-3">{contactInfo?.phoneNumber}</p>
+                <p className="text-gray-300 mb-2">Customer Support:</p>
+                <p className="text-white text-lg font-medium">{supportInfo?.customerSupportPhone}</p>
+              </div>
+
+              <div className="bg-gray-800/70 backdrop-blur-md p-6 rounded-lg shadow-md border border-gray-700 text-center">
+                <div className="bg-eco-900/50 text-eco-400 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold text-eco-400 mb-2">Email Us</h3>
+                <p className="text-gray-300 mb-2">General Inquiries:</p>
+                <p className="text-white text-lg font-medium mb-3">{contactInfo?.emailAddress}</p>
+                <p className="text-gray-300 mb-2">Customer Support:</p>
+                <p className="text-white text-lg font-medium">{supportInfo?.customerSupportEmail}</p>
+              </div>
+
+              <div className="bg-gray-800/70 backdrop-blur-md p-6 rounded-lg shadow-md border border-gray-700 text-center">
+                <div className="bg-eco-900/50 text-eco-400 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-semibold text-eco-400 mb-2">Working Hours</h3>
+                <p className="text-gray-300 mb-2">Nursery Hours:</p>
+                <div className="text-white mb-3">
+                  {contactInfo?.businessHours.split("\n").map((line, index) => (
+                    <p key={index} className="my-1">{line}</p>
+                  ))}
+                </div>
+                <p className="text-gray-300 mb-2">Support Hours:</p>
+                <p className="text-white">{supportInfo?.supportHours}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Form and Location */}
+        <section className="py-16 bg-gray-900/50">
+          <div className="eco-container">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* Contact Form */}
+              <div className={`transition-all duration-1000 delay-500 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+                <h2 className="text-2xl font-serif font-bold mb-6 text-eco-400">Send Us a Message</h2>
+                <div className="bg-gray-800/70 backdrop-blur-md p-6 rounded-lg shadow-md border border-gray-700">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="text-white">Your Name</Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="John Doe"
+                          required
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-white">Email Address</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="john@example.com"
+                          required
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Phone className="h-5 w-5 text-eco-600 mt-1 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+1 (555) 123-4567</p>
-                      <p className="text-gray-600">Mon-Fri: 9am - 5pm EST</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-white">Phone Number</Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="+91 98765 43210"
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="subject" className="text-white">Subject</Label>
+                        <Input
+                          id="subject"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleChange}
+                          placeholder="Product Inquiry"
+                          required
+                          className="bg-gray-700 border-gray-600 text-white"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Home className="h-5 w-5 text-eco-600 mt-1 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-gray-900">Visit Our Nursery</h3>
-                      <p className="text-gray-600">123 Green Avenue</p>
-                      <p className="text-gray-600">Eco City, EC 12345</p>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="message" className="text-white">Your Message</Label>
+                      <Textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="How can we help you?"
+                        rows={5}
+                        required
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Clock className="h-5 w-5 text-eco-600 mt-1 mr-3" />
-                    <div>
-                      <h3 className="font-medium text-gray-900">Business Hours</h3>
-                      <p className="text-gray-600">Monday - Friday: 9am - 6pm</p>
-                      <p className="text-gray-600">Saturday: 8am - 5pm</p>
-                      <p className="text-gray-600">Sunday: 10am - 4pm</p>
-                    </div>
-                  </div>
+
+                    <Button type="submit" className="w-full bg-eco-600 hover:bg-eco-700">
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Message
+                    </Button>
+                  </form>
                 </div>
                 
+                {/* Social Media Links */}
                 <div className="mt-8">
-                  <h3 className="font-medium text-gray-900 mb-3">Follow Us</h3>
-                  <div className="flex space-x-4">
-                    <a 
-                      href="#" 
-                      className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                      aria-label="Facebook"
+                  <h3 className="text-xl font-serif font-bold mb-4 text-eco-400">Connect With Us</h3>
+                  <div className="flex flex-wrap gap-4">
+                    <a
+                      href={`https://instagram.com/${contactInfo?.socialMedia.instagram}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gray-800/70 backdrop-blur-md px-4 py-3 rounded-lg shadow-md border border-gray-700 flex items-center gap-2 hover:bg-gray-700/70 transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                      </svg>
+                      <Instagram className="h-5 w-5 text-eco-400" />
+                      <span className="text-white">@{contactInfo?.socialMedia.instagram}</span>
                     </a>
-                    <a 
-                      href="#" 
-                      className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                      aria-label="Instagram"
+                    <a
+                      href={`https://facebook.com/${contactInfo?.socialMedia.facebook}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gray-800/70 backdrop-blur-md px-4 py-3 rounded-lg shadow-md border border-gray-700 flex items-center gap-2 hover:bg-gray-700/70 transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                      </svg>
+                      <Facebook className="h-5 w-5 text-eco-400" />
+                      <span className="text-white">{contactInfo?.socialMedia.facebook}</span>
                     </a>
-                    <a 
-                      href="#" 
-                      className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                      aria-label="Twitter"
+                    <a
+                      href={`https://wa.me/${contactInfo?.socialMedia.whatsapp.replace(/\+/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gray-800/70 backdrop-blur-md px-4 py-3 rounded-lg shadow-md border border-gray-700 flex items-center gap-2 hover:bg-gray-700/70 transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                      </svg>
-                    </a>
-                    <a 
-                      href="#" 
-                      className="bg-eco-100 hover:bg-eco-200 text-eco-800 p-2 rounded-full transition-colors"
-                      aria-label="Pinterest"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                        <path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"></path>
-                        <path d="M12 2v2"></path>
-                        <path d="M12 20v2"></path>
-                        <path d="M20 12h2"></path>
-                        <path d="M2 12h2"></path>
-                      </svg>
+                      <MessageSquare className="h-5 w-5 text-eco-400" />
+                      <span className="text-white">WhatsApp</span>
                     </a>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="lg:col-span-2">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-2xl font-serif font-bold text-eco-800 mb-6">
-                  Send Us a Message
-                </h2>
+
+              {/* Location */}
+              <div className={`space-y-6 transition-all duration-1000 delay-700 ${isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+                <h2 className="text-2xl font-serif font-bold mb-6 text-eco-400">Visit Our Nursery</h2>
                 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="Your name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Your email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
+                <div className="bg-gray-800/70 backdrop-blur-md p-6 rounded-lg shadow-md border border-gray-700 mb-6">
+                  <div className="flex items-start gap-3 mb-4">
+                    <MapPin className="h-5 w-5 text-eco-500 mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-medium text-white mb-1">Address</h3>
+                      <div className="text-gray-300">
+                        {contactInfo?.address.split("\n").map((line, index) => (
+                          <p key={index} className="my-1">{line}</p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        placeholder="Your phone number"
-                        value={formData.phone}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        placeholder="Message subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message <span className="text-red-500">*</span></Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      placeholder="Your message"
-                      rows={6}
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full md:w-auto bg-eco-600 hover:bg-eco-700"
-                    disabled={isSubmitting}
+                  <a 
+                    href={contactInfo?.mapLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block w-full mt-4"
                   >
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-12">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-serif font-bold text-eco-800 mb-6">
-                Find Us
-              </h2>
-              
-              <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center bg-eco-50">
-                  <p className="text-gray-600">Interactive map will be displayed here</p>
+                    <Button className="w-full bg-eco-600 hover:bg-eco-700">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Get Directions
+                    </Button>
+                  </a>
+                </div>
+                
+                <div className="rounded-lg overflow-hidden shadow-lg h-[300px] md:h-[400px]">
+                  <iframe
+                    title="Store Location"
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(contactInfo?.address || "")}`}
+                    allowFullScreen
+                  ></iframe>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <CTASection />
       </main>
       <Footer />
     </div>

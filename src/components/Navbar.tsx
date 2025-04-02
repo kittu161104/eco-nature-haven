@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ProfileMenu from "@/components/ProfileMenu";
 import CartModal from "@/components/CartModal";
 import SearchModal from "@/components/SearchModal";
-import { Menu, Search, ShoppingCart, X } from "lucide-react";
+import { Menu, Search, ShoppingCart, X, Leaf } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "./ui/badge";
@@ -19,6 +19,7 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Update cart count whenever cart is updated
   useEffect(() => {
@@ -48,15 +49,21 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
+    
+    // Trigger load animation
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 200);
+    
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timer);
     };
   }, []);
 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },
-    { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
@@ -75,20 +82,20 @@ const Navbar = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         isScrolled
-          ? "bg-gray-900/90 backdrop-blur-md shadow-sm"
-          : "bg-gray-900/60 backdrop-blur-sm"
+          ? "bg-gray-900/90 backdrop-blur-lg shadow-lg"
+          : "bg-transparent"
       }`}
     >
       <div className="eco-container">
-        <div className="flex h-16 items-center justify-between">
+        <div className={`flex h-16 items-center justify-between transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 -translate-y-4'}`}>
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <Leaf className="h-6 w-6 text-eco-500 animate-leaf-sway" />
               <h1 className="text-2xl font-bold">
-                <span className="bg-gradient-to-r from-eco-400 to-eco-500 text-transparent bg-clip-text">Natural</span>
-                <span className="text-eco-500">Green</span>
+                <span className="shimmer-text">Natural Green</span>
               </h1>
             </Link>
           </div>
@@ -96,17 +103,23 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           {!isMobile && (
             <nav className="mx-6 flex items-center space-x-4 lg:space-x-6">
-              {navLinks.map((link) => (
+              {navLinks.map((link, index) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-eco-400 ${
-                    isActive(link.path)
-                      ? "text-eco-400 font-semibold"
-                      : "text-gray-300"
-                  }`}
+                  className={`text-sm font-medium transition-colors hover:text-eco-400 relative
+                    ${isActive(link.path) ? "text-eco-400 font-semibold" : "text-gray-300"}
+                  `}
+                  style={{ 
+                    transitionDelay: `${index * 100}ms`,
+                    animation: isLoaded ? `fadeInUp 0.5s ease ${index * 100 + 300}ms forwards` : 'none',
+                    opacity: 0
+                  }}
                 >
                   {link.name}
+                  {isActive(link.path) && (
+                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-eco-400 rounded-full"></span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -117,8 +130,12 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800"
+              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 transition-all duration-300"
               onClick={toggleSearch}
+              style={{ 
+                animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
+                opacity: 0
+              }}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -126,8 +143,12 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 relative"
+              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 relative transition-all duration-300"
               onClick={toggleCart}
+              style={{ 
+                animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
+                opacity: 0
+              }}
             >
               <ShoppingCart className="h-5 w-5" />
               {cartItemCount > 0 && (
@@ -138,7 +159,12 @@ const Navbar = () => {
             </Button>
 
             {/* Profile Menu */}
-            <ProfileMenu />
+            <div style={{ 
+              animation: isLoaded ? 'fadeInUp 0.5s ease 800ms forwards' : 'none',
+              opacity: 0
+            }}>
+              <ProfileMenu />
+            </div>
 
             {/* Mobile Navigation */}
             {isMobile && (
@@ -148,6 +174,10 @@ const Navbar = () => {
                     variant="ghost"
                     size="icon"
                     className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 ml-1"
+                    style={{ 
+                      animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
+                      opacity: 0
+                    }}
                   >
                     <Menu className="h-5 w-5" />
                   </Button>

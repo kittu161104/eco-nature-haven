@@ -48,8 +48,21 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(17, 24, 39, 0.92);
+    background: rgba(12, 15, 25, 0.95);
     z-index: -1;
+    animation: gradientShift 15s ease infinite alternate;
+  }
+  
+  @keyframes gradientShift {
+    0% {
+      background: rgba(12, 15, 25, 0.95);
+    }
+    50% {
+      background: rgba(15, 23, 42, 0.95);
+    }
+    100% {
+      background: rgba(17, 24, 39, 0.95);
+    }
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -58,7 +71,7 @@
   
   /* Adjust admin section background */
   .admin-layout-container {
-    background: rgba(17, 24, 39, 0.98);
+    background: rgba(12, 15, 25, 0.98);
     backdrop-filter: blur(5px);
   }
   
@@ -81,11 +94,39 @@
   /* Card styling with glassmorphism */
   .eco-card {
     @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 border border-gray-800;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
   
   .eco-card:hover {
     @apply shadow-lg transform -translate-y-1 border-gray-700;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
+
+  /* Animate elements on page load */
+  .animate-on-load {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered animation for multiple items */
+  .animate-stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-stagger > *:nth-child(1) { animation: fadeInUp 0.5s ease 0.1s forwards; }
+  .animate-stagger > *:nth-child(2) { animation: fadeInUp 0.5s ease 0.2s forwards; }
+  .animate-stagger > *:nth-child(3) { animation: fadeInUp 0.5s ease 0.3s forwards; }
+  .animate-stagger > *:nth-child(4) { animation: fadeInUp 0.5s ease 0.4s forwards; }
+  .animate-stagger > *:nth-child(5) { animation: fadeInUp 0.5s ease 0.5s forwards; }
 }
 
 @layer components {
@@ -104,6 +145,29 @@
     transform: translateY(0);
     transition: opacity 400ms, transform 400ms;
   }
+
+  /* Dynamic glow effect for buttons */
+  .glow-on-hover {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glow-on-hover::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(var(--eco-400-rgb), 0.3) 0%, rgba(0,0,0,0) 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .glow-on-hover:hover::after {
+    opacity: 1;
+  }
 }
 
 /* Custom Eco-friendly color theme */
@@ -119,6 +183,7 @@
   --eco-800: #245a32;
   --eco-900: #1a462a;
   --eco-950: #0e2c1a;
+  --eco-400-rgb: 108, 182, 133;
 }
 
 .bg-eco-50 { background-color: var(--eco-50); }
@@ -169,5 +234,21 @@
   }
   50% {
     transform: rotate(2deg);
+  }
+}
+
+/* Shimmering text effect */
+.shimmer-text {
+  background: linear-gradient(90deg, var(--eco-500) 0%, var(--eco-400) 30%, var(--eco-300) 50%, var(--eco-400) 70%, var(--eco-500) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
   }
 }
