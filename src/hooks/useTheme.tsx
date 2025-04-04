@@ -3,41 +3,57 @@ import { useState, useEffect } from 'react';
 import { ThemeSettings, defaultTheme, applyTheme } from '@/lib/theme';
 
 export function useTheme() {
+  // Initialize with a safe default theme
   const [theme, setTheme] = useState<ThemeSettings>(defaultTheme);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Safe theme loading on mount
   useEffect(() => {
-    // Load theme from localStorage on initial load
-    try {
-      const savedTheme = localStorage.getItem('themeSettings');
-      if (savedTheme) {
-        try {
-          const parsedTheme = JSON.parse(savedTheme);
-          // Validate the theme object to ensure it has the required properties
-          if (typeof parsedTheme === 'object' && parsedTheme !== null && 'mode' in parsedTheme) {
-            setTheme(parsedTheme);
-            applyTheme(parsedTheme);
-          } else {
-            console.warn('Invalid theme structure, resetting to default');
+    const loadTheme = () => {
+      try {
+        const savedTheme = localStorage.getItem('themeSettings');
+        if (savedTheme) {
+          try {
+            const parsedTheme = JSON.parse(savedTheme);
+            // Validate the theme structure with explicit checks
+            if (
+              typeof parsedTheme === 'object' && 
+              parsedTheme !== null && 
+              'mode' in parsedTheme &&
+              'primaryColor' in parsedTheme &&
+              'secondaryColor' in parsedTheme
+            ) {
+              setTheme(parsedTheme);
+              applyTheme(parsedTheme);
+            } else {
+              console.warn('Invalid theme structure, resetting to default');
+              setTheme(defaultTheme);
+              applyTheme(defaultTheme);
+            }
+          } catch (parseError) {
+            console.error('Error parsing theme settings:', parseError);
             setTheme(defaultTheme);
             applyTheme(defaultTheme);
           }
-        } catch (e) {
-          console.error('Error parsing theme settings:', e);
-          // If there's an error, reset to default theme
-          setTheme(defaultTheme);
+        } else {
+          // Apply default theme if none is saved
           applyTheme(defaultTheme);
         }
-      } else {
-        // Initialize with default theme if nothing is saved
+      } catch (error) {
+        console.error('Error loading theme from localStorage:', error);
+        // Ensure we have a valid theme even if everything fails
         applyTheme(defaultTheme);
+      } finally {
+        setIsInitialized(true);
       }
-    } catch (error) {
-      console.error('Error loading theme from localStorage:', error);
-      // Continue with default theme
-    } finally {
-      setIsInitialized(true);
-    }
+    };
+
+    // Use setTimeout to ensure DOM is ready before applying theme
+    setTimeout(loadTheme, 0);
+    
+    return () => {
+      // Cleanup if needed
+    };
   }, []);
 
   const updateTheme = (newTheme: Partial<ThemeSettings>) => {
@@ -49,14 +65,13 @@ export function useTheme() {
         localStorage.setItem('themeSettings', JSON.stringify(updatedTheme));
       } catch (storageError) {
         console.error('Error saving theme to localStorage:', storageError);
-        // Continue even if storage fails
       }
       
       applyTheme(updatedTheme);
       return updatedTheme;
     } catch (error) {
       console.error('Error updating theme:', error);
-      return theme; // Return current theme if update fails
+      return theme;
     }
   };
 

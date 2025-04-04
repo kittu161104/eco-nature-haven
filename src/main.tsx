@@ -19,6 +19,16 @@ const getRootElement = () => {
   return root;
 };
 
+// Create a stable error handler
+const handleError = (error: any) => {
+  console.error("Application error:", error);
+};
+
+// Set up global error handler
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event.error);
+});
+
 // Initialize theme before rendering, but don't let it crash the app
 try {
   initializeTheme();
@@ -30,13 +40,15 @@ try {
 try {
   ReactDOM.createRoot(getRootElement()).render(
     <React.StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <React.ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </React.ErrorBoundary>
     </React.StrictMode>,
   );
 } catch (error) {
-  console.error("Failed to render application:", error);
+  handleError(error);
   
   // Display a fallback message if rendering fails
   const rootElement = getRootElement();
@@ -44,6 +56,9 @@ try {
     <div style="padding: 20px; text-align: center; font-family: system-ui, sans-serif;">
       <h1>Something went wrong</h1>
       <p>We're sorry, but the application failed to load. Please try refreshing the page.</p>
+      <button onclick="window.location.reload()" style="padding: 8px 16px; margin-top: 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Refresh Page
+      </button>
     </div>
   `;
 }

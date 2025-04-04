@@ -20,43 +20,77 @@ export const defaultTheme: ThemeSettings = {
   fontFamily: 'Inter, sans-serif',
 };
 
-// Apply theme to the document
+// Apply theme to the document with improved error handling
 export function applyTheme(theme: ThemeSettings | null | undefined): void {
-  // Safety check - if theme is null or undefined, use default
+  // Use default theme if the provided theme is null or undefined
   if (!theme) {
     console.warn("Attempting to apply undefined theme. Using default instead.");
-    theme = defaultTheme;
+    theme = {...defaultTheme};
   }
   
   try {
     // Ensure document is available (avoid SSR issues)
     if (typeof document === 'undefined') return;
 
-    // Set color mode
-    if (theme.mode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    // Set color mode with fallbacks
+    try {
+      if (theme.mode === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    } catch (e) {
+      console.error("Error applying theme mode:", e);
     }
 
     // Apply custom colors if enabled
-    if (theme.enableCustomColors) {
-      document.documentElement.style.setProperty('--primary', theme.primaryColor);
-      document.documentElement.style.setProperty('--secondary', theme.secondaryColor);
+    try {
+      if (theme.enableCustomColors) {
+        document.documentElement.style.setProperty('--primary', theme.primaryColor || defaultTheme.primaryColor);
+        document.documentElement.style.setProperty('--secondary', theme.secondaryColor || defaultTheme.secondaryColor);
+      }
+    } catch (e) {
+      console.error("Error applying theme colors:", e);
     }
 
     // Apply background safely
-    if (theme.backgroundImage) {
-      document.documentElement.style.setProperty('--nursery-background', `url(${theme.backgroundImage})`);
+    try {
+      if (theme.backgroundImage) {
+        document.documentElement.style.setProperty('--nursery-background', `url(${theme.backgroundImage})`);
+      }
+    } catch (e) {
+      console.error("Error applying background image:", e);
     }
     
     // Apply font safely
-    if (theme.fontFamily) {
-      document.documentElement.style.setProperty('--font-family', theme.fontFamily);
+    try {
+      if (theme.fontFamily) {
+        document.documentElement.style.setProperty('--font-family', theme.fontFamily);
+      }
+    } catch (e) {
+      console.error("Error applying font family:", e);
+    }
+
+    // Fix text color for light mode
+    try {
+      if (theme.mode === 'light') {
+        // Ensure text is dark in light mode
+        document.documentElement.style.setProperty('--foreground', '20 14.3% 4.1%');
+        document.documentElement.style.setProperty('--card-foreground', '20 14.3% 4.1%');
+        document.documentElement.style.setProperty('--popover-foreground', '20 14.3% 4.1%');
+      } else {
+        // Reset text colors for dark mode
+        document.documentElement.style.setProperty('--foreground', '210 40% 98%');
+        document.documentElement.style.setProperty('--card-foreground', '210 40% 98%');
+        document.documentElement.style.setProperty('--popover-foreground', '210 40% 98%');
+      }
+    } catch (e) {
+      console.error("Error applying text colors:", e);
     }
   } catch (error) {
     console.error("Error applying theme:", error);
-    // Continue execution even if there's an error with theme application
   }
 }
 
@@ -65,23 +99,32 @@ export function initializeTheme(): ThemeSettings {
   try {
     // Ensure we're in a browser environment
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-      return defaultTheme;
+      return {...defaultTheme};
     }
     
     const savedTheme = localStorage.getItem('themeSettings');
     if (savedTheme) {
       try {
         const theme = JSON.parse(savedTheme);
-        applyTheme(theme);
-        return theme;
+        // Validate the theme has required properties
+        if (typeof theme === 'object' && theme !== null && 'mode' in theme) {
+          // Apply with safely merged defaults for missing properties
+          const validTheme = { ...defaultTheme, ...theme };
+          applyTheme(validTheme);
+          return validTheme;
+        } else {
+          console.warn("Invalid theme structure in localStorage, using default");
+          applyTheme(defaultTheme);
+          return {...defaultTheme};
+        }
       } catch (error) {
         console.error("Failed to parse saved theme:", error);
         applyTheme(defaultTheme);
-        return defaultTheme;
+        return {...defaultTheme};
       }
     } else {
       applyTheme(defaultTheme);
-      return defaultTheme;
+      return {...defaultTheme};
     }
   } catch (error) {
     console.error("Failed to initialize theme:", error);
@@ -92,6 +135,6 @@ export function initializeTheme(): ThemeSettings {
     } catch (e) {
       console.error("Failed to apply default theme:", e);
     }
-    return defaultTheme;
+    return {...defaultTheme};
   }
 }
