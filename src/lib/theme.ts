@@ -21,13 +21,17 @@ export const defaultTheme: ThemeSettings = {
 };
 
 // Apply theme to the document
-export function applyTheme(theme: ThemeSettings): void {
+export function applyTheme(theme: ThemeSettings | null | undefined): void {
+  // Safety check - if theme is null or undefined, use default
   if (!theme) {
-    console.error("Attempting to apply undefined theme. Using default instead.");
+    console.warn("Attempting to apply undefined theme. Using default instead.");
     theme = defaultTheme;
   }
   
   try {
+    // Ensure document is available (avoid SSR issues)
+    if (typeof document === 'undefined') return;
+
     // Set color mode
     if (theme.mode === 'dark') {
       document.documentElement.classList.add('dark');
@@ -41,31 +45,43 @@ export function applyTheme(theme: ThemeSettings): void {
       document.documentElement.style.setProperty('--secondary', theme.secondaryColor);
     }
 
-    // Apply background
-    document.documentElement.style.setProperty('--nursery-background', `url(${theme.backgroundImage})`);
+    // Apply background safely
+    if (theme.backgroundImage) {
+      document.documentElement.style.setProperty('--nursery-background', `url(${theme.backgroundImage})`);
+    }
     
-    // Apply font
-    document.documentElement.style.setProperty('--font-family', theme.fontFamily);
+    // Apply font safely
+    if (theme.fontFamily) {
+      document.documentElement.style.setProperty('--font-family', theme.fontFamily);
+    }
   } catch (error) {
     console.error("Error applying theme:", error);
     // Continue execution even if there's an error with theme application
   }
 }
 
-// Initialize theme from localStorage or defaults
-export function initializeTheme(): void {
+// Initialize theme from localStorage or defaults with improved error handling
+export function initializeTheme(): ThemeSettings {
   try {
+    // Ensure we're in a browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return defaultTheme;
+    }
+    
     const savedTheme = localStorage.getItem('themeSettings');
     if (savedTheme) {
       try {
         const theme = JSON.parse(savedTheme);
         applyTheme(theme);
+        return theme;
       } catch (error) {
         console.error("Failed to parse saved theme:", error);
         applyTheme(defaultTheme);
+        return defaultTheme;
       }
     } else {
       applyTheme(defaultTheme);
+      return defaultTheme;
     }
   } catch (error) {
     console.error("Failed to initialize theme:", error);
@@ -75,7 +91,7 @@ export function initializeTheme(): void {
       applyTheme(defaultTheme);
     } catch (e) {
       console.error("Failed to apply default theme:", e);
-      // Last resort - don't let this crash the app
     }
+    return defaultTheme;
   }
 }

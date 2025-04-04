@@ -13,8 +13,15 @@ export function useTheme() {
       if (savedTheme) {
         try {
           const parsedTheme = JSON.parse(savedTheme);
-          setTheme(parsedTheme);
-          applyTheme(parsedTheme);
+          // Validate the theme object to ensure it has the required properties
+          if (typeof parsedTheme === 'object' && parsedTheme !== null && 'mode' in parsedTheme) {
+            setTheme(parsedTheme);
+            applyTheme(parsedTheme);
+          } else {
+            console.warn('Invalid theme structure, resetting to default');
+            setTheme(defaultTheme);
+            applyTheme(defaultTheme);
+          }
         } catch (e) {
           console.error('Error parsing theme settings:', e);
           // If there's an error, reset to default theme
@@ -37,7 +44,14 @@ export function useTheme() {
     try {
       const updatedTheme = { ...theme, ...newTheme };
       setTheme(updatedTheme);
-      localStorage.setItem('themeSettings', JSON.stringify(updatedTheme));
+      
+      try {
+        localStorage.setItem('themeSettings', JSON.stringify(updatedTheme));
+      } catch (storageError) {
+        console.error('Error saving theme to localStorage:', storageError);
+        // Continue even if storage fails
+      }
+      
       applyTheme(updatedTheme);
       return updatedTheme;
     } catch (error) {
