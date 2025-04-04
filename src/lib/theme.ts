@@ -13,9 +13,9 @@ export type ThemeSettings = {
 
 export const defaultTheme: ThemeSettings = {
   mode: 'dark',
-  primaryColor: '#4CAF50',
-  secondaryColor: '#8BC34A',
-  backgroundImage: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae',
+  primaryColor: '#16a34a', // Green-600
+  secondaryColor: '#4ade80', // Green-400
+  backgroundImage: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1742&auto=format&fit=crop',
   enableCustomColors: true,
   fontFamily: 'Inter, sans-serif',
 };
@@ -75,38 +75,18 @@ export function applyTheme(theme: ThemeSettings | null | undefined): void {
       console.error("Error applying font family:", e);
     }
 
-    // Set text colors based on theme mode to ensure visibility
-    try {
-      if (theme.mode === 'light') {
-        // Ensure text is dark in light mode for better visibility
-        document.documentElement.style.setProperty('--foreground', '20 14.3% 4.1%');
-        document.documentElement.style.setProperty('--card-foreground', '20 14.3% 4.1%');
-        document.documentElement.style.setProperty('--popover-foreground', '20 14.3% 4.1%');
-        
-        // Add additional text color rules for forms and inputs
-        document.documentElement.style.setProperty('--input-text', '#000000');
-        document.documentElement.style.setProperty('--form-text', '#111111');
-      } else {
-        // Reset text colors for dark mode
-        document.documentElement.style.setProperty('--foreground', '210 40% 98%');
-        document.documentElement.style.setProperty('--card-foreground', '210 40% 98%');
-        document.documentElement.style.setProperty('--popover-foreground', '210 40% 98%');
-        
-        // Reset additional text colors
-        document.documentElement.style.setProperty('--input-text', '#ffffff');
-        document.documentElement.style.setProperty('--form-text', '#f9f9f9');
-      }
-      
-      // Set a global text color override to ensure readability
-      const backgroundColor = theme.mode === 'light' ? '#ffffff' : '#121212';
-      const textColor = theme.mode === 'light' ? '#111111' : '#f9f9f9';
-      
-      document.documentElement.style.setProperty('--bg-color', backgroundColor);
-      document.documentElement.style.setProperty('--text-color', textColor);
-      
-    } catch (e) {
-      console.error("Error applying text colors:", e);
-    }
+    // Always set text colors for proper contrast
+    document.documentElement.style.setProperty('--foreground', '0 0% 100%');
+    document.documentElement.style.setProperty('--card-foreground', '0 0% 100%');
+    document.documentElement.style.setProperty('--popover-foreground', '0 0% 100%');
+    
+    // Set input and form text colors
+    document.documentElement.style.setProperty('--input-text', '#ffffff');
+    document.documentElement.style.setProperty('--form-text', '#ffffff');
+    
+    // Set global text color override to ensure readability
+    document.documentElement.style.setProperty('--bg-color', '#000000');
+    document.documentElement.style.setProperty('--text-color', '#ffffff');
   } catch (error) {
     console.error("Error applying theme:", error);
   }

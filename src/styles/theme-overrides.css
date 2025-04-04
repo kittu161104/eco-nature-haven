@@ -1,79 +1,158 @@
 
 /* Theme override styles to ensure text visibility */
 
-/* Light mode specific overrides */
-.light-theme-active input,
-.light-theme-active textarea,
-.light-theme-active select {
-  color: var(--input-text, #111111) !important;
+/* Color overrides for black and green theme */
+:root {
+  --text-primary: #ffffff;
+  --text-secondary: #4ade80;
+  --text-muted: #a3a3a3;
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --border-color: #16a34a;
+  --hover-bg: rgba(22, 163, 74, 0.2);
+  --shadow-color: rgba(22, 163, 74, 0.15);
 }
 
-.light-theme-active form label,
-.light-theme-active .form-label {
-  color: var(--form-text, #111111) !important;
+/* Global text color overrides */
+body, button, input, textarea, select, label {
+  color: var(--text-primary) !important;
 }
 
-/* Ensure buttons have proper contrast */
-.light-theme-active button:not([class*="bg-"]):not(.text-white),
-.light-theme-active .button:not([class*="bg-"]):not(.text-white) {
-  color: var(--text-color, #111111) !important;
+/* Button and link styles */
+a:not([class]), 
+.link {
+  color: var(--text-secondary) !important;
+  text-decoration: none;
+  position: relative;
 }
 
-/* Force text color in white backgrounds */
-.light-theme-active .bg-white *:not(.text-eco-400):not(.text-eco-500):not(.text-gray-300):not(.text-white),
-.light-theme-active div[class*="bg-white"] *:not(.text-eco-400):not(.text-eco-500):not(.text-gray-300):not(.text-white) {
-  color: #111111 !important;
+a:not([class])::after, 
+.link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--text-secondary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease-out;
 }
 
-/* Additional text color rules for common components */
-.light-theme-active .card:not(.bg-gray-800):not(.bg-gray-900), 
-.light-theme-active .panel:not(.bg-gray-800):not(.bg-gray-900) {
-  color: var(--text-color, #111111) !important;
+a:not([class]):hover::after, 
+.link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
-/* Fix toast text colors in light mode */
-.light-theme-active .toast,
-.light-theme-active .sonner-toast {
-  color: #111111 !important;
-  border-color: #e5e5e5 !important;
-  background-color: #ffffff !important;
+/* Form elements */
+input, 
+textarea, 
+select {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
+  color: white !important;
 }
 
-/* Fixed toast text - ensure visibility on all backgrounds */
-.toast-title,
-.toast-description {
-  color: #111111 !important;
+input:focus, 
+textarea:focus, 
+select:focus {
+  border-color: rgba(22, 163, 74, 0.7) !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
 }
 
-/* Fix tooltip and popover text visibility */
-.light-theme-active [data-radix-popper-content-wrapper] {
-  color: #111111 !important;
+input::placeholder, 
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* Make sure form inputs have visible text */
-.light-theme-active input::placeholder,
-.light-theme-active textarea::placeholder {
-  color: #666666 !important;
+/* Card and panels */
+.card, 
+.panel {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
 }
 
-/* Ensure text is visible in dialog boxes */
-.light-theme-active [role="dialog"] {
-  color: var(--text-color, #111111) !important;
-}
-
-/* Fix text visibility in toast notifications */
+/* Toast notifications */
 .sonner-toast {
-  --tw-text-opacity: 1 !important;
-  color: rgba(0, 0, 0, var(--tw-text-opacity)) !important;
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  border-color: rgba(22, 163, 74, 0.5) !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
 }
 
-.sonner-toast-description,
-.sonner-toast-title {
-  color: inherit !important;
+.toast-title, 
+.toast-description,
+.sonner-toast-title,
+.sonner-toast-description {
+  color: white !important;
 }
 
-/* Fix for dark mode toasts */
-.dark .sonner-toast {
-  --tw-text-opacity: 1 !important;
-  color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
+/* Dropdown menus */
+[data-radix-popper-content-wrapper] {
+  background-color: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
+  color: white !important;
+}
+
+/* Dialog boxes */
+[role="dialog"] {
+  background-color: rgba(0, 0, 0, 0.95) !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
+  color: white !important;
+}
+
+/* Transitions for smooth page changes */
+.page-transition-enter {
+  opacity: 0;
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(22, 163, 74, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(22, 163, 74, 0.1) !important;
+}
+
+/* Green glow effects */
+.green-glow {
+  box-shadow: 0 0 15px rgba(22, 163, 74, 0.5) !important;
+}
+
+.green-glow-hover:hover {
+  box-shadow: 0 0 15px rgba(22, 163, 74, 0.5) !important;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+/* Fix for tooltips */
+.tooltip {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  color: white !important;
+  border: 1px solid rgba(22, 163, 74, 0.5) !important;
+}
+
+/* Ensure text is visible in all contexts */
+.text-muted {
+  color: #a3a3a3 !important;
+}
+
+.text-emphasis {
+  color: #4ade80 !important;
 }

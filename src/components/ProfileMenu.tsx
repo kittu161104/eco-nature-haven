@@ -42,66 +42,69 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
     navigate("/admin");
   };
 
+  const handleUserProfile = () => {
+    if (onClick) onClick();
+    navigate(`/account/${user?.id}`);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
-          className="text-eco-800 hover:text-eco-600 hover:bg-eco-50"
+          className="text-white hover:text-green-400 hover:bg-black/40"
         >
           <User className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 bg-black/80 backdrop-blur-md border-green-800 text-white">
         {isAuthenticated ? (
           <>
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span className="font-medium">{user?.name}</span>
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="text-xs text-green-400 truncate">
                   {user?.email}
                 </span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-green-900/50" />
             
             {isAdmin && (
-              <DropdownMenuItem onClick={handleAdminDashboard}>
+              <DropdownMenuItem onClick={handleAdminDashboard} className="hover:bg-green-900/30">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
               </DropdownMenuItem>
             )}
             
-            <DropdownMenuItem asChild>
-              <Link to="/account" onClick={onClick}>
-                <User className="mr-2 h-4 w-4" />
-                <span>My Account</span>
-              </Link>
+            <DropdownMenuItem onClick={handleUserProfile} className="hover:bg-green-900/30">
+              <User className="mr-2 h-4 w-4" />
+              <span>My Account</span>
             </DropdownMenuItem>
             
             <DropdownMenuItem asChild>
-              <Link to="/orders" onClick={onClick}>
+              <Link to="/orders" onClick={onClick} className="flex items-center hover:bg-green-900/30">
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 <span>My Orders</span>
               </Link>
             </DropdownMenuItem>
             
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-green-900/50" />
             
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-900/30">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
           </>
         ) : (
           <>
-            <DropdownMenuItem onClick={handleLogin}>
+            <DropdownMenuItem onClick={handleLogin} className="hover:bg-green-900/30">
               <LogIn className="mr-2 h-4 w-4" />
               <span>Log in</span>
             </DropdownMenuItem>
             
-            <DropdownMenuItem onClick={handleRegister}>
+            <DropdownMenuItem onClick={handleRegister} className="hover:bg-green-900/30">
               <UserPlus className="mr-2 h-4 w-4" />
               <span>Register</span>
             </DropdownMenuItem>

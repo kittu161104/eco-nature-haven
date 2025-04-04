@@ -8,9 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./styles/theme-overrides.css";
-
-// Safely import Sonner
-const SonnerToaster = lazy(() => import("@/components/ui/sonner").then(module => ({ default: module.Toaster })));
+import SafeSonner from "./components/SafeSonner";
+import { AnimatePresence } from "framer-motion";
 
 // Eager load critical components
 import Index from "./pages/Index";
@@ -33,6 +32,7 @@ const Orders = lazy(() => import("./pages/admin/Orders"));
 const Customers = lazy(() => import("./pages/admin/Customers"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
 const Account = lazy(() => import("./pages/Account"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 const UserOrders = lazy(() => import("./pages/UserOrders"));
 const Payment = lazy(() => import("./pages/Payment"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -54,9 +54,9 @@ const queryClient = new QueryClient({
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-pulse flex flex-col items-center">
-      <div className="h-16 w-16 bg-eco-600 rounded-full opacity-70 mb-4"></div>
-      <div className="h-4 w-24 bg-gray-200 rounded mb-2.5"></div>
-      <div className="h-3 w-36 bg-gray-200 rounded"></div>
+      <div className="h-16 w-16 bg-green-600 rounded-full opacity-70 mb-4"></div>
+      <div className="h-4 w-24 bg-green-900/40 rounded mb-2.5"></div>
+      <div className="h-3 w-36 bg-green-900/30 rounded"></div>
     </div>
   </div>
 );
@@ -165,34 +165,37 @@ const AppContent = () => {
   return (
     <>
       <InitializeStoreData />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/orders" element={<UserOrders />} />
-          <Route path="/payment" element={<Payment />} />
-          
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="products" element={<Products />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="posts" element={<Posts />} />
-            <Route path="customers" element={<Customers />} />
-            <Route path="pages" element={<Pages />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <AnimatePresence mode="wait">
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/account/:id" element={<UserProfile />} />
+            <Route path="/orders" element={<UserOrders />} />
+            <Route path="/payment" element={<Payment />} />
+            
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="products" element={<Products />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="posts" element={<Posts />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="pages" element={<Pages />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </AnimatePresence>
     </>
   );
 };
@@ -211,10 +214,8 @@ const App = () => (
         <AuthProvider>
           <ErrorBoundary>
             <Toaster />
-            <ErrorBoundary fallback={<div className="p-4">Failed to load toast notifications</div>}>
-              <Suspense fallback={null}>
-                <SonnerToaster />
-              </Suspense>
+            <ErrorBoundary fallback={<div className="p-4 text-green-400 bg-black/80">Failed to load toast notifications</div>}>
+              <SafeSonner />
             </ErrorBoundary>
             <AppContent />
           </ErrorBoundary>

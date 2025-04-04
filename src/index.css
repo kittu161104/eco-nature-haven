@@ -1,59 +1,60 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.5rem;
-    --nursery-background: url('https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80');
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 142 70% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 142 50% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 142 70% 20%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 142 50% 20%;
+    --input: 0 0% 10%;
+    --ring: 142 70% 35%;
+    --radius: 0.75rem;
+    --nursery-background: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1742&auto=format&fit=crop');
     --font-family: 'Inter, sans-serif';
   }
 
-  /* Light mode colors with improved text contrast */
   .light {
-    --background: 0 0% 100%;
-    --foreground: 20 14.3% 4.1%; /* Dark text for light mode */
-    --card: 0 0% 100%;
-    --card-foreground: 20 14.3% 4.1%; /* Dark text for light mode */
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 14.3% 4.1%; /* Dark text for light mode */
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%; /* Darker muted text */
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 20 5.9% 90%;
-    --input: 20 5.9% 90%;
-    --ring: 142.1 76.2% 36.3%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 142 70% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 142 50% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 142 70% 20%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 142 50% 20%;
+    --input: 0 0% 10%;
+    --ring: 142 70% 40%;
   }
 
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-200;
   }
+  
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-family, 'Inter, sans-serif');
@@ -71,38 +72,38 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(12, 15, 25, 0.95);
+    background: rgba(0, 0, 0, 0.92);
     z-index: -1;
     animation: gradientShift 15s ease infinite alternate;
   }
   
   /* Light mode overlay */
   .light body::before {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(0, 0, 0, 0.9);
   }
   
   @keyframes gradientShift {
     0% {
-      background: rgba(12, 15, 25, 0.95);
+      background: rgba(0, 0, 0, 0.92);
     }
     50% {
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(0, 0, 0, 0.94);
     }
     100% {
-      background: rgba(17, 24, 39, 0.95);
+      background: rgba(0, 0, 0, 0.96);
     }
   }
   
   /* Light mode gradient shift */
   .light @keyframes gradientShift {
     0% {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(0, 0, 0, 0.9);
     }
     50% {
-      background: rgba(250, 250, 250, 0.85);
+      background: rgba(0, 0, 0, 0.92);
     }
     100% {
-      background: rgba(245, 245, 245, 0.85);
+      background: rgba(0, 0, 0, 0.94);
     }
   }
   
@@ -112,12 +113,12 @@
   
   /* Adjust admin section background */
   .admin-layout-container {
-    background: rgba(12, 15, 25, 0.98);
+    background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(5px);
   }
 
   .light .admin-layout-container {
-    background: rgba(255, 255, 255, 0.98);
+    background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(5px);
   }
   
@@ -127,7 +128,7 @@
   }
 
   .light .section-title {
-    @apply text-eco-600;
+    @apply text-eco-400;
   }
   
   .section-title::after {
@@ -143,24 +144,24 @@
   
   /* Card styling with glassmorphism */
   .eco-card {
-    @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 border border-gray-800;
+    @apply bg-black bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 border border-green-900;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
 
   .light .eco-card {
-    @apply bg-white bg-opacity-90 border-gray-200;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    color: #0f172a; /* Ensure text is dark in light cards */
+    @apply bg-black bg-opacity-80 border-green-800;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
   }
   
   .eco-card:hover {
-    @apply shadow-lg transform -translate-y-1 border-gray-700;
+    @apply shadow-lg transform -translate-y-1 border-green-700;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
 
   .light .eco-card:hover {
-    @apply border-gray-300;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    @apply border-green-600;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
 
   /* Animate elements on page load */
@@ -189,33 +190,59 @@
   .animate-stagger > *:nth-child(4) { animation: fadeInUp 0.5s ease 0.4s forwards; }
   .animate-stagger > *:nth-child(5) { animation: fadeInUp 0.5s ease 0.5s forwards; }
 
-  /* Light mode text color corrections - explicit and specific */
-  .light .text-white {
-    @apply text-gray-900;
+  /* Page transition animation */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
   }
   
-  .light .text-gray-200 {
-    @apply text-gray-800;
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
   }
   
-  .light .text-gray-300 {
-    @apply text-gray-700;
+  .page-transition-exit {
+    opacity: 1;
   }
   
-  .light .text-gray-400 {
-    @apply text-gray-600;
+  .page-transition-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  /* Glassmorphism blur effect */
+  .glass-panel {
+    @apply bg-black/60 backdrop-blur-md border border-green-900/50;
   }
   
-  /* Additional selector specificity for light mode inputs and selects */
-  .light input, 
-  .light select, 
-  .light textarea {
-    color: #0f172a !important;
+  /* Glowing green effect for interactive elements */
+  .glow-green:hover {
+    box-shadow: 0 0 15px rgba(22, 163, 74, 0.5);
   }
   
-  /* Fix dropdown text in light mode */
-  .light [data-radix-popper-content-wrapper] {
-    color: #0f172a !important;
+  /* Navbar & card blur effects */
+  .blur-bg {
+    @apply bg-black/80 backdrop-blur-md;
+  }
+  
+  /* Modern scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(22, 163, 74, 0.5);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(22, 163, 74, 0.8);
   }
 }
 
@@ -249,7 +276,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(var(--eco-400-rgb), 0.3) 0%, rgba(0,0,0,0) 70%);
+    background: radial-gradient(circle, rgba(22, 163, 74, 0.4) 0%, rgba(0,0,0,0) 70%);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
@@ -259,36 +286,47 @@
     opacity: 1;
   }
 
-  /* Light mode specific styles */
-  .light .text-input {
-    @apply text-gray-900 border-gray-300 bg-white;
+  /* Button styles */
+  .btn-primary {
+    @apply bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-all duration-300;
   }
   
-  .light .card {
-    @apply bg-white shadow-md border border-gray-200 text-gray-900;
+  .btn-outline {
+    @apply border border-green-600 text-green-500 hover:bg-green-600/20 px-4 py-2 rounded-md transition-all duration-300;
   }
   
-  /* Ensure dropdown menus have proper background in light mode */
-  .light .SelectContent,
-  .light [data-radix-select-content] {
-    @apply bg-white text-gray-900 border border-gray-200;
+  /* Card styles */
+  .neo-card {
+    @apply bg-black/70 backdrop-blur-md border border-green-900/40 rounded-lg p-5 shadow-lg;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .neo-card:hover {
+    @apply border-green-700/60;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.3);
+  }
+  
+  /* Form element styling */
+  .neo-input {
+    @apply bg-black/50 border border-green-900/50 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300;
   }
 }
 
 /* Custom Eco-friendly color theme */
 :root {
-  --eco-50: #f5f9f7;
-  --eco-100: #e6f3ea;
-  --eco-200: #c8e5d5;
-  --eco-300: #9ad0af;
-  --eco-400: #6cb685;
-  --eco-500: #48a05d;
-  --eco-600: #328a46;
-  --eco-700: #297039;
-  --eco-800: #245a32;
-  --eco-900: #1a462a;
-  --eco-950: #0e2c1a;
-  --eco-400-rgb: 108, 182, 133;
+  --eco-50: #f0fdf4;
+  --eco-100: #dcfce7;
+  --eco-200: #bbf7d0;
+  --eco-300: #86efac;
+  --eco-400: #4ade80;
+  --eco-500: #22c55e;
+  --eco-600: #16a34a;
+  --eco-700: #15803d;
+  --eco-800: #166534;
+  --eco-900: #14532d;
+  --eco-950: #052e16;
+  --eco-400-rgb: 74, 222, 128;
 }
 
 .bg-eco-50 { background-color: var(--eco-50); }
@@ -315,10 +353,13 @@
 .border-gray-700 { border-color: rgb(55, 65, 81); }
 .border-gray-800 { border-color: rgb(31, 41, 55); }
 
-.light .bg-gray-800 { background-color: rgb(229, 231, 235); }
-.light .bg-gray-900 { background-color: rgb(243, 244, 246); }
-.light .border-gray-700 { border-color: rgb(209, 213, 219); }
-.light .border-gray-800 { border-color: rgb(229, 231, 235); }
+.light .bg-gray-800 { background-color: rgb(17, 24, 39); }
+.light .bg-gray-900 { background-color: rgb(17, 24, 39); }
+.light .border-gray-700 { border-color: rgb(55, 65, 81); }
+.light .border-gray-800 { border-color: rgb(31, 41, 55); }
+.light .text-gray-400 { color: rgb(209, 213, 219); }
+.light .text-gray-500 { color: rgb(209, 213, 219); }
+.light .text-gray-900 { color: rgb(255, 255, 255); }
 
 /* Add plant-related animations */
 .animate-grow {
@@ -361,4 +402,25 @@
   to {
     background-position: 200% center;
   }
+}
+
+/* Page transitions */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
 }
