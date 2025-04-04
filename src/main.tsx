@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import "./index.css";
 import { initializeTheme } from "./lib/theme.ts";
+import ErrorBoundary from "./components/ErrorBoundary.tsx";
 
 // Safely get root element - provide fallback if not found
 const getRootElement = () => {
@@ -40,11 +41,11 @@ try {
 try {
   ReactDOM.createRoot(getRootElement()).render(
     <React.StrictMode>
-      <React.ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
+      <ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </React.ErrorBoundary>
+      </ErrorBoundary>
     </React.StrictMode>,
   );
 } catch (error) {

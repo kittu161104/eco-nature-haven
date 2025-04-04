@@ -73,19 +73,45 @@ export function applyTheme(theme: ThemeSettings | null | undefined): void {
       console.error("Error applying font family:", e);
     }
 
-    // Fix text color for light mode
+    // Set text colors based on theme mode to ensure visibility
     try {
       if (theme.mode === 'light') {
-        // Ensure text is dark in light mode
+        // Ensure text is dark in light mode for better visibility
         document.documentElement.style.setProperty('--foreground', '20 14.3% 4.1%');
         document.documentElement.style.setProperty('--card-foreground', '20 14.3% 4.1%');
         document.documentElement.style.setProperty('--popover-foreground', '20 14.3% 4.1%');
+        
+        // Add additional text color rules for forms and inputs
+        document.documentElement.style.setProperty('--input-text', '#000000');
+        document.documentElement.style.setProperty('--form-text', '#111111');
+        
+        // Add a specific class to help with styling
+        document.documentElement.classList.add('light-theme-active');
       } else {
         // Reset text colors for dark mode
         document.documentElement.style.setProperty('--foreground', '210 40% 98%');
         document.documentElement.style.setProperty('--card-foreground', '210 40% 98%');
         document.documentElement.style.setProperty('--popover-foreground', '210 40% 98%');
+        
+        // Reset additional text colors
+        document.documentElement.style.setProperty('--input-text', '#ffffff');
+        document.documentElement.style.setProperty('--form-text', '#f9f9f9');
+        
+        // Remove light theme class
+        document.documentElement.classList.remove('light-theme-active');
       }
+      
+      // Set a global text color override to ensure readability
+      const backgroundColor = theme.mode === 'light' ? '#ffffff' : '#121212';
+      const textColor = theme.mode === 'light' ? '#111111' : '#f9f9f9';
+      
+      document.documentElement.style.setProperty('--bg-color', backgroundColor);
+      document.documentElement.style.setProperty('--text-color', textColor);
+      
+      // Apply additional styles to ensure text visibility
+      document.body.style.color = textColor;
+      document.body.style.backgroundColor = backgroundColor;
+      
     } catch (e) {
       console.error("Error applying text colors:", e);
     }

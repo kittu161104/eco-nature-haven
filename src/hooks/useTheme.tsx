@@ -10,6 +10,7 @@ export function useTheme() {
   // Safe theme loading on mount
   useEffect(() => {
     const loadTheme = () => {
+      setIsLoading(true);
       try {
         const savedTheme = localStorage.getItem('themeSettings');
         if (savedTheme) {
@@ -45,8 +46,12 @@ export function useTheme() {
         applyTheme(defaultTheme);
       } finally {
         setIsInitialized(true);
+        setIsLoading(false);
       }
     };
+
+    // Add isLoading state to track loading status
+    const [isLoading, setIsLoading] = useState(false);
 
     // Use setTimeout to ensure DOM is ready before applying theme
     setTimeout(loadTheme, 0);

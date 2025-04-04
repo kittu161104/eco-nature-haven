@@ -1,0 +1,32 @@
+
+/* Theme override styles to ensure text visibility */
+
+/* Light mode specific overrides */
+.light-theme-active input,
+.light-theme-active textarea,
+.light-theme-active select {
+  color: var(--input-text, #111111);
+}
+
+.light-theme-active form label,
+.light-theme-active .form-label {
+  color: var(--form-text, #111111);
+}
+
+/* Ensure buttons have proper contrast */
+.light-theme-active button:not([class*="bg-"]),
+.light-theme-active .button:not([class*="bg-"]) {
+  color: var(--text-color, #111111);
+}
+
+/* Force text color in white backgrounds */
+.light-theme-active .bg-white *,
+.light-theme-active div[class*="bg-white"] * {
+  color: #111111;
+}
+
+/* Additional text color rules for common components */
+.light-theme-active .card, 
+.light-theme-active .panel {
+  color: var(--text-color, #111111);
+}
