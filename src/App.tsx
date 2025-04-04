@@ -139,19 +139,24 @@ const InitializeStoreData = () => {
 
 const AppContent = () => {
   useEffect(() => {
-    applyStoredSettings();
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "appearanceSettings") {
-        applyStoredSettings();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    try {
+      applyStoredSettings();
+      
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === "appearanceSettings") {
+          applyStoredSettings();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    } catch (error) {
+      console.error("Failed to initialize app settings:", error);
+      // Continue rendering the app even if settings fail
+    }
   }, []);
   
   return (
@@ -202,7 +207,15 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Toaster />
-          <Sonner />
+          {/* Wrap Sonner in a try-catch to prevent it from crashing the app */}
+          {(() => {
+            try {
+              return <Sonner />;
+            } catch (error) {
+              console.error("Failed to render Sonner:", error);
+              return null;
+            }
+          })()}
           <AppContent />
         </AuthProvider>
       </BrowserRouter>

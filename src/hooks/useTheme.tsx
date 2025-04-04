@@ -4,14 +4,18 @@ import { ThemeSettings, defaultTheme, applyTheme } from '@/lib/theme';
 
 export function useTheme() {
   // Initialize with a safe default theme
-  const [theme, setTheme] = useState<ThemeSettings>(defaultTheme);
+  const [theme, setTheme] = useState<ThemeSettings | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Safe theme loading on mount
   useEffect(() => {
     const loadTheme = () => {
       setIsLoading(true);
       try {
+        // Start with the default theme
+        let currentTheme = {...defaultTheme};
+        
         const savedTheme = localStorage.getItem('themeSettings');
         if (savedTheme) {
           try {
@@ -24,46 +28,40 @@ export function useTheme() {
               'primaryColor' in parsedTheme &&
               'secondaryColor' in parsedTheme
             ) {
-              setTheme(parsedTheme);
-              applyTheme(parsedTheme);
+              currentTheme = {...currentTheme, ...parsedTheme};
             } else {
-              console.warn('Invalid theme structure, resetting to default');
-              setTheme(defaultTheme);
-              applyTheme(defaultTheme);
+              console.warn('Invalid theme structure, using default theme');
             }
           } catch (parseError) {
             console.error('Error parsing theme settings:', parseError);
-            setTheme(defaultTheme);
-            applyTheme(defaultTheme);
           }
-        } else {
-          // Apply default theme if none is saved
-          applyTheme(defaultTheme);
         }
+        
+        setTheme(currentTheme);
+        applyTheme(currentTheme);
       } catch (error) {
         console.error('Error loading theme from localStorage:', error);
         // Ensure we have a valid theme even if everything fails
+        setTheme({...defaultTheme});
         applyTheme(defaultTheme);
       } finally {
         setIsInitialized(true);
         setIsLoading(false);
       }
     };
-
-    // Add isLoading state to track loading status
-    const [isLoading, setIsLoading] = useState(false);
-
+    
     // Use setTimeout to ensure DOM is ready before applying theme
-    setTimeout(loadTheme, 0);
+    const timer = setTimeout(loadTheme, 0);
     
     return () => {
-      // Cleanup if needed
+      clearTimeout(timer);
     };
   }, []);
 
   const updateTheme = (newTheme: Partial<ThemeSettings>) => {
     try {
-      const updatedTheme = { ...theme, ...newTheme };
+      const currentTheme = theme || {...defaultTheme};
+      const updatedTheme = { ...currentTheme, ...newTheme };
       setTheme(updatedTheme);
       
       try {
@@ -76,11 +74,12 @@ export function useTheme() {
       return updatedTheme;
     } catch (error) {
       console.error('Error updating theme:', error);
-      return theme;
+      return theme || {...defaultTheme};
     }
   };
 
   const toggleMode = () => {
+    if (!theme) return updateTheme({ mode: 'light' });
     const newMode = theme.mode === 'dark' ? 'light' : 'dark';
     return updateTheme({ mode: newMode });
   };
@@ -89,9 +88,10 @@ export function useTheme() {
     theme,
     updateTheme,
     toggleMode,
-    isDark: theme.mode === 'dark',
-    isLight: theme.mode === 'light',
+    isDark: theme?.mode === 'dark',
+    isLight: theme?.mode === 'light',
     isInitialized,
+    isLoading,
   };
 }
 

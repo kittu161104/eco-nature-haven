@@ -5,28 +5,51 @@
 .light-theme-active input,
 .light-theme-active textarea,
 .light-theme-active select {
-  color: var(--input-text, #111111);
+  color: var(--input-text, #111111) !important;
 }
 
 .light-theme-active form label,
 .light-theme-active .form-label {
-  color: var(--form-text, #111111);
+  color: var(--form-text, #111111) !important;
 }
 
 /* Ensure buttons have proper contrast */
-.light-theme-active button:not([class*="bg-"]),
-.light-theme-active .button:not([class*="bg-"]) {
-  color: var(--text-color, #111111);
+.light-theme-active button:not([class*="bg-"]):not(.text-white),
+.light-theme-active .button:not([class*="bg-"]):not(.text-white) {
+  color: var(--text-color, #111111) !important;
 }
 
 /* Force text color in white backgrounds */
-.light-theme-active .bg-white *,
-.light-theme-active div[class*="bg-white"] * {
-  color: #111111;
+.light-theme-active .bg-white *:not(.text-eco-400):not(.text-eco-500):not(.text-gray-300):not(.text-white),
+.light-theme-active div[class*="bg-white"] *:not(.text-eco-400):not(.text-eco-500):not(.text-gray-300):not(.text-white) {
+  color: #111111 !important;
 }
 
 /* Additional text color rules for common components */
-.light-theme-active .card, 
-.light-theme-active .panel {
-  color: var(--text-color, #111111);
+.light-theme-active .card:not(.bg-gray-800):not(.bg-gray-900), 
+.light-theme-active .panel:not(.bg-gray-800):not(.bg-gray-900) {
+  color: var(--text-color, #111111) !important;
+}
+
+/* Fix toast text colors in light mode */
+.light-theme-active .toast,
+.light-theme-active .sonner-toast {
+  color: #111111 !important;
+  border-color: #e5e5e5 !important;
+}
+
+/* Fix tooltip and popover text visibility */
+.light-theme-active [data-radix-popper-content-wrapper] {
+  color: #111111 !important;
+}
+
+/* Make sure form inputs have visible text */
+.light-theme-active input::placeholder,
+.light-theme-active textarea::placeholder {
+  color: #666666 !important;
+}
+
+/* Ensure text is visible in dialog boxes */
+.light-theme-active [role="dialog"] {
+  color: var(--text-color, #111111) !important;
 }
