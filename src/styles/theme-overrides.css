@@ -36,6 +36,13 @@
 .light-theme-active .sonner-toast {
   color: #111111 !important;
   border-color: #e5e5e5 !important;
+  background-color: #ffffff !important;
+}
+
+/* Fixed toast text - ensure visibility on all backgrounds */
+.toast-title,
+.toast-description {
+  color: #111111 !important;
 }
 
 /* Fix tooltip and popover text visibility */
@@ -52,4 +59,21 @@
 /* Ensure text is visible in dialog boxes */
 .light-theme-active [role="dialog"] {
   color: var(--text-color, #111111) !important;
+}
+
+/* Fix text visibility in toast notifications */
+.sonner-toast {
+  --tw-text-opacity: 1 !important;
+  color: rgba(0, 0, 0, var(--tw-text-opacity)) !important;
+}
+
+.sonner-toast-description,
+.sonner-toast-title {
+  color: inherit !important;
+}
+
+/* Fix for dark mode toasts */
+.dark .sonner-toast {
+  --tw-text-opacity: 1 !important;
+  color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
 }

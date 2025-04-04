@@ -1,5 +1,8 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { RefreshCcw } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -8,6 +11,7 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  error?: Error;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -15,9 +19,9 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false
   };
 
-  public static getDerivedStateFromError(_: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI.
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -27,15 +31,25 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return this.props.fallback || (
-        <div className="p-6 text-center">
-          <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-          <p className="mb-4">Please try refreshing the page</p>
-          <button 
+        <div className="p-6 flex flex-col items-center justify-center min-h-[300px]">
+          <Alert variant="destructive" className="mb-4 max-w-md">
+            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertDescription>
+              {this.state.error?.message && (
+                <div className="text-xs mt-1 text-red-800 dark:text-red-300 opacity-80 overflow-hidden text-ellipsis">
+                  Error: {this.state.error.message}
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+          
+          <Button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-eco-500 text-white rounded hover:bg-eco-600"
+            className="mt-4 flex items-center gap-2"
           >
+            <RefreshCcw className="h-4 w-4" />
             Refresh Page
-          </button>
+          </Button>
         </div>
       );
     }

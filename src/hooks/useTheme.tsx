@@ -4,7 +4,7 @@ import { ThemeSettings, defaultTheme, applyTheme } from '@/lib/theme';
 
 export function useTheme() {
   // Initialize with a safe default theme
-  const [theme, setTheme] = useState<ThemeSettings | null>(null);
+  const [theme, setTheme] = useState<ThemeSettings>(defaultTheme);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,9 +24,7 @@ export function useTheme() {
             if (
               typeof parsedTheme === 'object' && 
               parsedTheme !== null && 
-              'mode' in parsedTheme &&
-              'primaryColor' in parsedTheme &&
-              'secondaryColor' in parsedTheme
+              'mode' in parsedTheme
             ) {
               currentTheme = {...currentTheme, ...parsedTheme};
             } else {
@@ -60,8 +58,7 @@ export function useTheme() {
 
   const updateTheme = (newTheme: Partial<ThemeSettings>) => {
     try {
-      const currentTheme = theme || {...defaultTheme};
-      const updatedTheme = { ...currentTheme, ...newTheme };
+      const updatedTheme = { ...theme, ...newTheme };
       setTheme(updatedTheme);
       
       try {
@@ -74,12 +71,11 @@ export function useTheme() {
       return updatedTheme;
     } catch (error) {
       console.error('Error updating theme:', error);
-      return theme || {...defaultTheme};
+      return theme;
     }
   };
 
   const toggleMode = () => {
-    if (!theme) return updateTheme({ mode: 'light' });
     const newMode = theme.mode === 'dark' ? 'light' : 'dark';
     return updateTheme({ mode: newMode });
   };
@@ -88,8 +84,8 @@ export function useTheme() {
     theme,
     updateTheme,
     toggleMode,
-    isDark: theme?.mode === 'dark',
-    isLight: theme?.mode === 'light',
+    isDark: theme.mode === 'dark',
+    isLight: theme.mode === 'light',
     isInitialized,
     isLoading,
   };

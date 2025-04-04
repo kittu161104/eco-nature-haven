@@ -5,9 +5,11 @@ import { useTheme } from "@/hooks/useTheme";
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  // Initialize with safe defaults
   const { theme } = useTheme();
-  // Use our theme mode instead of next-themes
-  const currentTheme = theme?.mode || "dark";
+  
+  // Use our theme mode with proper fallback
+  const currentTheme = theme?.mode || "system";
 
   return (
     <Sonner

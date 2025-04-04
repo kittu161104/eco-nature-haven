@@ -1,13 +1,16 @@
 
 import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import ErrorBoundary from "./components/ErrorBoundary";
 import "./styles/theme-overrides.css";
+
+// Safely import Sonner
+const SonnerToaster = lazy(() => import("@/components/ui/sonner").then(module => ({ default: module.Toaster })));
 
 // Eager load critical components
 import Index from "./pages/Index";
@@ -206,17 +209,15 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <AuthProvider>
-          <Toaster />
-          {/* Wrap Sonner in a try-catch to prevent it from crashing the app */}
-          {(() => {
-            try {
-              return <Sonner />;
-            } catch (error) {
-              console.error("Failed to render Sonner:", error);
-              return null;
-            }
-          })()}
-          <AppContent />
+          <ErrorBoundary>
+            <Toaster />
+            <ErrorBoundary fallback={<div className="p-4">Failed to load toast notifications</div>}>
+              <Suspense fallback={null}>
+                <SonnerToaster />
+              </Suspense>
+            </ErrorBoundary>
+            <AppContent />
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

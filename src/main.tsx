@@ -41,10 +41,8 @@ try {
 try {
   ReactDOM.createRoot(getRootElement()).render(
     <React.StrictMode>
-      <ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+      <ErrorBoundary>
+        <App />
       </ErrorBoundary>
     </React.StrictMode>,
   );
