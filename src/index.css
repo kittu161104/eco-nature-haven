@@ -26,6 +26,30 @@
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
     --nursery-background: url('https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80');
+    --font-family: 'Inter, sans-serif';
+  }
+
+  /* Light mode colors */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
   }
 
   * {
@@ -33,7 +57,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family, 'Inter, sans-serif');
     background-image: var(--nursery-background);
     background-size: cover;
     background-attachment: fixed;
@@ -53,6 +77,11 @@
     animation: gradientShift 15s ease infinite alternate;
   }
   
+  /* Light mode overlay */
+  .light body::before {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  
   @keyframes gradientShift {
     0% {
       background: rgba(12, 15, 25, 0.95);
@@ -65,6 +94,19 @@
     }
   }
   
+  /* Light mode gradient shift */
+  .light @keyframes gradientShift {
+    0% {
+      background: rgba(255, 255, 255, 0.85);
+    }
+    50% {
+      background: rgba(250, 250, 250, 0.85);
+    }
+    100% {
+      background: rgba(245, 245, 245, 0.85);
+    }
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Merriweather', serif;
   }
@@ -74,10 +116,19 @@
     background: rgba(12, 15, 25, 0.98);
     backdrop-filter: blur(5px);
   }
+
+  .light .admin-layout-container {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(5px);
+  }
   
   /* Section title styling */
   .section-title {
     @apply text-3xl font-bold mb-4 text-eco-400 relative inline-block;
+  }
+
+  .light .section-title {
+    @apply text-eco-600;
   }
   
   .section-title::after {
@@ -96,10 +147,20 @@
     @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 border border-gray-800;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
+
+  .light .eco-card {
+    @apply bg-white bg-opacity-90 border-gray-200;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
   
   .eco-card:hover {
     @apply shadow-lg transform -translate-y-1 border-gray-700;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .light .eco-card:hover {
+    @apply border-gray-300;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   }
 
   /* Animate elements on page load */
@@ -127,6 +188,23 @@
   .animate-stagger > *:nth-child(3) { animation: fadeInUp 0.5s ease 0.3s forwards; }
   .animate-stagger > *:nth-child(4) { animation: fadeInUp 0.5s ease 0.4s forwards; }
   .animate-stagger > *:nth-child(5) { animation: fadeInUp 0.5s ease 0.5s forwards; }
+
+  /* Light mode text color corrections */
+  .light .text-white {
+    @apply text-gray-900;
+  }
+  
+  .light .text-gray-200 {
+    @apply text-gray-800;
+  }
+  
+  .light .text-gray-300 {
+    @apply text-gray-700;
+  }
+  
+  .light .text-gray-400 {
+    @apply text-gray-600;
+  }
 }
 
 @layer components {
@@ -167,6 +245,15 @@
 
   .glow-on-hover:hover::after {
     opacity: 1;
+  }
+
+  /* Light mode specific styles */
+  .light .text-input {
+    @apply text-gray-900 border-gray-300 bg-white;
+  }
+  
+  .light .card {
+    @apply bg-white shadow-md border border-gray-200;
   }
 }
 
@@ -209,6 +296,11 @@
 .text-gray-900 { color: rgb(17, 24, 39); }
 .border-gray-700 { border-color: rgb(55, 65, 81); }
 .border-gray-800 { border-color: rgb(31, 41, 55); }
+
+.light .bg-gray-800 { background-color: rgb(229, 231, 235); }
+.light .bg-gray-900 { background-color: rgb(243, 244, 246); }
+.light .border-gray-700 { border-color: rgb(209, 213, 219); }
+.light .border-gray-800 { border-color: rgb(229, 231, 235); }
 
 /* Add plant-related animations */
 .animate-grow {

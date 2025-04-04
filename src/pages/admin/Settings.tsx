@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,12 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, Leaf, RefreshCw, Plus, Trash } from "lucide-react";
+import { Save, Leaf, RefreshCw, Plus, Trash, Moon, Sun, Palette } from "lucide-react";
+import useTheme from "@/hooks/useTheme";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { theme, updateTheme, toggleMode } = useTheme();
   const [generalSettings, setGeneralSettings] = useState({
     storeName: "Natural Green Nursery",
     storeEmail: "info@naturalgreennursery.com",
@@ -26,6 +29,7 @@ const Settings = () => {
     storeAddress: "123 Garden Street, Green City, India",
     currency: "INR",
     taxRate: "18",
+    regions: ["Andhra Pradesh", "Telangana"]
   });
   
   const [emailSettings, setEmailSettings] = useState({
@@ -36,12 +40,12 @@ const Settings = () => {
   });
   
   const [appearanceSettings, setAppearanceSettings] = useState({
-    primaryColor: "#4CAF50",
-    secondaryColor: "#8BC34A",
+    primaryColor: theme.primaryColor || "#4CAF50",
+    secondaryColor: theme.secondaryColor || "#8BC34A",
     logoUrl: "",
-    enableDarkMode: false,
     productsPerPage: "12",
-    backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+    backgroundImage: theme.backgroundImage || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+    fontFamily: theme.fontFamily || "Inter, sans-serif"
   });
 
   const [footerSettings, setFooterSettings] = useState({
@@ -66,7 +70,17 @@ const Settings = () => {
     newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
   });
 
+  // Font family options
+  const fontOptions = [
+    { value: "Inter, sans-serif", label: "Inter (Default)" },
+    { value: "Roboto, sans-serif", label: "Roboto" },
+    { value: "Merriweather, serif", label: "Merriweather" },
+    { value: "Poppins, sans-serif", label: "Poppins" },
+    { value: "Open Sans, sans-serif", label: "Open Sans" }
+  ];
+
   useEffect(() => {
+    // Load stored settings
     const storedGeneralSettings = localStorage.getItem("generalSettings");
     const storedEmailSettings = localStorage.getItem("emailSettings");
     const storedAppearanceSettings = localStorage.getItem("appearanceSettings");
@@ -81,13 +95,18 @@ const Settings = () => {
     }
     
     if (storedAppearanceSettings) {
-      setAppearanceSettings(JSON.parse(storedAppearanceSettings));
+      setAppearanceSettings({
+        ...JSON.parse(storedAppearanceSettings),
+        primaryColor: theme.primaryColor,
+        secondaryColor: theme.secondaryColor,
+        backgroundImage: theme.backgroundImage
+      });
     }
 
     if (storedFooterSettings) {
       setFooterSettings(JSON.parse(storedFooterSettings));
     }
-  }, []);
+  }, [theme]);
 
   const handleGeneralChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -188,12 +207,19 @@ const Settings = () => {
   };
 
   const handleSaveSettings = () => {
+    // Save all settings to localStorage
     localStorage.setItem("generalSettings", JSON.stringify(generalSettings));
     localStorage.setItem("emailSettings", JSON.stringify(emailSettings));
     localStorage.setItem("appearanceSettings", JSON.stringify(appearanceSettings));
     localStorage.setItem("footerSettings", JSON.stringify(footerSettings));
     
-    document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
+    // Apply theme changes
+    updateTheme({
+      primaryColor: appearanceSettings.primaryColor,
+      secondaryColor: appearanceSettings.secondaryColor,
+      backgroundImage: appearanceSettings.backgroundImage,
+      fontFamily: appearanceSettings.fontFamily
+    });
     
     toast({
       title: "Settings saved",
@@ -202,6 +228,7 @@ const Settings = () => {
   };
 
   const handleReset = () => {
+    // Reset all settings to defaults
     setGeneralSettings({
       storeName: "Natural Green Nursery",
       storeEmail: "info@naturalgreennursery.com",
@@ -209,6 +236,7 @@ const Settings = () => {
       storeAddress: "123 Garden Street, Green City, India",
       currency: "INR",
       taxRate: "18",
+      regions: ["Andhra Pradesh", "Telangana"]
     });
     
     setEmailSettings({
@@ -222,9 +250,9 @@ const Settings = () => {
       primaryColor: "#4CAF50",
       secondaryColor: "#8BC34A",
       logoUrl: "",
-      enableDarkMode: false,
       productsPerPage: "12",
-      backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+      backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+      fontFamily: "Inter, sans-serif"
     });
 
     setFooterSettings({
@@ -249,6 +277,14 @@ const Settings = () => {
       newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
     });
     
+    // Reset theme to default
+    updateTheme({
+      primaryColor: "#4CAF50",
+      secondaryColor: "#8BC34A",
+      backgroundImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+      fontFamily: "Inter, sans-serif"
+    });
+    
     toast({
       title: "Settings reset",
       description: "Your settings have been reset to default values.",
@@ -261,6 +297,23 @@ const Settings = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-eco-800">Settings</h1>
           <div className="space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={toggleMode}
+              className="mr-2"
+            >
+              {theme.mode === 'dark' ? (
+                <>
+                  <Sun className="h-4 w-4 mr-2" />
+                  Light Mode
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4 mr-2" />
+                  Dark Mode
+                </>
+              )}
+            </Button>
             <Button variant="outline" onClick={handleReset}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Reset
@@ -318,13 +371,13 @@ const Settings = () => {
                 <Select 
                   value={generalSettings.currency} 
                   onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
-                  disabled
                 >
                   <SelectTrigger id="currency">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="INR">INR (₹)</SelectItem>
+                    <SelectItem value="USD">USD ($)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -340,6 +393,17 @@ const Settings = () => {
                   value={generalSettings.taxRate}
                   onChange={handleGeneralChange}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Service Regions</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {generalSettings.regions.map((region, index) => (
+                    <div key={index} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                      {region}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
@@ -417,6 +481,30 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="appearance" className="space-y-6 pt-4">
+            <div className="flex items-center space-x-4 mb-6">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center"
+                onClick={toggleMode}
+              >
+                {theme.mode === 'dark' ? (
+                  <>
+                    <Sun className="h-4 w-4 mr-2" />
+                    Switch to Light Mode
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-4 w-4 mr-2" />
+                    Switch to Dark Mode
+                  </>
+                )}
+              </Button>
+              <div className="text-sm text-muted-foreground">
+                Current theme: <span className="font-medium">{theme.mode === 'dark' ? 'Dark' : 'Light'}</span>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="primaryColor">Primary Color</Label>
@@ -454,6 +542,23 @@ const Settings = () => {
                     name="secondaryColor"
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fontFamily">Font Family</Label>
+                <Select 
+                  value={appearanceSettings.fontFamily}
+                  onValueChange={(value) => setAppearanceSettings({...appearanceSettings, fontFamily: value})}
+                >
+                  <SelectTrigger id="fontFamily">
+                    <SelectValue placeholder="Select font family" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontOptions.map(font => (
+                      <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
@@ -498,21 +603,12 @@ const Settings = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-2 pt-4">
-              <Switch
-                id="enableDarkMode"
-                checked={appearanceSettings.enableDarkMode}
-                onCheckedChange={(checked) => handleAppearanceToggle("enableDarkMode", checked)}
-              />
-              <Label htmlFor="enableDarkMode">Enable Dark Mode</Label>
-            </div>
-            
             <div className="p-4 border rounded-lg mt-6">
               <div className="flex items-center mb-2">
-                <Leaf className="h-5 w-5 text-eco-600 mr-2" />
+                <Palette className="h-5 w-5 text-eco-600 mr-2" />
                 <span className="font-medium">Theme Preview</span>
               </div>
-              <div className="bg-gray-100 p-4 rounded border">
+              <div className={`${theme.mode === 'light' ? 'bg-gray-100' : 'bg-gray-800'} p-4 rounded border`}>
                 <div 
                   className="h-8 rounded" 
                   style={{ backgroundColor: appearanceSettings.primaryColor }}
@@ -522,6 +618,9 @@ const Settings = () => {
                   style={{ backgroundColor: appearanceSettings.secondaryColor }}
                 ></div>
                 <div className="h-32 mt-2 rounded bg-cover bg-center" style={{ backgroundImage: `url(${appearanceSettings.backgroundImage})` }}></div>
+                <div className="mt-2 p-2 border rounded" style={{ fontFamily: appearanceSettings.fontFamily }}>
+                  <p>Sample text in {appearanceSettings.fontFamily.split(',')[0]}</p>
+                </div>
               </div>
             </div>
           </TabsContent>
