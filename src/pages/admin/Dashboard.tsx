@@ -1,8 +1,10 @@
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBag, Users, FileText, DollarSign, AlertCircle } from "lucide-react";
+import { ShoppingBag, Users, FileText, DollarSign, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface Order {
   id: string;
@@ -39,6 +41,7 @@ interface Activity {
   description: string;
   timestamp: string;
   icon: React.ReactNode;
+  color?: string;
 }
 
 const Dashboard = () => {
@@ -50,9 +53,10 @@ const Dashboard = () => {
   });
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch real data from localStorage
-  useEffect(() => {
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  
+  // Function to fetch data
+  const fetchDashboardData = () => {
     try {
       setIsLoading(true);
       
@@ -86,7 +90,7 @@ const Dashboard = () => {
         blogPosts: posts.length,
       });
       
-      // Generate recent activities from orders and posts
+      // Generate recent activities
       const recentActivities: Activity[] = [];
       
       // Add recent orders
@@ -99,7 +103,8 @@ const Dashboard = () => {
             type: "order",
             description: `New order #${order.id.slice(0, 6)} from ${customer?.name || 'Unknown customer'}`,
             timestamp: order.createdAt,
-            icon: <ShoppingBag className="h-5 w-5 text-green-500" />
+            icon: <ShoppingBag className="h-5 w-5 text-green-500" />,
+            color: "green-500"
           });
         });
       
@@ -112,7 +117,8 @@ const Dashboard = () => {
             type: "customer",
             description: `New customer registered: ${customer.name}`,
             timestamp: customer.createdAt,
-            icon: <Users className="h-5 w-5 text-green-500" />
+            icon: <Users className="h-5 w-5 text-green-500" />,
+            color: "green-500"
           });
         });
       
@@ -125,7 +131,8 @@ const Dashboard = () => {
             type: "post",
             description: `New blog post: "${post.title}" by ${post.author}`,
             timestamp: post.createdAt,
-            icon: <FileText className="h-5 w-5 text-green-500" />
+            icon: <FileText className="h-5 w-5 text-green-500" />,
+            color: "green-500"
           });
         });
       
@@ -134,6 +141,9 @@ const Dashboard = () => {
       
       // Take only the 5 most recent
       setActivities(recentActivities.slice(0, 5));
+      
+      // Update last refreshed timestamp
+      setLastUpdated(new Date());
       
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -144,11 +154,37 @@ const Dashboard = () => {
         type: "error",
         description: "There was an error loading recent activities",
         timestamp: new Date().toISOString(),
-        icon: <AlertCircle className="h-5 w-5 text-red-500" />
+        icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+        color: "red-500"
       }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchDashboardData();
+    
+    // Set up interval for real-time updates (every 30 seconds)
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+    
+    // Listen for storage changes from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "orders" || e.key === "customers" || e.key === "products" || e.key === "posts") {
+        fetchDashboardData();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Format currency
@@ -175,111 +211,170 @@ const Dashboard = () => {
     }
   };
 
+  // Animation variants for staggered animations
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-6"
+    >
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="text-sm text-green-400">
-          Last updated: {new Date().toLocaleTimeString()}
-        </p>
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-green-400">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </p>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={fetchDashboardData}
+            disabled={isLoading}
+            className="border-green-700 text-green-400 hover:bg-green-900/20"
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Updating...' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-stagger">
-        <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-white">Total Sales</CardTitle>
-            <DollarSign className="h-8 w-8 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{isLoading ? '...' : formatCurrency(stats.totalSales)}</div>
-            <div className="text-xs text-green-400 mt-1">
-              Real-time revenue tracking
-            </div>
-          </CardContent>
-        </Card>
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants}>
+          <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-white">Total Sales</CardTitle>
+              <DollarSign className="h-8 w-8 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{isLoading ? '...' : formatCurrency(stats.totalSales)}</div>
+              <div className="text-xs text-green-400 mt-1">
+                Real-time revenue tracking
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-white">Active Orders</CardTitle>
-            <ShoppingBag className="h-8 w-8 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.activeOrders}</div>
-            <div className="text-xs text-green-400 mt-1">
-              Orders currently processing
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div variants={itemVariants}>
+          <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-white">Active Orders</CardTitle>
+              <ShoppingBag className="h-8 w-8 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.activeOrders}</div>
+              <div className="text-xs text-green-400 mt-1">
+                Orders currently processing
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-white">Customers</CardTitle>
-            <Users className="h-8 w-8 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.customers}</div>
-            <div className="text-xs text-green-400 mt-1">
-              Total registered users
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div variants={itemVariants}>
+          <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-white">Customers</CardTitle>
+              <Users className="h-8 w-8 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.customers}</div>
+              <div className="text-xs text-green-400 mt-1">
+                Total registered users
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-white">Blog Posts</CardTitle>
-            <FileText className="h-8 w-8 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.blogPosts}</div>
-            <div className="text-xs text-green-400 mt-1">
-              Published content
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <motion.div variants={itemVariants}>
+          <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-white">Blog Posts</CardTitle>
+              <FileText className="h-8 w-8 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{isLoading ? '...' : stats.blogPosts}</div>
+              <div className="text-xs text-green-400 mt-1">
+                Published content
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Recent activity */}
-      <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
-        <CardHeader>
-          <CardTitle className="text-white">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-center gap-4 animate-pulse">
-                  <div className="h-10 w-10 rounded-full bg-green-900/20"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 w-48 bg-green-900/20 rounded"></div>
-                    <div className="h-3 w-24 bg-green-900/10 rounded"></div>
+      <motion.div variants={itemVariants}>
+        <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
+          <CardHeader>
+            <CardTitle className="text-white">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center gap-4 animate-pulse">
+                    <div className="h-10 w-10 rounded-full bg-green-900/20"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 w-48 bg-green-900/20 rounded"></div>
+                      <div className="h-3 w-24 bg-green-900/10 rounded"></div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : activities.length > 0 ? (
-            <div className="space-y-4">
-              {activities.map((activity, index) => (
-                <div key={activity.id} className="flex items-center gap-4 transition-all duration-300 hover:bg-green-900/10 p-2 rounded-md" 
-                     style={{animationDelay: `${index * 100}ms`}}>
-                  <div className="h-10 w-10 rounded-full bg-black/40 flex items-center justify-center border border-green-800/50">
-                    {activity.icon}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{activity.description}</p>
-                    <p className="text-xs text-green-400">{formatDate(activity.timestamp)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-green-400">No recent activity found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                ))}
+              </div>
+            ) : activities.length > 0 ? (
+              <div className="space-y-4">
+                {activities.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-center gap-4 transition-all duration-300 hover:bg-green-900/10 p-2 rounded-md"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-black/40 flex items-center justify-center border border-green-800/50">
+                      {activity.icon}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">{activity.description}</p>
+                      <p className="text-xs text-green-400">{formatDate(activity.timestamp)}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-green-400">No recent activity found</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 };
 

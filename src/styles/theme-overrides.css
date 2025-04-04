@@ -1,21 +1,36 @@
 
-/* Theme override styles to ensure text visibility */
+/* Theme override styles - Black and Green Theme Only */
 
 /* Color overrides for black and green theme */
 :root {
   --text-primary: #ffffff;
   --text-secondary: #4ade80;
-  --text-muted: #a3a3a3;
+  --text-muted: #6b7280;
   --bg-primary: #000000;
-  --bg-secondary: #111111;
+  --bg-secondary: #0a0a0a;
   --border-color: #16a34a;
   --hover-bg: rgba(22, 163, 74, 0.2);
   --shadow-color: rgba(22, 163, 74, 0.15);
+  --eco-50: #f0fdf4;
+  --eco-100: #dcfce7;
+  --eco-200: #bbf7d0;
+  --eco-300: #86efac;
+  --eco-400: #4ade80;
+  --eco-500: #22c55e;
+  --eco-600: #16a34a;
+  --eco-700: #15803d;
+  --eco-800: #166534;
+  --eco-900: #14532d;
+  --eco-950: #052e16;
 }
 
-/* Global text color overrides */
+/* Global text and background color overrides */
 body, button, input, textarea, select, label {
   color: var(--text-primary) !important;
+}
+
+body {
+  background-color: var(--bg-primary) !important;
 }
 
 /* Button and link styles */
@@ -69,9 +84,13 @@ textarea::placeholder {
 
 /* Card and panels */
 .card, 
-.panel {
-  background-color: rgba(0, 0, 0, 0.7) !important;
+.panel,
+[data-radix-popper-content-wrapper],
+[role="dialog"] {
+  background-color: rgba(0, 0, 0, 0.8) !important;
   border-color: rgba(22, 163, 74, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(22, 163, 74, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 /* Toast notifications */
@@ -87,40 +106,6 @@ textarea::placeholder {
 .sonner-toast-title,
 .sonner-toast-description {
   color: white !important;
-}
-
-/* Dropdown menus */
-[data-radix-popper-content-wrapper] {
-  background-color: rgba(0, 0, 0, 0.95) !important;
-  backdrop-filter: blur(10px) !important;
-  border-color: rgba(22, 163, 74, 0.3) !important;
-  color: white !important;
-}
-
-/* Dialog boxes */
-[role="dialog"] {
-  background-color: rgba(0, 0, 0, 0.95) !important;
-  border-color: rgba(22, 163, 74, 0.3) !important;
-  color: white !important;
-}
-
-/* Transitions for smooth page changes */
-.page-transition-enter {
-  opacity: 0;
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transition: opacity 300ms;
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
 }
 
 /* Glassmorphism utilities */
@@ -141,18 +126,76 @@ textarea::placeholder {
   transition: box-shadow 0.3s ease-in-out;
 }
 
-/* Fix for tooltips */
-.tooltip {
-  background-color: rgba(0, 0, 0, 0.9) !important;
-  color: white !important;
-  border: 1px solid rgba(22, 163, 74, 0.5) !important;
-}
-
-/* Ensure text is visible in all contexts */
+/* Text visibility in all contexts */
 .text-muted {
-  color: #a3a3a3 !important;
+  color: #6b7280 !important;
 }
 
 .text-emphasis {
-  color: #4ade80 !important;
+  color: var(--eco-400) !important;
+}
+
+/* Fix for all backgrounds to be black */
+.bg-white,
+.bg-gray-100,
+.bg-gray-50,
+.light-mode-bg {
+  background-color: black !important;
+}
+
+/* Page transitions for smooth navigation */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Override any remaining white backgrounds */
+.bg-light,
+[class*="bg-light"],
+[class*="bg-gray"],
+[class*="bg-neutral"],
+[class*="bg-slate"],
+[class*="bg-zinc"] {
+  background-color: black !important;
+}
+
+/* Menu items */
+.dropdown-item,
+.menu-item {
+  background-color: black !important;
+  color: white !important;
+}
+
+.dropdown-item:hover,
+.menu-item:hover {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+}
+
+/* Ensure all dialogs and modals follow theme */
+.modal,
+.dialog,
+.popover {
+  background-color: black !important;
+  border-color: var(--border-color) !important;
+  color: white !important;
+}
+
+/* Enhanced blur effect for background elements */
+.blur-backdrop {
+  backdrop-filter: blur(15px) !important;
 }
