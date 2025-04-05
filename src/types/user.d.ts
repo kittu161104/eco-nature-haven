@@ -4,7 +4,7 @@ interface User {
   name: string;
   email: string;
   createdAt: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
   role?: string;
   avatar?: string;
   phone?: string;

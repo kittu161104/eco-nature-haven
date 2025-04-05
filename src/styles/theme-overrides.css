@@ -5,7 +5,7 @@
 :root {
   --text-primary: #ffffff;
   --text-secondary: #4ade80;
-  --text-muted: #6b7280;
+  --text-muted: #a3a3a3;
   --bg-primary: #000000;
   --bg-secondary: #0a0a0a;
   --border-color: #16a34a;
@@ -128,7 +128,7 @@ textarea::placeholder {
 
 /* Text visibility in all contexts */
 .text-muted {
-  color: #6b7280 !important;
+  color: #a3a3a3 !important;
 }
 
 .text-emphasis {
@@ -141,6 +141,22 @@ textarea::placeholder {
 .bg-gray-50,
 .light-mode-bg {
   background-color: black !important;
+}
+
+/* Force text to be white in all contexts */
+p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
+  color: white !important;
+}
+
+.text-gray-500, 
+.text-gray-600, 
+.text-gray-700, 
+.text-gray-800, 
+.text-gray-900,
+[class*="text-gray-"],
+[class*="text-slate-"],
+[class*="text-neutral-"] {
+  color: white !important;
 }
 
 /* Page transitions for smooth navigation */
