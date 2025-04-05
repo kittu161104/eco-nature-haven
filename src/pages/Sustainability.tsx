@@ -1,284 +1,180 @@
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Leaf, Recycle, Droplets, Sun, Wind } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Leaf, Recycle, DropletIcon, TreePine, Sun } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Sustainability = () => {
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.6 }
-    }
-  };
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [pageContent, setPageContent] = useState({
+    title: "Our Sustainability Commitment",
+    subtitle: "Creating a Greener Tomorrow",
+    mainContent: "At Natural Green Nursery, sustainability isn't just a buzzword—it's at the core of everything we do. From our cultivation practices to our packaging, we're committed to minimizing our environmental footprint while helping you create a thriving green space.",
+    practices: [
+      {
+        title: "Eco-friendly Products",
+        description: "All our plant varieties are carefully selected to be suitable for local environments, reducing the need for excessive watering, fertilizers, or pesticides."
+      },
+      {
+        title: "Responsible Sourcing",
+        description: "We work directly with local growers who share our commitment to sustainable growing practices and fair labor conditions."
+      },
+      {
+        title: "Plastic Reduction",
+        description: "Our packaging is made from recycled materials, and we're working toward eliminating plastic completely by 2025."
+      },
+      {
+        title: "Community Initiatives",
+        description: "For every order placed, we donate to local reforestation projects and urban greening initiatives."
+      }
+    ],
+    contactHeading: "Join Our Eco-Friendly Initiatives"
+  });
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
+  useEffect(() => {
+    // Check if custom content exists in local storage
+    const storedPagesData = localStorage.getItem("pagesData");
+    if (storedPagesData) {
+      try {
+        const parsedData = JSON.parse(storedPagesData);
+        if (parsedData.sustainability) {
+          // Parse the content which may be stored as a JSON string
+          try {
+            const sustainabilityData = typeof parsedData.sustainability.content === 'string' ? 
+              JSON.parse(parsedData.sustainability.content) : 
+              parsedData.sustainability.content;
+              
+            if (sustainabilityData) {
+              setPageContent(sustainabilityData);
+            }
+          } catch (e) {
+            console.log("Using default content for sustainability page");
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing sustainability data:", error);
       }
     }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name || !email || !message) {
+      toast({
+        title: "Please complete all fields",
+        description: "All fields are required to submit the form.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // In a real app, you would send this data to your backend
+    console.log("Form submission:", { name, email, message });
+    
+    toast({
+      title: "Message sent!",
+      description: "Thank you for your interest in our sustainability initiatives.",
+    });
+    
+    // Reset form
+    setName("");
+    setEmail("");
+    setMessage("");
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20">
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-green-900/30 to-black"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.3),transparent_70%)]"></div>
+        <div className="bg-eco-800 text-white py-20">
+          <div className="eco-container text-center">
+            <div className="inline-flex items-center px-4 py-1 rounded-full bg-eco-600/30 text-eco-100 mb-4">
+              <Leaf className="h-5 w-5 mr-2 animate-leaf-sway" />
+              <span>Eco-Friendly Practices</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">{pageContent.title}</h1>
+            <p className="text-xl text-eco-100 max-w-2xl mx-auto">{pageContent.subtitle}</p>
+          </div>
+        </div>
+        
+        {/* Main content */}
+        <div className="eco-container py-16">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <p className="text-lg">{pageContent.mainContent}</p>
           </div>
           
-          <div className="eco-container relative z-10">
-            <motion.div 
-              className="max-w-3xl mx-auto text-center"
-              initial="hidden"
-              animate="visible"
-              variants={fadeIn}
-            >
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                Our Commitment to <span className="text-eco-400">Sustainability</span>
-              </h1>
-              <p className="text-xl text-white/80 mb-8">
-                Creating a greener future through sustainable practices, one plant at a time.
-              </p>
-              <div className="flex justify-center">
-                <Leaf className="h-16 w-16 text-eco-500 animate-pulse" />
+          <div className="grid md:grid-cols-2 gap-8">
+            {pageContent.practices.map((practice, index) => (
+              <div key={index} className="bg-black p-6 rounded-lg border border-green-800 hover:border-green-600 transition-all">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-eco-800/30 text-eco-500 mb-4">
+                  {index === 0 && <Leaf className="h-6 w-6" />}
+                  {index === 1 && <TreePine className="h-6 w-6" />}
+                  {index === 2 && <Recycle className="h-6 w-6" />}
+                  {index === 3 && <Sun className="h-6 w-6" />}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{practice.title}</h3>
+                <p>{practice.description}</p>
               </div>
-            </motion.div>
+            ))}
           </div>
-        </section>
-
-        {/* Our Approach */}
-        <section className="py-16 bg-black/80">
-          <div className="eco-container">
-            <motion.div 
-              className="max-w-3xl mx-auto text-center mb-12"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeIn}
-            >
-              <h2 className="text-3xl font-bold mb-4 text-white">Our Sustainable Approach</h2>
-              <p className="text-white/70">
-                At Natural Green Nursery, sustainability isn't just a buzzword—it's at the core of everything we do.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-8"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-            >
-              <motion.div 
-                className="bg-black/50 backdrop-blur-lg p-8 rounded-lg border border-green-900/50 glass"
-                variants={fadeIn}
-              >
-                <div className="bg-green-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                  <Recycle className="h-8 w-8 text-eco-400" />
+          
+          {/* Contact Form */}
+          <div className="mt-20 bg-black p-8 rounded-lg border border-green-800">
+            <h2 className="text-2xl font-bold mb-6 text-center">{pageContent.contactHeading}</h2>
+            <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
+              <div className="grid gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">Your Name</label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-black border-green-700"
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-white">Eco-Friendly Packaging</h3>
-                <p className="text-white/70">
-                  We've eliminated plastic from our packaging, using only biodegradable and compostable materials. Our pots are made from recycled materials or biodegradable alternatives.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                className="bg-black/50 backdrop-blur-lg p-8 rounded-lg border border-green-900/50 glass"
-                variants={fadeIn}
-              >
-                <div className="bg-green-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                  <Droplets className="h-8 w-8 text-eco-400" />
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-black border-green-700"
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-white">Water Conservation</h3>
-                <p className="text-white/70">
-                  Our nursery employs advanced drip irrigation systems and rainwater harvesting to minimize water usage. We also prioritize drought-resistant plants in our collection.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                className="bg-black/50 backdrop-blur-lg p-8 rounded-lg border border-green-900/50 glass"
-                variants={fadeIn}
-              >
-                <div className="bg-green-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                  <Sun className="h-8 w-8 text-eco-400" />
+                
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium mb-1">Your Message or Initiative Idea</label>
+                  <Textarea
+                    id="message"
+                    rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="bg-black border-green-700"
+                    placeholder="Share your eco-friendly initiative ideas or questions..."
+                  />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-white">Renewable Energy</h3>
-                <p className="text-white/70">
-                  Our facilities are powered by 100% renewable energy sources. Solar panels on our greenhouse roofs generate electricity for our operations.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                className="bg-black/50 backdrop-blur-lg p-8 rounded-lg border border-green-900/50 glass"
-                variants={fadeIn}
-              >
-                <div className="bg-green-900/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6">
-                  <Wind className="h-8 w-8 text-eco-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-white">Carbon Footprint Reduction</h3>
-                <p className="text-white/70">
-                  We work with local growers to reduce transportation emissions and calculate our carbon footprint annually, offsetting it through verified reforestation projects.
-                </p>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Certifications */}
-        <section className="py-16 bg-black">
-          <div className="eco-container">
-            <motion.div 
-              className="text-center mb-12"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeIn}
-            >
-              <h2 className="text-3xl font-bold mb-4 text-white">Our Certifications</h2>
-              <p className="text-white/70 max-w-2xl mx-auto">
-                We're proud to be recognized for our commitment to sustainable and ethical business practices.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={staggerContainer}
-            >
-              {['Organic Certified', 'Fair Trade', 'B Corp', 'Carbon Neutral'].map((cert, index) => (
-                <motion.div 
-                  key={index}
-                  className="bg-black/40 backdrop-blur-md border border-green-900/40 rounded-lg p-6 text-center hover:border-green-500 transition-colors duration-300"
-                  variants={fadeIn}
+                
+                <Button 
+                  type="submit" 
+                  className="bg-eco-600 hover:bg-eco-700 text-white"
                 >
-                  <div className="w-16 h-16 bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-eco-400 text-2xl font-bold">{index + 1}</span>
-                  </div>
-                  <h3 className="font-bold text-white mb-2">{cert}</h3>
-                  <p className="text-white/60 text-sm">
-                    Verified and certified for meeting the highest industry standards.
-                  </p>
-                </motion.div>
-              ))}
-            </motion.div>
+                  Submit
+                </Button>
+              </div>
+            </form>
           </div>
-        </section>
-
-        {/* Environmental Impact */}
-        <section className="py-16 bg-black/90">
-          <div className="eco-container">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-              >
-                <h2 className="text-3xl font-bold mb-6 text-white">Our Environmental Impact</h2>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <h4 className="font-bold text-white">Reduced Water Usage</h4>
-                      <span className="ml-auto text-eco-400">85%</span>
-                    </div>
-                    <div className="h-2 bg-green-900/30 rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-eco-500"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: '85%' }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3, duration: 1 }}
-                      ></motion.div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <h4 className="font-bold text-white">Plastic Reduction</h4>
-                      <span className="ml-auto text-eco-400">92%</span>
-                    </div>
-                    <div className="h-2 bg-green-900/30 rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-eco-500"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: '92%' }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.5, duration: 1 }}
-                      ></motion.div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <h4 className="font-bold text-white">Carbon Footprint</h4>
-                      <span className="ml-auto text-eco-400">70%</span>
-                    </div>
-                    <div className="h-2 bg-green-900/30 rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-eco-500"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: '70%' }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.7, duration: 1 }}
-                      ></motion.div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <h4 className="font-bold text-white">Renewable Energy</h4>
-                      <span className="ml-auto text-eco-400">100%</span>
-                    </div>
-                    <div className="h-2 bg-green-900/30 rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-eco-500"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: '100%' }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.9, duration: 1 }}
-                      ></motion.div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div
-                className="bg-black/40 backdrop-blur-lg p-8 rounded-lg border border-green-900/30"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-              >
-                <h3 className="text-xl font-bold mb-4 text-white">Annual Impact Report</h3>
-                <p className="text-white/70 mb-6">
-                  Every year, we publish a comprehensive sustainability report detailing our environmental impact, social initiatives, and progress toward our goals.
-                </p>
-                <ul className="space-y-3">
-                  {['10,000+ trees planted', '5 million gallons of water saved', '300+ tons of carbon offset', '85% waste reduction'].map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="bg-green-900/30 p-1 rounded-full flex-shrink-0 mr-3">
-                        <Leaf className="h-4 w-4 text-eco-400" />
-                      </span>
-                      <span className="text-white/90">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>

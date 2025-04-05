@@ -35,24 +35,6 @@ const Pages = () => {
       content: "We're here to help! Reach out to us for any queries or assistance.",
       metaDescription: "Contact Natural Green Nursery for inquiries about plants, gardening supplies, or any other questions.",
       lastUpdated: new Date().toISOString(),
-    },
-    faq: {
-      title: "Frequently Asked Questions",
-      content: "Find answers to common questions about our products, shipping, and more.",
-      metaDescription: "Frequently Asked Questions about Natural Green Nursery products and services.",
-      lastUpdated: new Date().toISOString(),
-    },
-    terms: {
-      title: "Terms and Conditions",
-      content: "Please read our terms and conditions carefully before using our website or services.",
-      metaDescription: "Terms and Conditions for Natural Green Nursery website and services.",
-      lastUpdated: new Date().toISOString(),
-    },
-    privacy: {
-      title: "Privacy Policy",
-      content: "Our privacy policy outlines how we collect, use, and protect your personal information.",
-      metaDescription: "Privacy Policy for Natural Green Nursery website and services.",
-      lastUpdated: new Date().toISOString(),
     }
   });
   
@@ -61,7 +43,20 @@ const Pages = () => {
   useEffect(() => {
     const storedPages = localStorage.getItem("pagesData");
     if (storedPages) {
-      setPagesData(JSON.parse(storedPages));
+      try {
+        const parsedData = JSON.parse(storedPages);
+        // Filter out the pages we want to remove
+        const filteredData = Object.keys(parsedData)
+          .filter(key => ['about', 'contact'].includes(key))
+          .reduce((obj, key) => {
+            obj[key] = parsedData[key];
+            return obj;
+          }, {} as PagesData);
+        
+        setPagesData(filteredData);
+      } catch (error) {
+        console.error("Error parsing pages data:", error);
+      }
     }
   }, []);
   
@@ -93,12 +88,16 @@ const Pages = () => {
       title: "Page saved",
       description: `The ${activeTab} page has been updated successfully.`,
     });
+
+    // Dispatch an event to notify other parts of the application
+    const event = new CustomEvent('pages-updated', { detail: { updatedPages: updatedPagesData } });
+    window.dispatchEvent(event);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-eco-800">Page Management</h1>
+        <h1 className="text-3xl font-bold text-white">Page Management</h1>
         <div className="space-x-2">
           <Button 
             variant="outline" 
@@ -118,7 +117,7 @@ const Pages = () => {
           </Button>
           
           {editMode && (
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} className="bg-green-700 hover:bg-green-800">
               <Save className="h-4 w-4 mr-2" />
               Save Changes
             </Button>
@@ -132,12 +131,9 @@ const Pages = () => {
         onValueChange={setActiveTab} 
         className="w-full"
       >
-        <TabsList className="grid grid-cols-5">
+        <TabsList className="grid grid-cols-2">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
-          <TabsTrigger value="faq">FAQ</TabsTrigger>
-          <TabsTrigger value="terms">Terms</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
         </TabsList>
         
         {Object.keys(pagesData).map((pageKey) => (
@@ -145,48 +141,51 @@ const Pages = () => {
             {editMode ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Page Title</label>
+                  <label className="block text-sm font-medium mb-1 text-white">Page Title</label>
                   <Input
                     name="title"
                     value={pagesData[pageKey].title}
                     onChange={handlePageChange}
+                    className="bg-black border-green-800"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Meta Description</label>
+                  <label className="block text-sm font-medium mb-1 text-white">Meta Description</label>
                   <Input
                     name="metaDescription"
                     value={pagesData[pageKey].metaDescription}
                     onChange={handlePageChange}
+                    className="bg-black border-green-800"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Content</label>
+                  <label className="block text-sm font-medium mb-1 text-white">Content</label>
                   <Textarea
                     name="content"
                     value={pagesData[pageKey].content}
                     onChange={handlePageChange}
                     rows={15}
+                    className="bg-black border-green-800"
                   />
                 </div>
                 
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted">
                   Last updated: {new Date(pagesData[pageKey].lastUpdated).toLocaleString()}
                 </p>
               </div>
             ) : (
-              <ScrollArea className="h-[500px] w-full rounded-md border p-4">
-                <Card>
+              <ScrollArea className="h-[500px] w-full rounded-md border p-4 border-green-800">
+                <Card className="bg-black border-green-800">
                   <CardHeader>
-                    <CardTitle>{pagesData[pageKey].title}</CardTitle>
-                    <CardDescription>{pagesData[pageKey].metaDescription}</CardDescription>
+                    <CardTitle className="text-white">{pagesData[pageKey].title}</CardTitle>
+                    <CardDescription className="text-gray-400">{pagesData[pageKey].metaDescription}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="whitespace-pre-wrap">{pagesData[pageKey].content}</div>
+                    <div className="whitespace-pre-wrap text-white">{pagesData[pageKey].content}</div>
                   </CardContent>
-                  <CardFooter className="text-xs text-muted-foreground">
+                  <CardFooter className="text-xs text-gray-400">
                     Last updated: {new Date(pagesData[pageKey].lastUpdated).toLocaleString()}
                   </CardFooter>
                 </Card>

@@ -2,14 +2,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Leaf, Mail, Home, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { safelyParseJSON } from "@/lib/utils";
 
 const Footer = () => {
-  const [email, setEmail] = useState("");
-  const { toast } = useToast();
   const [footerData, setFooterData] = useState({
     companyName: "Natural Green Nursery",
     address: "123 Green Avenue, Eco City, EC 12345",
@@ -23,11 +18,10 @@ const Footer = () => {
     ],
     quickLinks: [
       { name: "Shop Plants", url: "/shop" },
-      { name: "Gardening Blog", url: "/blog" },
       { name: "About Us", url: "/about" },
+      { name: "Contact", url: "/contact" },
       { name: "Sustainability", url: "/sustainability" }
-    ],
-    newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
+    ]
   });
 
   useEffect(() => {
@@ -38,28 +32,10 @@ const Footer = () => {
     }
   }, []);
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    toast({
-      title: "Subscription successful!",
-      description: "Thank you for subscribing to our newsletter.",
-    });
-    setEmail("");
-  };
-
   return (
     <footer className="bg-gray-900 text-white">
       <div className="eco-container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Column */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
@@ -138,29 +114,6 @@ const Footer = () => {
                 <span className="text-gray-300">{footerData.email}</span>
               </li>
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="font-serif font-bold text-lg mb-4 text-eco-400">Newsletter</h3>
-            <p className="text-gray-300 text-sm mb-4">
-              {footerData.newsletterText}
-            </p>
-            <form onSubmit={handleSubscribe} className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Your email address"
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button 
-                type="submit" 
-                className="w-full bg-eco-500 hover:bg-eco-600 text-gray-900"
-              >
-                Subscribe
-              </Button>
-            </form>
           </div>
         </div>
 

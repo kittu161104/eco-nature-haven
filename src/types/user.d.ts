@@ -9,6 +9,9 @@ interface User {
   avatar?: string;
   phone?: string;
   address?: string;
+  sustainabilityBadges?: string[];
+  ecoPoints?: number;
+  plantCareTips?: boolean;
 }
 
 export default User;

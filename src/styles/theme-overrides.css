@@ -218,15 +218,16 @@ p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
 
 /* Make navbar buttons more visible */
 .navbar-button {
-  background-color: rgba(22, 163, 74, 0.2) !important;
-  border: 1px solid rgba(22, 163, 74, 0.4) !important;
+  background-color: rgba(22, 163, 74, 0.3) !important;
+  border: 1px solid rgba(22, 163, 74, 0.5) !important;
   color: white !important;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-button:hover {
-  background-color: rgba(22, 163, 74, 0.4) !important;
-  border-color: rgba(22, 163, 74, 0.6) !important;
-  box-shadow: 0 0 10px rgba(22, 163, 74, 0.3) !important;
+  background-color: rgba(22, 163, 74, 0.5) !important;
+  border-color: rgba(22, 163, 74, 0.8) !important;
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.4) !important;
 }
 
 /* Fix filters scrolling */
@@ -241,11 +242,15 @@ p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
 .filter-scroll::-webkit-scrollbar {
   width: 8px;
   background-color: rgba(0, 0, 0, 0.2);
+  visibility: visible !important;
+  display: block !important;
 }
 
 .filter-scroll::-webkit-scrollbar-thumb {
   background-color: var(--eco-600);
   border-radius: 4px;
+  visibility: visible !important;
+  display: block !important;
 }
 
 /* Improve dropdown visibility */
@@ -263,4 +268,41 @@ p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
 .dark-theme {
   background-color: black !important;
   color: white !important;
+}
+
+/* Status and action highlights */
+.status-pending,
+.status-processing {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+  color: white !important;
+  border-left: 3px solid var(--eco-600) !important;
+}
+
+.status-completed,
+.status-delivered,
+.status-success {
+  background-color: rgba(22, 163, 74, 0.3) !important;
+  color: white !important;
+  border-left: 3px solid var(--eco-500) !important;
+}
+
+.status-cancelled,
+.status-failed {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: white !important;
+  border-left: 3px solid #dc2626 !important;
+}
+
+.action-button {
+  background-color: var(--eco-700) !important;
+  color: white !important;
+}
+
+.action-button:hover {
+  background-color: var(--eco-800) !important;
+}
+
+/* Shop hero section */
+.shop-hero {
+  background-color: var(--eco-800) !important;
 }

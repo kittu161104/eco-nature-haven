@@ -115,13 +115,13 @@ const Shop = () => {
       <Navbar />
       <main className="flex-grow">
         {/* Shop Hero */}
-        <div className="bg-eco-100 py-12">
+        <div className="bg-eco-800 py-12">
           <div className="eco-container">
             <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-eco-800 mb-4">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">
                 Shop Our Collection
               </h1>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-200 max-w-2xl mx-auto">
                 Discover our wide range of sustainable plants, gardening supplies, and eco-friendly decor
               </p>
             </div>
