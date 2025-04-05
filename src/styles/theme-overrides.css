@@ -215,3 +215,52 @@ p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
 .blur-backdrop {
   backdrop-filter: blur(15px) !important;
 }
+
+/* Make navbar buttons more visible */
+.navbar-button {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+  border: 1px solid rgba(22, 163, 74, 0.4) !important;
+  color: white !important;
+}
+
+.navbar-button:hover {
+  background-color: rgba(22, 163, 74, 0.4) !important;
+  border-color: rgba(22, 163, 74, 0.6) !important;
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.3) !important;
+}
+
+/* Fix filters scrolling */
+.filter-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--eco-600) rgba(0, 0, 0, 0.2);
+}
+
+.filter-scroll::-webkit-scrollbar {
+  width: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.filter-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--eco-600);
+  border-radius: 4px;
+}
+
+/* Improve dropdown visibility */
+[data-radix-popper-content-wrapper] {
+  z-index: 1000 !important;
+}
+
+/* Selection styles */
+::selection {
+  background-color: var(--eco-700) !important;
+  color: white !important;
+}
+
+/* Ensure dark mode in all components */
+.dark-theme {
+  background-color: black !important;
+  color: white !important;
+}

@@ -57,17 +57,15 @@ const Settings = () => {
     socialLinks: [
       { name: "facebook", url: "#" },
       { name: "instagram", url: "#" },
-      { name: "twitter", url: "#" },
       { name: "pinterest", url: "#" }
     ],
     quickLinks: [
       { name: "Shop Plants", url: "/shop" },
       { name: "Gardening Blog", url: "/blog" },
       { name: "About Us", url: "/about" },
-      { name: "Sustainability", url: "/sustainability" },
-      { name: "FAQ", url: "/faq" }
+      { name: "Sustainability", url: "/sustainability" }
     ],
-    newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
+    newsletterText: ""
   });
 
   // Font family options
@@ -95,16 +93,30 @@ const Settings = () => {
     }
     
     if (storedAppearanceSettings) {
+      const parsedSettings = JSON.parse(storedAppearanceSettings);
       setAppearanceSettings({
-        ...JSON.parse(storedAppearanceSettings),
-        primaryColor: theme.primaryColor,
-        secondaryColor: theme.secondaryColor,
-        backgroundImage: theme.backgroundImage
+        ...parsedSettings,
+        primaryColor: theme.primaryColor || parsedSettings.primaryColor,
+        secondaryColor: theme.secondaryColor || parsedSettings.secondaryColor,
+        backgroundImage: theme.backgroundImage || parsedSettings.backgroundImage
       });
     }
 
     if (storedFooterSettings) {
-      setFooterSettings(JSON.parse(storedFooterSettings));
+      setFooterSettings(prev => {
+        const parsed = JSON.parse(storedFooterSettings);
+        // Filter out Twitter from social links if present
+        const filteredSocialLinks = parsed.socialLinks ? 
+          parsed.socialLinks.filter((link: {name: string}) => link.name !== "twitter") : 
+          prev.socialLinks;
+          
+        // Ensure we don't have newsletter text
+        return {
+          ...parsed,
+          socialLinks: filteredSocialLinks,
+          newsletterText: ""
+        };
+      });
     }
   }, [theme]);
 
@@ -136,13 +148,6 @@ const Settings = () => {
     setAppearanceSettings({
       ...appearanceSettings,
       [name]: value,
-    });
-  };
-
-  const handleAppearanceToggle = (name: string, checked: boolean) => {
-    setAppearanceSettings({
-      ...appearanceSettings,
-      [name]: checked,
     });
   };
 
@@ -264,17 +269,15 @@ const Settings = () => {
       socialLinks: [
         { name: "facebook", url: "#" },
         { name: "instagram", url: "#" },
-        { name: "twitter", url: "#" },
         { name: "pinterest", url: "#" }
       ],
       quickLinks: [
         { name: "Shop Plants", url: "/shop" },
         { name: "Gardening Blog", url: "/blog" },
         { name: "About Us", url: "/about" },
-        { name: "Sustainability", url: "/sustainability" },
-        { name: "FAQ", url: "/faq" }
+        { name: "Sustainability", url: "/sustainability" }
       ],
-      newsletterText: "Subscribe to our newsletter for gardening tips, new arrivals, and exclusive offers."
+      newsletterText: ""
     });
     
     // Reset theme to default
@@ -295,30 +298,30 @@ const Settings = () => {
     <ScrollArea className="h-[calc(100vh-120px)]">
       <div className="space-y-6 p-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-eco-800">Settings</h1>
+          <h1 className="text-3xl font-bold text-white">Settings</h1>
           <div className="space-x-2">
             <Button 
               variant="outline" 
               onClick={toggleMode}
-              className="mr-2"
+              className="mr-2 bg-black border-green-900/50 text-white"
             >
               {theme.mode === 'dark' ? (
                 <>
-                  <Sun className="h-4 w-4 mr-2" />
-                  Light Mode
+                  <Sun className="h-4 w-4 mr-2 text-green-400" />
+                  <span className="text-green-400">Light Mode</span>
                 </>
               ) : (
                 <>
-                  <Moon className="h-4 w-4 mr-2" />
-                  Dark Mode
+                  <Moon className="h-4 w-4 mr-2 text-green-400" />
+                  <span className="text-green-400">Dark Mode</span>
                 </>
               )}
             </Button>
-            <Button variant="outline" onClick={handleReset}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reset
+            <Button variant="outline" onClick={handleReset} className="bg-black border-green-900/50 text-white">
+              <RefreshCw className="h-4 w-4 mr-2 text-green-400" />
+              <span className="text-green-400">Reset</span>
             </Button>
-            <Button onClick={handleSaveSettings}>
+            <Button onClick={handleSaveSettings} className="bg-green-700 text-white hover:bg-green-800">
               <Save className="h-4 w-4 mr-2" />
               Save Changes
             </Button>
@@ -326,64 +329,67 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="email">Email</TabsTrigger>
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="footer">Footer</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-black/60 text-white">
+            <TabsTrigger value="general" className="text-white data-[state=active]:text-green-400 data-[state=active]:bg-green-900/20">General</TabsTrigger>
+            <TabsTrigger value="email" className="text-white data-[state=active]:text-green-400 data-[state=active]:bg-green-900/20">Email</TabsTrigger>
+            <TabsTrigger value="appearance" className="text-white data-[state=active]:text-green-400 data-[state=active]:bg-green-900/20">Appearance</TabsTrigger>
+            <TabsTrigger value="footer" className="text-white data-[state=active]:text-green-400 data-[state=active]:bg-green-900/20">Footer</TabsTrigger>
           </TabsList>
           
           <TabsContent value="general" className="space-y-6 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="storeName">Store Name</Label>
+                <Label htmlFor="storeName" className="text-white">Store Name</Label>
                 <Input
                   id="storeName"
                   name="storeName"
                   value={generalSettings.storeName}
                   onChange={handleGeneralChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="storeEmail">Store Email</Label>
+                <Label htmlFor="storeEmail" className="text-white">Store Email</Label>
                 <Input
                   id="storeEmail"
                   name="storeEmail"
                   type="email"
                   value={generalSettings.storeEmail}
                   onChange={handleGeneralChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="storePhone">Store Phone</Label>
+                <Label htmlFor="storePhone" className="text-white">Store Phone</Label>
                 <Input
                   id="storePhone"
                   name="storePhone"
                   value={generalSettings.storePhone}
                   onChange={handleGeneralChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
+                <Label htmlFor="currency" className="text-white">Currency</Label>
                 <Select 
                   value={generalSettings.currency} 
                   onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
                 >
-                  <SelectTrigger id="currency">
+                  <SelectTrigger id="currency" className="bg-black/60 border-green-900/50 text-white">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="INR">INR (₹)</SelectItem>
-                    <SelectItem value="USD">USD ($)</SelectItem>
+                  <SelectContent className="bg-black border-green-900/50 text-white">
+                    <SelectItem value="INR" className="text-white focus:text-green-400 focus:bg-green-900/20">INR (₹)</SelectItem>
+                    <SelectItem value="USD" className="text-white focus:text-green-400 focus:bg-green-900/20">USD ($)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                <Label htmlFor="taxRate" className="text-white">Tax Rate (%)</Label>
                 <Input
                   id="taxRate"
                   name="taxRate"
@@ -392,14 +398,15 @@ const Settings = () => {
                   step="0.01"
                   value={generalSettings.taxRate}
                   onChange={handleGeneralChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Service Regions</Label>
+                <Label className="text-white">Service Regions</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {generalSettings.regions.map((region, index) => (
-                    <div key={index} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                    <div key={index} className="bg-green-900/30 text-white px-3 py-1 rounded-full text-sm border border-green-900/50">
                       {region}
                     </div>
                   ))}
@@ -408,13 +415,14 @@ const Settings = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="storeAddress">Store Address</Label>
+              <Label htmlFor="storeAddress" className="text-white">Store Address</Label>
               <Textarea
                 id="storeAddress"
                 name="storeAddress"
                 value={generalSettings.storeAddress}
                 onChange={handleGeneralChange}
                 rows={3}
+                className="bg-black/60 border-green-900/50 text-white"
               />
             </div>
           </TabsContent>
@@ -423,8 +431,8 @@ const Settings = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="enableOrderConfirmation">Order Confirmation Emails</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label htmlFor="enableOrderConfirmation" className="text-white">Order Confirmation Emails</Label>
+                  <p className="text-sm text-green-400">
                     Send an email when a customer places an order
                   </p>
                 </div>
@@ -435,12 +443,12 @@ const Settings = () => {
                 />
               </div>
               
-              <Separator />
+              <Separator className="bg-green-900/30" />
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="enableShippingNotifications">Shipping Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label htmlFor="enableShippingNotifications" className="text-white">Shipping Notifications</Label>
+                  <p className="text-sm text-green-400">
                     Send an email when an order ships
                   </p>
                 </div>
@@ -451,12 +459,12 @@ const Settings = () => {
                 />
               </div>
               
-              <Separator />
+              <Separator className="bg-green-900/30" />
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="enableMarketingEmails">Marketing Emails</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label htmlFor="enableMarketingEmails" className="text-white">Marketing Emails</Label>
+                  <p className="text-sm text-green-400">
                     Send promotional emails and newsletters
                   </p>
                 </div>
@@ -469,13 +477,14 @@ const Settings = () => {
             </div>
             
             <div className="space-y-2 pt-4">
-              <Label htmlFor="footerText">Email Footer Text</Label>
+              <Label htmlFor="footerText" className="text-white">Email Footer Text</Label>
               <Textarea
                 id="footerText"
                 name="footerText"
                 value={emailSettings.footerText}
                 onChange={handleEmailChange}
                 rows={4}
+                className="bg-black/60 border-green-900/50 text-white"
               />
             </div>
           </TabsContent>
@@ -485,29 +494,29 @@ const Settings = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="flex items-center"
+                className="flex items-center bg-black/60 border-green-900/50"
                 onClick={toggleMode}
               >
                 {theme.mode === 'dark' ? (
                   <>
-                    <Sun className="h-4 w-4 mr-2" />
-                    Switch to Light Mode
+                    <Sun className="h-4 w-4 mr-2 text-green-400" />
+                    <span className="text-green-400">Switch to Light Mode</span>
                   </>
                 ) : (
                   <>
-                    <Moon className="h-4 w-4 mr-2" />
-                    Switch to Dark Mode
+                    <Moon className="h-4 w-4 mr-2 text-green-400" />
+                    <span className="text-green-400">Switch to Dark Mode</span>
                   </>
                 )}
               </Button>
-              <div className="text-sm text-muted-foreground">
-                Current theme: <span className="font-medium">{theme.mode === 'dark' ? 'Dark' : 'Light'}</span>
+              <div className="text-sm text-green-400">
+                Current theme: <span className="font-medium text-white">{theme.mode === 'dark' ? 'Dark' : 'Light'}</span>
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="primaryColor">Primary Color</Label>
+                <Label htmlFor="primaryColor" className="text-white">Primary Color</Label>
                 <div className="flex gap-2">
                   <Input
                     id="primaryColor"
@@ -515,18 +524,19 @@ const Settings = () => {
                     type="color"
                     value={appearanceSettings.primaryColor}
                     onChange={handleAppearanceChange}
-                    className="w-12 h-10 p-1"
+                    className="w-12 h-10 p-1 bg-black/60 border-green-900/50"
                   />
                   <Input
                     value={appearanceSettings.primaryColor}
                     onChange={handleAppearanceChange}
                     name="primaryColor"
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="secondaryColor">Secondary Color</Label>
+                <Label htmlFor="secondaryColor" className="text-white">Secondary Color</Label>
                 <div className="flex gap-2">
                   <Input
                     id="secondaryColor"
@@ -534,81 +544,86 @@ const Settings = () => {
                     type="color"
                     value={appearanceSettings.secondaryColor}
                     onChange={handleAppearanceChange}
-                    className="w-12 h-10 p-1"
+                    className="w-12 h-10 p-1 bg-black/60 border-green-900/50"
                   />
                   <Input
                     value={appearanceSettings.secondaryColor}
                     onChange={handleAppearanceChange}
                     name="secondaryColor"
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="fontFamily">Font Family</Label>
+                <Label htmlFor="fontFamily" className="text-white">Font Family</Label>
                 <Select 
                   value={appearanceSettings.fontFamily}
                   onValueChange={(value) => setAppearanceSettings({...appearanceSettings, fontFamily: value})}
                 >
-                  <SelectTrigger id="fontFamily">
+                  <SelectTrigger id="fontFamily" className="bg-black/60 border-green-900/50 text-white">
                     <SelectValue placeholder="Select font family" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-black border-green-900/50 text-white">
                     {fontOptions.map(font => (
-                      <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                      <SelectItem key={font.value} value={font.value} className="text-white focus:text-green-400 focus:bg-green-900/20">
+                        {font.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="logoUrl">Logo URL</Label>
+                <Label htmlFor="logoUrl" className="text-white">Logo URL</Label>
                 <Input
                   id="logoUrl"
                   name="logoUrl"
                   placeholder="https://example.com/logo.png"
                   value={appearanceSettings.logoUrl}
                   onChange={handleAppearanceChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="backgroundImage">Background Image URL</Label>
+                <Label htmlFor="backgroundImage" className="text-white">Background Image URL</Label>
                 <Input
                   id="backgroundImage"
                   name="backgroundImage"
                   placeholder="https://example.com/background.jpg"
                   value={appearanceSettings.backgroundImage}
                   onChange={handleAppearanceChange}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="productsPerPage">Products Per Page</Label>
+                <Label htmlFor="productsPerPage" className="text-white">Products Per Page</Label>
                 <Select 
                   value={appearanceSettings.productsPerPage}
                   onValueChange={(value) => setAppearanceSettings({...appearanceSettings, productsPerPage: value})}
                 >
-                  <SelectTrigger id="productsPerPage">
+                  <SelectTrigger id="productsPerPage" className="bg-black/60 border-green-900/50 text-white">
                     <SelectValue placeholder="Select number" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="8">8 products</SelectItem>
-                    <SelectItem value="12">12 products</SelectItem>
-                    <SelectItem value="16">16 products</SelectItem>
-                    <SelectItem value="24">24 products</SelectItem>
-                    <SelectItem value="36">36 products</SelectItem>
+                  <SelectContent className="bg-black border-green-900/50 text-white">
+                    <SelectItem value="8" className="text-white focus:text-green-400 focus:bg-green-900/20">8 products</SelectItem>
+                    <SelectItem value="12" className="text-white focus:text-green-400 focus:bg-green-900/20">12 products</SelectItem>
+                    <SelectItem value="16" className="text-white focus:text-green-400 focus:bg-green-900/20">16 products</SelectItem>
+                    <SelectItem value="24" className="text-white focus:text-green-400 focus:bg-green-900/20">24 products</SelectItem>
+                    <SelectItem value="36" className="text-white focus:text-green-400 focus:bg-green-900/20">36 products</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
-            <div className="p-4 border rounded-lg mt-6">
+            <div className="p-4 border border-green-900/50 rounded-lg mt-6 bg-black/60">
               <div className="flex items-center mb-2">
-                <Palette className="h-5 w-5 text-eco-600 mr-2" />
-                <span className="font-medium">Theme Preview</span>
+                <Palette className="h-5 w-5 text-green-500 mr-2" />
+                <span className="font-medium text-white">Theme Preview</span>
               </div>
-              <div className={`${theme.mode === 'light' ? 'bg-gray-100' : 'bg-gray-800'} p-4 rounded border`}>
+              <div className="bg-black p-4 rounded border border-green-900/50">
                 <div 
                   className="h-8 rounded" 
                   style={{ backgroundColor: appearanceSettings.primaryColor }}
@@ -618,8 +633,8 @@ const Settings = () => {
                   style={{ backgroundColor: appearanceSettings.secondaryColor }}
                 ></div>
                 <div className="h-32 mt-2 rounded bg-cover bg-center" style={{ backgroundImage: `url(${appearanceSettings.backgroundImage})` }}></div>
-                <div className="mt-2 p-2 border rounded" style={{ fontFamily: appearanceSettings.fontFamily }}>
-                  <p>Sample text in {appearanceSettings.fontFamily.split(',')[0]}</p>
+                <div className="mt-2 p-2 border border-green-900/50 rounded bg-black" style={{ fontFamily: appearanceSettings.fontFamily }}>
+                  <p className="text-white">Sample text in {appearanceSettings.fontFamily.split(',')[0]}</p>
                 </div>
               </div>
             </div>
@@ -629,75 +644,69 @@ const Settings = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
+                  <Label htmlFor="companyName" className="text-white">Company Name</Label>
                   <Input
                     id="companyName"
                     name="companyName"
                     value={footerSettings.companyName}
                     onChange={handleFooterChange}
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Company Email</Label>
+                  <Label htmlFor="email" className="text-white">Company Email</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     value={footerSettings.email}
                     onChange={handleFooterChange}
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Company Phone</Label>
+                  <Label htmlFor="phone" className="text-white">Company Phone</Label>
                   <Input
                     id="phone"
                     name="phone"
                     value={footerSettings.phone}
                     onChange={handleFooterChange}
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Company Address</Label>
+                  <Label htmlFor="address" className="text-white">Company Address</Label>
                   <Input
                     id="address"
                     name="address"
                     value={footerSettings.address}
                     onChange={handleFooterChange}
+                    className="bg-black/60 border-green-900/50 text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Company Description</Label>
+                <Label htmlFor="description" className="text-white">Company Description</Label>
                 <Textarea
                   id="description"
                   name="description"
                   value={footerSettings.description}
                   onChange={handleFooterChange}
                   rows={3}
+                  className="bg-black/60 border-green-900/50 text-white"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="newsletterText">Newsletter Text</Label>
-                <Textarea
-                  id="newsletterText"
-                  name="newsletterText"
-                  value={footerSettings.newsletterText}
-                  onChange={handleFooterChange}
-                  rows={2}
-                />
-              </div>
-
-              <Separator className="my-6" />
+              <Separator className="bg-green-900/30" />
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <Label>Social Links</Label>
-                  <Button type="button" size="sm" variant="outline" onClick={addSocialLink}>
+                  <Label className="text-white">Social Links</Label>
+                  <Button type="button" size="sm" variant="outline" onClick={addSocialLink} className="bg-black/60 border-green-900/50 text-green-400">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Link
                   </Button>
@@ -706,21 +715,23 @@ const Settings = () => {
                 {footerSettings.socialLinks.map((link, index) => (
                   <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
                     <Input
-                      placeholder="Name (facebook, twitter, etc)"
+                      placeholder="Name (facebook, instagram, etc)"
                       value={link.name}
                       onChange={(e) => handleSocialLinkChange(index, 'name', e.target.value)}
+                      className="bg-black/60 border-green-900/50 text-white"
                     />
                     <Input
                       placeholder="URL"
                       value={link.url}
                       onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                      className="bg-black/60 border-green-900/50 text-white"
                     />
                     <Button 
                       type="button" 
                       variant="ghost" 
                       size="icon"
                       onClick={() => removeSocialLink(index)}
-                      className="text-red-500"
+                      className="text-red-500 hover:text-red-400 hover:bg-red-900/20"
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -728,12 +739,12 @@ const Settings = () => {
                 ))}
               </div>
 
-              <Separator className="my-6" />
+              <Separator className="bg-green-900/30" />
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <Label>Quick Links</Label>
-                  <Button type="button" size="sm" variant="outline" onClick={addQuickLink}>
+                  <Label className="text-white">Quick Links</Label>
+                  <Button type="button" size="sm" variant="outline" onClick={addQuickLink} className="bg-black/60 border-green-900/50 text-green-400">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Link
                   </Button>
@@ -745,18 +756,20 @@ const Settings = () => {
                       placeholder="Link Text"
                       value={link.name}
                       onChange={(e) => handleQuickLinkChange(index, 'name', e.target.value)}
+                      className="bg-black/60 border-green-900/50 text-white"
                     />
                     <Input
                       placeholder="URL"
                       value={link.url}
                       onChange={(e) => handleQuickLinkChange(index, 'url', e.target.value)}
+                      className="bg-black/60 border-green-900/50 text-white"
                     />
                     <Button 
                       type="button" 
                       variant="ghost" 
                       size="icon"
                       onClick={() => removeQuickLink(index)}
-                      className="text-red-500"
+                      className="text-red-500 hover:text-red-400 hover:bg-red-900/20"
                     >
                       <Trash className="h-4 w-4" />
                     </Button>

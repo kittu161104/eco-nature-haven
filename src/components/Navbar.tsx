@@ -107,8 +107,8 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-eco-400 relative
-                    ${isActive(link.path) ? "text-eco-400 font-semibold" : "text-gray-300"}
+                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
+                    ${isActive(link.path) ? "bg-green-700/40 border-green-600/60" : ""}
                   `}
                   style={{ 
                     transitionDelay: `${index * 100}ms`,
@@ -130,7 +130,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 transition-all duration-300"
+              className="navbar-button rounded-full hover:text-eco-400 transition-all duration-300"
               onClick={toggleSearch}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
@@ -143,7 +143,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 relative transition-all duration-300"
+              className="navbar-button rounded-full relative transition-all duration-300"
               onClick={toggleCart}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
@@ -173,7 +173,7 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-300 hover:text-eco-400 hover:bg-gray-800 ml-1"
+                    className="navbar-button rounded-full ml-1"
                     style={{ 
                       animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
                       opacity: 0
@@ -188,9 +188,9 @@ const Navbar = () => {
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`text-sm font-medium transition-colors hover:text-eco-400 py-2 ${
+                        className={`navbar-button px-3 py-2 rounded-md ${
                           isActive(link.path)
-                            ? "text-eco-400 font-semibold"
+                            ? "bg-green-700/40 text-eco-400 font-semibold"
                             : "text-gray-300"
                         }`}
                       >
