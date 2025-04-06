@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { safelyParseJSON } from "@/lib/utils";
-import { Leaf, Sprout, Seedling } from "lucide-react";
+import { Leaf, Sprout, Plant } from "lucide-react";
 
 interface AboutPageContent {
   title: string;
@@ -97,7 +97,7 @@ const About = () => {
             
             <div className="text-center p-6 bg-eco-900/30 backdrop-blur-sm rounded-lg border border-eco-700/30 transform transition-all hover:scale-105 duration-300">
               <div className="mx-auto h-16 w-16 bg-eco-800/50 rounded-full flex items-center justify-center mb-4">
-                <Seedling className="h-8 w-8 text-eco-400" />
+                <Plant className="h-8 w-8 text-eco-400" />
               </div>
               <h3 className="text-xl font-semibold text-eco-400 mb-2">Community-Focused</h3>
               <p className="text-white">We believe in building a community of plant lovers and environmental stewards.</p>
