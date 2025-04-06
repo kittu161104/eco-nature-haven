@@ -9,20 +9,15 @@ import {
   ShoppingBag,
   FileText,
   Users,
-  Settings,
   LogOut,
   Menu,
   X,
   Leaf,
-  Moon,
-  Sun,
 } from "lucide-react";
-import useTheme from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 
 const AdminLayout = () => {
   const { user, isAdmin, logout } = useAuth();
-  const { theme, toggleMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -72,14 +67,7 @@ const AdminLayout = () => {
       icon: <FileText className="h-5 w-5" />,
       path: "/admin/pages",
     },
-    {
-      name: "Settings",
-      icon: <Settings className="h-5 w-5" />,
-      path: "/admin/settings",
-    },
   ];
-
-  const isDark = theme.mode === 'dark';
 
   return (
     <div className="flex h-screen bg-black">
@@ -142,27 +130,6 @@ const AdminLayout = () => {
               );
             })}
           </nav>
-
-          {/* Theme toggle */}
-          <div className="px-4 py-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start bg-black/40 border-green-900/50 hover:bg-green-900/20"
-              onClick={toggleMode}
-            >
-              {isDark ? (
-                <>
-                  <Sun className="h-4 w-4 mr-2 text-green-400" />
-                  <span className="text-green-400">Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="h-4 w-4 mr-2 text-green-400" />
-                  <span className="text-green-400">Dark Mode</span>
-                </>
-              )}
-            </Button>
-          </div>
 
           {/* User info */}
           <div className="p-4 border-t border-green-900/50 bg-black/40">

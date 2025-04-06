@@ -107,7 +107,7 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
+                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
                     ${isActive(link.path) ? "bg-green-700/40 border-green-600/60" : ""}
                   `}
                   style={{ 
@@ -130,7 +130,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button rounded-full hover:text-eco-400 transition-all duration-300"
+              className="navbar-button rounded-full hover:text-eco-400 transition-all duration-300 text-white"
               onClick={toggleSearch}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
@@ -143,7 +143,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button rounded-full relative transition-all duration-300"
+              className="navbar-button rounded-full relative transition-all duration-300 text-white"
               onClick={toggleCart}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
@@ -173,7 +173,7 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="navbar-button rounded-full ml-1"
+                    className="navbar-button rounded-full ml-1 text-white"
                     style={{ 
                       animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
                       opacity: 0
@@ -191,7 +191,7 @@ const Navbar = () => {
                         className={`navbar-button px-3 py-2 rounded-md ${
                           isActive(link.path)
                             ? "bg-green-700/40 text-eco-400 font-semibold"
-                            : "text-gray-300"
+                            : "text-white"
                         }`}
                       >
                         {link.name}

@@ -19,8 +19,7 @@ const Footer = () => {
     quickLinks: [
       { name: "Shop Plants", url: "/shop" },
       { name: "About Us", url: "/about" },
-      { name: "Contact", url: "/contact" },
-      { name: "Sustainability", url: "/sustainability" }
+      { name: "Contact", url: "/contact" }
     ]
   });
 
@@ -28,7 +27,18 @@ const Footer = () => {
     // Get footer data from localStorage (saved in admin settings)
     const savedFooterData = localStorage.getItem("footerSettings");
     if (savedFooterData) {
-      setFooterData(safelyParseJSON(savedFooterData, footerData));
+      const parsedData = safelyParseJSON(savedFooterData, footerData);
+      
+      // Filter out any sustainability links if they exist
+      if (parsedData.quickLinks) {
+        parsedData.quickLinks = parsedData.quickLinks.filter(
+          (link: {name: string, url: string}) => 
+          !link.name.toLowerCase().includes('sustainability') && 
+          !link.url.toLowerCase().includes('sustainability')
+        );
+      }
+      
+      setFooterData(parsedData);
     }
   }, []);
 
