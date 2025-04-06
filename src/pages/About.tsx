@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { safelyParseJSON } from "@/lib/utils";
-import { Leaf, Sprout, Plant } from "lucide-react";
+import { Leaf, Sprout, TreePine } from "lucide-react";
 
 interface AboutPageContent {
   title: string;
@@ -33,7 +32,6 @@ const About = () => {
   });
 
   useEffect(() => {
-    // Listen for page content updates from admin
     const handlePagesUpdated = (event: CustomEvent) => {
       if (event.detail?.updatedPages?.about) {
         setPageContent(event.detail.updatedPages.about as AboutPageContent);
@@ -42,7 +40,6 @@ const About = () => {
 
     window.addEventListener('pages-updated', handlePagesUpdated as EventListener);
 
-    // Initial load from localStorage
     try {
       const storedPagesData = localStorage.getItem("pagesData");
       if (storedPagesData) {
@@ -64,7 +61,6 @@ const About = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-        {/* Hero Section */}
         <div className="bg-eco-800 py-20">
           <div className="eco-container text-center">
             <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-white">
@@ -76,7 +72,6 @@ const About = () => {
           </div>
         </div>
         
-        {/* Content Section */}
         <div className="eco-container py-16">
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="text-center p-6 bg-eco-900/30 backdrop-blur-sm rounded-lg border border-eco-700/30 transform transition-all hover:scale-105 duration-300">
@@ -97,7 +92,7 @@ const About = () => {
             
             <div className="text-center p-6 bg-eco-900/30 backdrop-blur-sm rounded-lg border border-eco-700/30 transform transition-all hover:scale-105 duration-300">
               <div className="mx-auto h-16 w-16 bg-eco-800/50 rounded-full flex items-center justify-center mb-4">
-                <Plant className="h-8 w-8 text-eco-400" />
+                <TreePine className="h-8 w-8 text-eco-400" />
               </div>
               <h3 className="text-xl font-semibold text-eco-400 mb-2">Community-Focused</h3>
               <p className="text-white">We believe in building a community of plant lovers and environmental stewards.</p>
