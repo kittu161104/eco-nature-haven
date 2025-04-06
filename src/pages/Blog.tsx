@@ -121,14 +121,14 @@ const Blog = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-        {/* Blog Header */}
-        <div className="bg-eco-100 py-12">
+        {/* Blog Header - Changed background color */}
+        <div className="bg-eco-600 py-12">
           <div className="eco-container">
             <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-eco-800 mb-4">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">
                 The Green Thumb Blog
               </h1>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-100 max-w-2xl mx-auto">
                 Expert advice, gardening tips, and sustainable living ideas from our plant specialists
               </p>
             </div>

@@ -67,6 +67,7 @@ const AdminLayout = () => {
       icon: <FileText className="h-5 w-5" />,
       path: "/admin/pages",
     },
+    // Settings page removed
   ];
 
   return (

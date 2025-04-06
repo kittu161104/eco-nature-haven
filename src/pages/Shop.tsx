@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -17,6 +16,8 @@ const Shop = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPriceLimit, setMaxPriceLimit] = useState(1000);
+  const [customMaxPrice, setCustomMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("Featured");
   const [showOnlyInStock, setShowOnlyInStock] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -42,7 +43,9 @@ const Shop = () => {
         // Set max price range based on product prices
         if (parsedProducts.length > 0) {
           const maxPrice = Math.max(...parsedProducts.map((p: ProductProps) => p.price));
-          setPriceRange([0, Math.ceil(maxPrice / 100) * 100]);
+          const roundedMaxPrice = Math.ceil(maxPrice / 100) * 100;
+          setMaxPriceLimit(roundedMaxPrice);
+          setPriceRange([0, roundedMaxPrice]);
         }
       } else {
         setProducts([]);
@@ -65,6 +68,31 @@ const Shop = () => {
       window.removeEventListener('products-updated', handleProductUpdates);
     };
   }, []);
+
+  // Handle custom max price input
+  const handleCustomMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomMaxPrice(e.target.value);
+  };
+
+  // Apply custom max price
+  const applyCustomMaxPrice = () => {
+    const newMaxPrice = parseInt(customMaxPrice);
+    if (!isNaN(newMaxPrice) && newMaxPrice > 0) {
+      setMaxPriceLimit(newMaxPrice);
+      setPriceRange([priceRange[0], newMaxPrice]);
+      toast({
+        title: "Price range updated",
+        description: `Maximum price set to ₹${newMaxPrice}`,
+      });
+    } else {
+      toast({
+        title: "Invalid price",
+        description: "Please enter a valid price",
+        variant: "destructive",
+      });
+    }
+    setCustomMaxPrice("");
+  };
 
   // Filter products based on selected filters
   const filteredProducts = products.filter((product) => {
@@ -219,14 +247,24 @@ const Shop = () => {
                   <h4 className="font-medium mb-3">Price Range</h4>
                   <Slider
                     value={priceRange}
-                    max={priceRange[1]}
+                    max={maxPriceLimit}
                     step={10}
                     onValueChange={setPriceRange}
                     className="mb-2"
                   />
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-gray-600 mb-3">
                     <span>₹{priceRange[0]}</span>
                     <span>₹{priceRange[1]}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Custom max price"
+                      value={customMaxPrice}
+                      onChange={handleCustomMaxPriceChange}
+                      className="text-sm"
+                    />
+                    <Button size="sm" onClick={applyCustomMaxPrice}>Set</Button>
                   </div>
                 </div>
                 
@@ -307,14 +345,24 @@ const Shop = () => {
                   <h4 className="font-medium mb-3">Price Range</h4>
                   <Slider
                     value={priceRange}
-                    max={priceRange[1]}
+                    max={maxPriceLimit}
                     step={10}
                     onValueChange={setPriceRange}
                     className="mb-2"
                   />
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-gray-600 mb-3">
                     <span>₹{priceRange[0]}</span>
                     <span>₹{priceRange[1]}</span>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <Input
+                      type="number"
+                      placeholder="Custom max price"
+                      value={customMaxPrice}
+                      onChange={handleCustomMaxPriceChange}
+                      className="text-sm"
+                    />
+                    <Button size="sm" onClick={applyCustomMaxPrice}>Set</Button>
                   </div>
                 </div>
                 

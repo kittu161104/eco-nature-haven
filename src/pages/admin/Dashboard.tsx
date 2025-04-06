@@ -55,34 +55,34 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
-  // Function to fetch data
-  const fetchDashboardData = () => {
+  // Function to fetch real data
+  const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
       
-      // Get orders
+      // Get orders from localStorage
       const ordersData = localStorage.getItem("orders");
       const orders: Order[] = ordersData ? JSON.parse(ordersData) : [];
       
-      // Get customers
+      // Get customers from localStorage
       const customersData = localStorage.getItem("customers");
       const customers: Customer[] = customersData ? JSON.parse(customersData) : [];
       
-      // Get products
+      // Get products from localStorage
       const productsData = localStorage.getItem("products");
       const products: Product[] = productsData ? JSON.parse(productsData) : [];
       
-      // Get blog posts
-      const postsData = localStorage.getItem("posts");
+      // Get blog posts from localStorage
+      const postsData = localStorage.getItem("blogPosts");
       const posts: BlogPost[] = postsData ? JSON.parse(postsData) : [];
       
-      // Calculate total sales
+      // Calculate total sales from actual orders
       const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
       
       // Count active orders (orders with status "processing")
       const activeOrdersCount = orders.filter(order => order.status === "processing").length;
       
-      // Update stats
+      // Update stats with real data
       setStats({
         totalSales: totalSales,
         activeOrders: activeOrdersCount,
@@ -90,10 +90,10 @@ const Dashboard = () => {
         blogPosts: posts.length,
       });
       
-      // Generate recent activities
+      // Generate activities from real data
       const recentActivities: Activity[] = [];
       
-      // Add recent orders
+      // Add recent orders to activity feed
       orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 3)
         .forEach(order => {
@@ -139,7 +139,7 @@ const Dashboard = () => {
       // Sort all activities by timestamp (newest first)
       recentActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       
-      // Take only the 5 most recent
+      // Only show the most recent activities
       setActivities(recentActivities.slice(0, 5));
       
       // Update last refreshed timestamp
@@ -148,7 +148,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast.error("Failed to load dashboard data");
-      // Show placeholder activities if there's an error
+      // Show error in activity feed if there's an error
       setActivities([{
         id: "error",
         type: "error",
@@ -166,14 +166,14 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     
-    // Set up interval for real-time updates (every 30 seconds)
+    // Set up interval for real-time updates
     const interval = setInterval(() => {
       fetchDashboardData();
     }, 30000);
     
     // Listen for storage changes from other tabs/windows
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "orders" || e.key === "customers" || e.key === "products" || e.key === "posts") {
+      if (e.key === "orders" || e.key === "customers" || e.key === "products" || e.key === "blogPosts") {
         fetchDashboardData();
       }
     };
@@ -211,7 +211,7 @@ const Dashboard = () => {
     }
   };
 
-  // Animation variants for staggered animations
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
