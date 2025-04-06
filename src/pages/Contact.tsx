@@ -44,7 +44,7 @@ const Contact = () => {
       const storedPagesData = localStorage.getItem("pagesData");
       if (storedPagesData) {
         const parsedData = safelyParseJSON(storedPagesData, {});
-        if (parsedData && parsedData.contact) {
+        if (parsedData && typeof parsedData === 'object' && 'contact' in parsedData) {
           setPageContent(parsedData.contact);
         }
       }

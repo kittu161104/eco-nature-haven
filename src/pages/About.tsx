@@ -27,7 +27,7 @@ const About = () => {
       const storedPagesData = localStorage.getItem("pagesData");
       if (storedPagesData) {
         const parsedData = safelyParseJSON(storedPagesData, {});
-        if (parsedData && parsedData.about) {
+        if (parsedData && typeof parsedData === 'object' && 'about' in parsedData) {
           setPageContent(parsedData.about);
         }
       }
