@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -16,12 +15,12 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, Leaf, RefreshCw, Plus, Trash, Moon, Sun, Palette } from "lucide-react";
+import { Save, Leaf, RefreshCw, Plus, Trash, Palette } from "lucide-react";
 import useTheme from "@/hooks/useTheme";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { theme, updateTheme, toggleMode } = useTheme();
+  const { theme, updateTheme } = useTheme();
   const [generalSettings, setGeneralSettings] = useState({
     storeName: "Natural Green Nursery",
     storeEmail: "info@naturalgreennursery.com",
@@ -228,7 +227,7 @@ const Settings = () => {
     
     toast({
       title: "Settings saved",
-      description: "Your settings have been saved successfully.",
+      description: "Your settings have been saved successfully and applied to the website.",
     });
   };
 
@@ -300,23 +299,6 @@ const Settings = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-white">Settings</h1>
           <div className="space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={toggleMode}
-              className="mr-2 bg-black border-green-900/50 text-white"
-            >
-              {theme.mode === 'dark' ? (
-                <>
-                  <Sun className="h-4 w-4 mr-2 text-green-400" />
-                  <span className="text-green-400">Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="h-4 w-4 mr-2 text-green-400" />
-                  <span className="text-green-400">Dark Mode</span>
-                </>
-              )}
-            </Button>
             <Button variant="outline" onClick={handleReset} className="bg-black border-green-900/50 text-white">
               <RefreshCw className="h-4 w-4 mr-2 text-green-400" />
               <span className="text-green-400">Reset</span>
@@ -490,30 +472,6 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="appearance" className="space-y-6 pt-4">
-            <div className="flex items-center space-x-4 mb-6">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center bg-black/60 border-green-900/50"
-                onClick={toggleMode}
-              >
-                {theme.mode === 'dark' ? (
-                  <>
-                    <Sun className="h-4 w-4 mr-2 text-green-400" />
-                    <span className="text-green-400">Switch to Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-4 w-4 mr-2 text-green-400" />
-                    <span className="text-green-400">Switch to Dark Mode</span>
-                  </>
-                )}
-              </Button>
-              <div className="text-sm text-green-400">
-                Current theme: <span className="font-medium text-white">{theme.mode === 'dark' ? 'Dark' : 'Light'}</span>
-              </div>
-            </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="primaryColor" className="text-white">Primary Color</Label>
@@ -636,6 +594,10 @@ const Settings = () => {
                 <div className="mt-2 p-2 border border-green-900/50 rounded bg-black" style={{ fontFamily: appearanceSettings.fontFamily }}>
                   <p className="text-white">Sample text in {appearanceSettings.fontFamily.split(',')[0]}</p>
                 </div>
+              </div>
+              <div className="mt-4 text-sm text-green-400">
+                Current theme mode: <span className="font-medium text-white">Dark</span>
+                <p className="mt-1">These site-wide theme settings will be applied across the entire website.</p>
               </div>
             </div>
           </TabsContent>
