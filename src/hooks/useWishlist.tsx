@@ -45,11 +45,6 @@ export function useWishlist() {
     // Prevent rapid successive calls
     setTimeout(() => setIsProcessing(false), 300);
   }, [setWishlistItems, isProcessing]);
-
-  // Clear the entire wishlist
-  const clearWishlist = useCallback(() => {
-    setWishlistItems([]);
-  }, [setWishlistItems]);
   
   // Toggle a product in the wishlist
   const toggleWishlist = useCallback((productId: string) => {
@@ -86,6 +81,5 @@ export function useWishlist() {
     toggleWishlist,
     getWishlistProducts,
     isProcessing,
-    clearWishlist
   };
 }

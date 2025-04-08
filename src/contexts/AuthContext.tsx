@@ -1,7 +1,16 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { User } from "@/types/user";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "customer";
+  createdAt: string;
+  lastLogin: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -10,7 +19,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (name: string, email: string, password: string) => Promise<void>;
-  updateUser: (updatedUserData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,7 +28,6 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
-  updateUser: () => {},
 });
 
 export const useAuth = () => {
@@ -35,33 +42,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   
   // Compute isAdmin based on user role
-  const isAdmin = user?.isAdmin || false;
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     // Check if user is already logged in
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error parsing user from localStorage:", error);
-        localStorage.removeItem("user");
-      }
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setIsAuthenticated(true);
     }
   }, []);
-
-  // Add updateUser function
-  const updateUser = (updatedUserData: User) => {
-    setUser(updatedUserData);
-    localStorage.setItem("user", JSON.stringify(updatedUserData));
-    
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been successfully updated.",
-    });
-  };
 
   const login = async (email: string, password: string) => {
     // Simple validation
@@ -238,8 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin, 
       login, 
       logout, 
-      register,
-      updateUser
+      register
     }}>
       {children}
     </AuthContext.Provider>
