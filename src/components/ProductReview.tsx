@@ -15,6 +15,9 @@ export interface Review {
   rating: number;
   comment: string;
   createdAt: string;
+  reported?: boolean;
+  approved?: boolean;
+  rejected?: boolean;
 }
 
 interface ProductReviewProps {
