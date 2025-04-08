@@ -121,8 +121,8 @@ const Blog = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-        {/* Blog Header - Changed background color */}
-        <div className="bg-eco-600 py-12">
+        {/* Blog Header - Changed background color to black */}
+        <div className="bg-black py-12 border-b border-green-900">
           <div className="eco-container">
             <div className="text-center">
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">
@@ -144,7 +144,7 @@ const Blog = () => {
               <Input
                 type="search"
                 placeholder="Search articles..."
-                className="pl-10"
+                className="pl-10 text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -157,8 +157,8 @@ const Blog = () => {
                   variant={activeCategory === category ? "default" : "outline"}
                   className={`
                     ${activeCategory === category 
-                      ? "bg-eco-600 hover:bg-eco-700" 
-                      : "text-gray-700 hover:text-eco-600 border-gray-200"
+                      ? "bg-eco-600 hover:bg-eco-700 text-white" 
+                      : "text-white hover:text-eco-600 border-gray-200"
                     }
                   `}
                   onClick={() => setActiveCategory(category)}
@@ -177,9 +177,9 @@ const Blog = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="text-center py-12 bg-black rounded-lg border border-green-900">
+              <h3 className="text-lg font-medium text-white mb-2">No articles found</h3>
+              <p className="text-white mb-4">
                 Try adjusting your search or category selection
               </p>
               <Button 
@@ -188,6 +188,7 @@ const Blog = () => {
                   setActiveCategory("All");
                   setSearchTerm("");
                 }}
+                className="text-white border-green-600 hover:bg-green-900/20"
               >
                 View All Articles
               </Button>

@@ -1,10 +1,11 @@
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBag, Users, FileText, DollarSign, AlertCircle, RefreshCw } from "lucide-react";
+import { ShoppingBag, Users, FileText, AlertCircle, RefreshCw, Star, Truck, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/utils";
 
 interface Order {
   id: string;
@@ -76,6 +77,10 @@ const Dashboard = () => {
       const postsData = localStorage.getItem("blogPosts");
       const posts: BlogPost[] = postsData ? JSON.parse(postsData) : [];
       
+      // Get reviews from localStorage
+      const reviewsData = localStorage.getItem("productReviews");
+      const reviews = reviewsData ? JSON.parse(reviewsData) : [];
+      
       // Calculate total sales from actual orders
       const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
       
@@ -95,22 +100,47 @@ const Dashboard = () => {
       
       // Add recent orders to activity feed
       orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 3)
+        .slice(0, 5)
         .forEach(order => {
           const customer = customers.find(c => c.id === order.userId);
+          
+          let icon, description, color;
+          
+          switch(order.status) {
+            case "completed":
+              icon = <CheckCircle className="h-5 w-5 text-green-500" />;
+              description = `Order #${order.id.slice(0, 6)} completed for ${customer?.name || 'Unknown customer'}`;
+              color = "green-500";
+              break;
+            case "processing":
+              icon = <Truck className="h-5 w-5 text-blue-500" />;
+              description = `Order #${order.id.slice(0, 6)} processing for ${customer?.name || 'Unknown customer'}`;
+              color = "blue-500";
+              break;
+            case "cancelled":
+              icon = <XCircle className="h-5 w-5 text-red-500" />;
+              description = `Order #${order.id.slice(0, 6)} cancelled for ${customer?.name || 'Unknown customer'}`;
+              color = "red-500";
+              break;
+            default:
+              icon = <ShoppingBag className="h-5 w-5 text-green-500" />;
+              description = `New order #${order.id.slice(0, 6)} from ${customer?.name || 'Unknown customer'}`;
+              color = "green-500";
+          }
+          
           recentActivities.push({
             id: `order-${order.id}`,
             type: "order",
-            description: `New order #${order.id.slice(0, 6)} from ${customer?.name || 'Unknown customer'}`,
+            description: description,
             timestamp: order.createdAt,
-            icon: <ShoppingBag className="h-5 w-5 text-green-500" />,
-            color: "green-500"
+            icon: icon,
+            color: color
           });
         });
       
       // Add recent customers
       customers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 2)
+        .slice(0, 3)
         .forEach(customer => {
           recentActivities.push({
             id: `customer-${customer.id}`,
@@ -124,7 +154,7 @@ const Dashboard = () => {
       
       // Add recent posts
       posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 2)
+        .slice(0, 3)
         .forEach(post => {
           recentActivities.push({
             id: `post-${post.id}`,
@@ -135,12 +165,29 @@ const Dashboard = () => {
             color: "green-500"
           });
         });
+        
+      // Add recent reviews
+      if (reviews && reviews.length > 0) {
+        reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 3)
+          .forEach(review => {
+            const product = products.find(p => p.id === review.productId);
+            recentActivities.push({
+              id: `review-${review.id}`,
+              type: "review",
+              description: `New ${review.rating}-star review for ${product?.name || 'a product'} by ${review.userName}`,
+              timestamp: review.createdAt,
+              icon: <Star className="h-5 w-5 text-yellow-500" />,
+              color: "yellow-500"
+            });
+          });
+      }
       
       // Sort all activities by timestamp (newest first)
       recentActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       
       // Only show the most recent activities
-      setActivities(recentActivities.slice(0, 5));
+      setActivities(recentActivities.slice(0, 8));
       
       // Update last refreshed timestamp
       setLastUpdated(new Date());
@@ -173,7 +220,7 @@ const Dashboard = () => {
     
     // Listen for storage changes from other tabs/windows
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "orders" || e.key === "customers" || e.key === "products" || e.key === "blogPosts") {
+      if (e.key === "orders" || e.key === "customers" || e.key === "products" || e.key === "blogPosts" || e.key === "productReviews") {
         fetchDashboardData();
       }
     };
@@ -186,14 +233,6 @@ const Dashboard = () => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -270,7 +309,9 @@ const Dashboard = () => {
           <Card className="bg-black/60 border-green-800 backdrop-blur-lg shadow-lg shadow-green-900/10">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-white">Total Sales</CardTitle>
-              <DollarSign className="h-8 w-8 text-green-500" />
+              <div className="h-8 w-8 rounded-full bg-green-900/30 flex items-center justify-center">
+                <img src="/rupee-icon.svg" alt="INR" className="h-4 w-4 text-green-500" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">{isLoading ? '...' : formatCurrency(stats.totalSales)}</div>

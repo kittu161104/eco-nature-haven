@@ -122,6 +122,22 @@ const Navbar = () => {
                   )}
                 </Link>
               ))}
+              <Link
+                to="/blog"
+                className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
+                  ${isActive("/blog") ? "bg-green-700/40 border-green-600/60" : ""}
+                `}
+                style={{ 
+                  transitionDelay: `400ms`,
+                  animation: isLoaded ? `fadeInUp 0.5s ease 700ms forwards` : 'none',
+                  opacity: 0
+                }}
+              >
+                Blog
+                {isActive("/blog") && (
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-eco-400 rounded-full"></span>
+                )}
+              </Link>
             </nav>
           )}
 
@@ -190,13 +206,23 @@ const Navbar = () => {
                         to={link.path}
                         className={`navbar-button px-3 py-2 rounded-md ${
                           isActive(link.path)
-                            ? "bg-green-700/40 text-eco-400 font-semibold"
+                            ? "bg-green-700/40 text-white font-semibold"
                             : "text-white"
                         }`}
                       >
                         {link.name}
                       </Link>
                     ))}
+                    <Link
+                      to="/blog"
+                      className={`navbar-button px-3 py-2 rounded-md ${
+                        isActive("/blog")
+                          ? "bg-green-700/40 text-white font-semibold"
+                          : "text-white"
+                      }`}
+                    >
+                      Blog
+                    </Link>
                   </div>
                 </SheetContent>
               </Sheet>
