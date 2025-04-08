@@ -408,8 +408,12 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6">
-                <p className="text-green-400">No recent activity found</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <AlertCircle className="h-12 w-12 text-green-400 mb-4" />
+                <h3 className="text-lg font-medium text-white mb-1">No recent activity</h3>
+                <p className="text-gray-400">
+                  No recent orders, customers, or other activities to display
+                </p>
               </div>
             )}
           </CardContent>
