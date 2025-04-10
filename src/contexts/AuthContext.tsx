@@ -2,15 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "customer";
-  createdAt: string;
-  lastLogin: string;
-}
+import { User } from "@/types/user";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,6 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (name: string, email: string, password: string) => Promise<void>;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   register: async () => {},
+  updateUser: () => {},
 });
 
 export const useAuth = () => {
@@ -53,6 +47,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
     }
   }, []);
+
+  const updateUser = (userData: Partial<User>) => {
+    if (!user) return;
+    
+    const updatedUser = { ...user, ...userData, updatedAt: new Date().toISOString() };
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    
+    // If this is a customer, also update the customers collection
+    if (user.role === "customer") {
+      try {
+        const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+        const updatedCustomers = customers.map((c: any) => 
+          c.id === parseInt(user.id) ? { ...c, name: updatedUser.name, email: updatedUser.email } : c
+        );
+        localStorage.setItem("customers", JSON.stringify(updatedCustomers));
+      } catch (error) {
+        console.error("Error updating customer data:", error);
+      }
+    }
+    
+    toast({
+      title: "Profile updated",
+      description: "Your profile information has been updated.",
+    });
+  };
 
   const login = async (email: string, password: string) => {
     // Simple validation
@@ -229,7 +249,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin, 
       login, 
       logout, 
-      register
+      register,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

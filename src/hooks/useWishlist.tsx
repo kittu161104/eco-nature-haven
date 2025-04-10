@@ -59,6 +59,16 @@ export function useWishlist() {
     }
   }, [isInWishlist, addToWishlist, removeFromWishlist, isProcessing]);
   
+  // Clear all items from the wishlist
+  const clearWishlist = useCallback(() => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    setWishlistItems([]);
+    
+    setTimeout(() => setIsProcessing(false), 300);
+  }, [setWishlistItems, isProcessing]);
+  
   // Get all wishlist items as product objects with error handling
   const getWishlistProducts = useCallback(() => {
     try {
@@ -79,6 +89,7 @@ export function useWishlist() {
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
+    clearWishlist,
     getWishlistProducts,
     isProcessing,
   };

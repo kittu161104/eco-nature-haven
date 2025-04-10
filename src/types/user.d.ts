@@ -3,6 +3,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  role: "admin" | "customer";
   phone?: string;
   address?: {
     street?: string;
@@ -17,9 +18,9 @@ export interface User {
     notifications: boolean;
     theme: 'light' | 'dark';
   };
-  isAdmin: boolean;
   createdAt: string;
-  updatedAt: string;
+  lastLogin: string;
+  updatedAt?: string;
 }
 
 export interface AuthState {

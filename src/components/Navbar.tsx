@@ -113,7 +113,8 @@ const Navbar = () => {
                   style={{ 
                     transitionDelay: `${index * 100}ms`,
                     animation: isLoaded ? `fadeInUp 0.5s ease ${index * 100 + 300}ms forwards` : 'none',
-                    opacity: 0
+                    opacity: 0,
+                    color: "white"
                   }}
                 >
                   {link.name}
@@ -130,7 +131,8 @@ const Navbar = () => {
                 style={{ 
                   transitionDelay: `400ms`,
                   animation: isLoaded ? `fadeInUp 0.5s ease 700ms forwards` : 'none',
-                  opacity: 0
+                  opacity: 0,
+                  color: "white"
                 }}
               >
                 Blog
@@ -150,7 +152,8 @@ const Navbar = () => {
               onClick={toggleSearch}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
-                opacity: 0
+                opacity: 0,
+                color: "white"
               }}
             >
               <Search className="h-5 w-5" />
@@ -163,7 +166,8 @@ const Navbar = () => {
               onClick={toggleCart}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
-                opacity: 0
+                opacity: 0,
+                color: "white"
               }}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -192,7 +196,8 @@ const Navbar = () => {
                     className="navbar-button rounded-full ml-1 text-white"
                     style={{ 
                       animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
-                      opacity: 0
+                      opacity: 0,
+                      color: "white"
                     }}
                   >
                     <Menu className="h-5 w-5" />
