@@ -89,7 +89,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Leaf className="h-6 w-6 text-eco-500 animate-leaf-sway" />
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-bold text-white">
                 <span className="shimmer-text">Natural Green</span>
               </h1>
             </Link>
@@ -101,7 +101,7 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
+                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
                     ${isActive(link.path) ? "bg-green-700/40 border-green-600/60" : ""}
                   `}
                   style={{ 
@@ -119,7 +119,7 @@ const Navbar = () => {
               ))}
               <Link
                 to="/blog"
-                className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
+                className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
                   ${isActive("/blog") ? "bg-green-700/40 border-green-600/60" : ""}
                 `}
                 style={{ 
@@ -163,7 +163,7 @@ const Navbar = () => {
             >
               <ShoppingCart className="h-5 w-5 text-white" />
               {cartItemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-eco-600">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-eco-600 text-white">
                   {cartItemCount}
                 </Badge>
               )}

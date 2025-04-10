@@ -165,6 +165,7 @@ header[class*="bg-green-900"] {
   background-color: var(--navbar-bg) !important;
 }
 
+/* Enhanced navbar button styling for better visibility */
 .navbar-button {
   background-color: rgba(22, 163, 74, 0.3) !important;
   border: 1px solid rgba(22, 163, 74, 0.5) !important;
@@ -178,18 +179,31 @@ header[class*="bg-green-900"] {
   box-shadow: 0 0 10px rgba(22, 163, 74, 0.4) !important;
 }
 
-/* Fix for navbar icons and text */
+/* Fix for ALL navbar buttons, icons and text to ensure white color */
 .navbar-button,
-.navbar-button * {
+.navbar-button *,
+header button,
+header button *,
+header a,
+header a * {
   color: white !important;
 }
 
-button[class*="ghost"] svg {
+button[class*="ghost"] svg,
+header svg {
   color: white !important;
 }
 
 .navbar-button:hover,
-.navbar-button:hover * {
+.navbar-button:hover *,
+header button:hover,
+header button:hover * {
+  color: white !important;
+}
+
+/* Make sure ProfileMenu button and contents are also white */
+header .dropdown-trigger svg,
+header .dropdown-trigger * {
   color: white !important;
 }
 
