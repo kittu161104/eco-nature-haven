@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -79,8 +80,8 @@ const Navbar = () => {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         isScrolled
-          ? "bg-gray-900/90 backdrop-blur-lg shadow-lg"
-          : "bg-transparent"
+          ? "bg-green-900/90 backdrop-blur-lg shadow-lg"
+          : "bg-green-900"
       }`}
     >
       <div className="eco-container">
@@ -140,7 +141,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300"
+              className="text-white hover:text-eco-400 hover:bg-green-800/40 transition-all duration-300"
               onClick={toggleSearch}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
@@ -153,7 +154,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300 relative"
+              className="text-white hover:text-eco-400 hover:bg-green-800/40 transition-all duration-300 relative"
               onClick={toggleCart}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
@@ -181,7 +182,7 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300 ml-1"
+                    className="text-white hover:text-eco-400 hover:bg-green-800/40 transition-all duration-300 ml-1"
                     style={{ 
                       animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
                       opacity: 0
@@ -190,7 +191,7 @@ const Navbar = () => {
                     <Menu className="h-5 w-5 text-white" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="bg-gray-900 text-white border-gray-800">
+                <SheetContent className="bg-green-900 text-white border-green-800">
                   <div className="flex flex-col space-y-4 mt-8">
                     {navLinks.map((link) => (
                       <Link
