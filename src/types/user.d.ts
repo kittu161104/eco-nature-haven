@@ -21,6 +21,7 @@ export interface User {
   createdAt: string;
   lastLogin: string;
   updatedAt?: string;
+  isAdmin?: boolean; // Add this for convenience in templates
 }
 
 export interface AuthState {

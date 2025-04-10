@@ -230,6 +230,21 @@ p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
   box-shadow: 0 0 10px rgba(22, 163, 74, 0.4) !important;
 }
 
+/* Fix for navbar icons and text */
+.navbar-button,
+.navbar-button * {
+  color: white !important;
+}
+
+button[class*="ghost"] svg {
+  color: white !important;
+}
+
+.navbar-button:hover,
+.navbar-button:hover * {
+  color: white !important;
+}
+
 /* Fix filters scrolling */
 .filter-scroll {
   max-height: 300px;

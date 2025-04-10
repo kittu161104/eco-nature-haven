@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,17 +20,14 @@ const Navbar = () => {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Update cart count whenever cart is updated
   useEffect(() => {
     const updateCartCount = () => {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       setCartItemCount(cart.reduce((total: number, item: any) => total + item.quantity, 0));
     };
 
-    // Initial count
     updateCartCount();
 
-    // Listen for cart updates
     window.addEventListener('cart-updated', updateCartCount);
     
     return () => {
@@ -50,7 +46,6 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll);
     
-    // Trigger load animation
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 200);
@@ -90,7 +85,6 @@ const Navbar = () => {
     >
       <div className="eco-container">
         <div className={`flex h-16 items-center justify-between transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 -translate-y-4'}`}>
-          {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Leaf className="h-6 w-6 text-eco-500 animate-leaf-sway" />
@@ -100,14 +94,13 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           {!isMobile && (
             <nav className="mx-6 flex items-center space-x-4 lg:space-x-6">
               {navLinks.map((link, index) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
+                  className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
                     ${isActive(link.path) ? "bg-green-700/40 border-green-600/60" : ""}
                   `}
                   style={{ 
@@ -125,7 +118,7 @@ const Navbar = () => {
               ))}
               <Link
                 to="/blog"
-                className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium text-white
+                className={`navbar-button px-3 py-1.5 rounded-md transition-all duration-300 text-sm font-medium
                   ${isActive("/blog") ? "bg-green-700/40 border-green-600/60" : ""}
                 `}
                 style={{ 
@@ -143,34 +136,31 @@ const Navbar = () => {
             </nav>
           )}
 
-          {/* Right side actions */}
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button rounded-full hover:text-eco-400 transition-all duration-300 text-white"
+              className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300"
               onClick={toggleSearch}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
-                opacity: 0,
-                color: "white"
+                opacity: 0
               }}
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-5 w-5 text-white" />
             </Button>
 
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button rounded-full relative transition-all duration-300 text-white"
+              className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300 relative"
               onClick={toggleCart}
               style={{ 
                 animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
-                opacity: 0,
-                color: "white"
+                opacity: 0
               }}
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-5 w-5 text-white" />
               {cartItemCount > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-eco-600">
                   {cartItemCount}
@@ -178,7 +168,6 @@ const Navbar = () => {
               )}
             </Button>
 
-            {/* Profile Menu */}
             <div style={{ 
               animation: isLoaded ? 'fadeInUp 0.5s ease 800ms forwards' : 'none',
               opacity: 0
@@ -186,21 +175,19 @@ const Navbar = () => {
               <ProfileMenu />
             </div>
 
-            {/* Mobile Navigation */}
             {isMobile && (
               <Sheet>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="navbar-button rounded-full ml-1 text-white"
+                    className="text-white hover:text-eco-400 hover:bg-black/40 transition-all duration-300 ml-1"
                     style={{ 
                       animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
-                      opacity: 0,
-                      color: "white"
+                      opacity: 0
                     }}
                   >
-                    <Menu className="h-5 w-5" />
+                    <Menu className="h-5 w-5 text-white" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="bg-gray-900 text-white border-gray-800">
@@ -209,10 +196,10 @@ const Navbar = () => {
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`navbar-button px-3 py-2 rounded-md ${
+                        className={`text-white px-3 py-2 rounded-md ${
                           isActive(link.path)
-                            ? "bg-green-700/40 text-white font-semibold"
-                            : "text-white"
+                            ? "bg-green-700/40 font-semibold"
+                            : ""
                         }`}
                       >
                         {link.name}
@@ -220,10 +207,10 @@ const Navbar = () => {
                     ))}
                     <Link
                       to="/blog"
-                      className={`navbar-button px-3 py-2 rounded-md ${
+                      className={`text-white px-3 py-2 rounded-md ${
                         isActive("/blog")
-                          ? "bg-green-700/40 text-white font-semibold"
-                          : "text-white"
+                          ? "bg-green-700/40 font-semibold"
+                          : ""
                       }`}
                     >
                       Blog
@@ -236,10 +223,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={toggleSearch} />
       
-      {/* Cart Modal */}
       <CartModal isOpen={isCartOpen} onClose={toggleCart} />
     </header>
   );
