@@ -1,17 +1,17 @@
 
-/* Theme override styles - Black and Green Theme Only */
+/* Advanced Dark Theme - Black and Dark Green Only */
 
-/* Color overrides for black and green theme */
 :root {
-  --text-primary: #ffffff;
-  --text-secondary: #4ade80;
-  --text-muted: #a3a3a3;
+  --text-primary: #22c55e;
+  --text-secondary: #16a34a;
+  --text-muted: #15803d;
   --bg-primary: #000000;
   --bg-secondary: #0a0a0a;
+  --bg-tertiary: #1a1a1a;
   --border-color: #16a34a;
   --hover-bg: rgba(22, 163, 74, 0.2);
-  --shadow-color: rgba(22, 163, 74, 0.15);
-  --navbar-bg: #166534; /* New dark green color for navbar */
+  --shadow-color: rgba(22, 163, 74, 0.3);
+  --navbar-bg: #000000;
   --eco-50: #f0fdf4;
   --eco-100: #dcfce7;
   --eco-200: #bbf7d0;
@@ -25,318 +25,188 @@
   --eco-950: #052e16;
 }
 
-/* Global text and background color overrides */
-body, button, input, textarea, select, label {
+/* Global overrides - Pure dark theme */
+body, 
+button, 
+input, 
+textarea, 
+select, 
+label,
+p, 
+h1, h2, h3, h4, h5, h6, 
+span, 
+div, 
+li, 
+td, 
+th,
+[class*="text-"] {
   color: var(--text-primary) !important;
+  background-color: transparent !important;
 }
 
 body {
   background-color: var(--bg-primary) !important;
+  background-image: radial-gradient(circle at 20% 80%, rgba(22, 163, 74, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(22, 163, 74, 0.1) 0%, transparent 50%);
 }
 
-/* Button and link styles */
-a:not([class]), 
-.link {
-  color: var(--text-secondary) !important;
-  text-decoration: none;
-  position: relative;
+/* Advanced glassmorphism effects */
+.glass {
+  background: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(22, 163, 74, 0.3) !important;
+  box-shadow: 0 16px 40px rgba(22, 163, 74, 0.2) !important;
 }
 
-a:not([class])::after, 
-.link::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  bottom: -2px;
-  left: 0;
-  background-color: var(--text-secondary);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease-out;
+.glass-heavy {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(30px) saturate(200%) !important;
+  border: 1px solid rgba(22, 163, 74, 0.4) !important;
+  box-shadow: 0 20px 50px rgba(22, 163, 74, 0.3) !important;
 }
 
-a:not([class]):hover::after, 
-.link:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
+/* Enhanced navbar styling */
+header {
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(22, 163, 74, 0.2) !important;
 }
 
-/* Form elements */
+.navbar-button {
+  background: rgba(22, 163, 74, 0.1) !important;
+  border: 1px solid rgba(22, 163, 74, 0.3) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.navbar-button:hover {
+  background: rgba(22, 163, 74, 0.2) !important;
+  border-color: rgba(22, 163, 74, 0.5) !important;
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Form elements with advanced styling */
 input, 
 textarea, 
 select {
-  background-color: rgba(0, 0, 0, 0.7) !important;
-  border-color: rgba(22, 163, 74, 0.3) !important;
-  color: white !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(22, 163, 74, 0.3) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 input:focus, 
 textarea:focus, 
 select:focus {
-  border-color: rgba(22, 163, 74, 0.7) !important;
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+  border-color: rgba(22, 163, 74, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2) !important;
+  background: rgba(0, 0, 0, 0.9) !important;
 }
 
-input::placeholder, 
-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Card and panels */
+/* Cards and panels */
 .card, 
 .panel,
 [data-radix-popper-content-wrapper],
 [role="dialog"] {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-  border-color: rgba(22, 163, 74, 0.3) !important;
-  box-shadow: 0 8px 32px rgba(22, 163, 74, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-/* Toast notifications */
-.sonner-toast {
-  background-color: rgba(0, 0, 0, 0.9) !important;
-  border-color: rgba(22, 163, 74, 0.5) !important;
-  color: white !important;
-  backdrop-filter: blur(10px);
-}
-
-.toast-title, 
-.toast-description,
-.sonner-toast-title,
-.sonner-toast-description {
-  color: white !important;
-}
-
-/* Glassmorphism utilities */
-.glass {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(10px) !important;
+  background: rgba(0, 0, 0, 0.9) !important;
   border: 1px solid rgba(22, 163, 74, 0.3) !important;
-  box-shadow: 0 8px 32px rgba(22, 163, 74, 0.1) !important;
+  box-shadow: 0 20px 60px rgba(22, 163, 74, 0.2) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
-/* Green glow effects */
-.green-glow {
-  box-shadow: 0 0 15px rgba(22, 163, 74, 0.5) !important;
+/* Button styling */
+button {
+  background: rgba(22, 163, 74, 0.8) !important;
+  border: 1px solid rgba(22, 163, 74, 0.5) !important;
+  color: var(--bg-primary) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.green-glow-hover:hover {
-  box-shadow: 0 0 15px rgba(22, 163, 74, 0.5) !important;
-  transition: box-shadow 0.3s ease-in-out;
+button:hover {
+  background: rgba(22, 163, 74, 1) !important;
+  box-shadow: 0 0 25px rgba(22, 163, 74, 0.5) !important;
+  transform: translateY(-2px) !important;
 }
 
-/* Text visibility in all contexts */
-.text-muted {
-  color: #a3a3a3 !important;
+/* Advanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-.text-emphasis {
-  color: var(--eco-400) !important;
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(22, 163, 74, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.6); }
 }
 
-/* Fix for all backgrounds to be black */
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Currency styling */
+.currency-inr::before {
+  content: "₹";
+  margin-right: 2px;
+}
+
+/* Profile menu enhancements */
+.profile-menu {
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  border: 1px solid rgba(22, 163, 74, 0.4) !important;
+  box-shadow: 0 25px 70px rgba(22, 163, 74, 0.3) !important;
+}
+
+/* Remove all white backgrounds */
 .bg-white,
 .bg-gray-100,
 .bg-gray-50,
-.light-mode-bg {
-  background-color: black !important;
-}
-
-/* Force text to be white in all contexts */
-p, h1, h2, h3, h4, h5, h6, span, div, li, td, th {
-  color: white !important;
-}
-
-.text-gray-500, 
-.text-gray-600, 
-.text-gray-700, 
-.text-gray-800, 
-.text-gray-900,
-[class*="text-gray-"],
-[class*="text-slate-"],
-[class*="text-neutral-"] {
-  color: white !important;
-}
-
-/* Navbar specific styling */
-header[class*="bg-green-900"] {
-  background-color: var(--navbar-bg) !important;
-}
-
-/* Enhanced navbar button styling for better visibility */
-.navbar-button {
-  background-color: rgba(22, 163, 74, 0.3) !important;
-  border: 1px solid rgba(22, 163, 74, 0.5) !important;
-  color: white !important;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.navbar-button:hover {
-  background-color: rgba(22, 163, 74, 0.5) !important;
-  border-color: rgba(22, 163, 74, 0.8) !important;
-  box-shadow: 0 0 10px rgba(22, 163, 74, 0.4) !important;
-}
-
-/* Fix for ALL navbar buttons, icons and text to ensure white color */
-.navbar-button,
-.navbar-button *,
-header button,
-header button *,
-header a,
-header a * {
-  color: white !important;
-}
-
-button[class*="ghost"] svg,
-header svg {
-  color: white !important;
-}
-
-.navbar-button:hover,
-.navbar-button:hover *,
-header button:hover,
-header button:hover * {
-  color: white !important;
-}
-
-/* Make sure ProfileMenu button and contents are also white */
-header .dropdown-trigger svg,
-header .dropdown-trigger * {
-  color: white !important;
-}
-
-/* Page transitions for smooth navigation */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.5s, transform 0.5s;
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Override any remaining white backgrounds */
-.bg-light,
-[class*="bg-light"],
+.light-mode-bg,
+[class*="bg-white"],
 [class*="bg-gray"],
-[class*="bg-neutral"],
-[class*="bg-slate"],
-[class*="bg-zinc"] {
-  background-color: black !important;
+[class*="bg-light"] {
+  background-color: var(--bg-primary) !important;
 }
 
-/* Menu items */
-.dropdown-item,
-.menu-item {
-  background-color: black !important;
-  color: white !important;
-}
-
-.dropdown-item:hover,
-.menu-item:hover {
-  background-color: rgba(22, 163, 74, 0.2) !important;
-}
-
-/* Ensure all dialogs and modals follow theme */
-.modal,
-.dialog,
-.popover {
-  background-color: black !important;
-  border-color: var(--border-color) !important;
-  color: white !important;
-}
-
-/* Enhanced blur effect for background elements */
-.blur-backdrop {
-  backdrop-filter: blur(15px) !important;
-}
-
-/* Fix filters scrolling */
-.filter-scroll {
-  max-height: 300px;
-  overflow-y: auto;
-  padding-right: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--eco-600) rgba(0, 0, 0, 0.2);
-}
-
-.filter-scroll::-webkit-scrollbar {
-  width: 8px;
-  background-color: rgba(0, 0, 0, 0.2);
-  visibility: visible !important;
-  display: block !important;
-}
-
-.filter-scroll::-webkit-scrollbar-thumb {
-  background-color: var(--eco-600);
-  border-radius: 4px;
-  visibility: visible !important;
-  display: block !important;
-}
-
-/* Improve dropdown visibility */
+/* Enhanced dropdown visibility */
 [data-radix-popper-content-wrapper] {
   z-index: 1000 !important;
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(22, 163, 74, 0.4) !important;
 }
 
-/* Selection styles */
-::selection {
-  background-color: var(--eco-700) !important;
-  color: white !important;
-}
-
-/* Ensure dark mode in all components */
-.dark-theme {
-  background-color: black !important;
-  color: white !important;
-}
-
-/* Status and action highlights */
-.status-pending,
-.status-processing {
-  background-color: rgba(22, 163, 74, 0.2) !important;
-  color: white !important;
-  border-left: 3px solid var(--eco-600) !important;
-}
-
-.status-completed,
-.status-delivered,
-.status-success {
-  background-color: rgba(22, 163, 74, 0.3) !important;
-  color: white !important;
+/* Status indicators */
+.status-completed {
+  background: rgba(22, 163, 74, 0.2) !important;
+  color: var(--text-primary) !important;
   border-left: 3px solid var(--eco-500) !important;
 }
 
-.status-cancelled,
-.status-failed {
-  background-color: rgba(220, 38, 38, 0.2) !important;
-  color: white !important;
-  border-left: 3px solid #dc2626 !important;
+.status-pending {
+  background: rgba(22, 163, 74, 0.1) !important;
+  color: var(--text-secondary) !important;
+  border-left: 3px solid var(--eco-600) !important;
 }
 
-.action-button {
-  background-color: var(--eco-700) !important;
-  color: white !important;
+/* Advanced scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background: rgba(0, 0, 0, 0.3);
 }
 
-.action-button:hover {
-  background-color: var(--eco-800) !important;
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--eco-600) 0%, var(--eco-800) 100%);
+  border-radius: 4px;
 }
 
-/* Shop hero section */
-.shop-hero {
-  background-color: var(--eco-800) !important;
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--eco-500) 0%, var(--eco-700) 100%);
 }
