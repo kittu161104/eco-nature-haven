@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { Leaf, Loader2, Shield } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -124,8 +125,7 @@ const Login = () => {
                   <FormItem>
                     <FormLabel className="text-white">Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
+                      <PasswordInput 
                         placeholder="••••••••" 
                         className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                         {...field} 
@@ -166,7 +166,7 @@ const Login = () => {
                     <FormItem>
                       <FormLabel className="text-white">Admin Code</FormLabel>
                       <FormControl>
-                        <Input 
+                        <PasswordInput 
                           placeholder="Enter admin access code" 
                           className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                           {...field} 
