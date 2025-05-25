@@ -31,7 +31,7 @@ const Payment = () => {
   const [subtotal, setSubtotal] = useState(0);
   const [shippingCost, setShippingCost] = useState(50);
   const [total, setTotal] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -45,6 +45,7 @@ const Payment = () => {
     state: "",
     pincode: "",
     phone: "",
+    upiId: "",
     saveInfo: true,
   });
 
@@ -105,12 +106,46 @@ const Payment = () => {
       });
       return;
     }
+
+    // Validate UPI ID for UPI payment
+    if (paymentMethod === "upi" && !formData.upiId) {
+      toast({
+        title: "UPI ID required",
+        description: "Please enter your UPI ID for UPI payment",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setLoading(true);
     
     try {
       // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (paymentMethod === "upi") {
+        // Get admin UPI settings
+        const adminSettings = JSON.parse(localStorage.getItem("adminSettings") || "{}");
+        const adminUpiId = adminSettings.upiId;
+        
+        if (!adminUpiId) {
+          toast({
+            title: "Payment unavailable",
+            description: "UPI payment is currently not available. Please try Cash on Delivery.",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+        
+        // Simulate UPI payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        toast({
+          title: "Payment initiated",
+          description: `Please complete payment to ${adminUpiId} using your UPI app`,
+        });
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Generate a random order ID
       const newOrderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -122,7 +157,7 @@ const Payment = () => {
         userId: user?.id,
         items: cartItems,
         total: total,
-        status: "processing",
+        status: paymentMethod === "upi" ? "pending_payment" : "processing",
         createdAt: new Date().toISOString(),
         shipping: {
           name: formData.name,
@@ -132,7 +167,8 @@ const Payment = () => {
           pincode: formData.pincode,
           phone: formData.phone
         },
-        paymentMethod
+        paymentMethod,
+        upiId: paymentMethod === "upi" ? formData.upiId : undefined
       };
       
       // Save order to localStorage
@@ -149,8 +185,8 @@ const Payment = () => {
       
     } catch (error) {
       toast({
-        title: "Payment failed",
-        description: "There was an error processing your payment. Please try again.",
+        title: "Order failed",
+        description: "There was an error processing your order. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -373,15 +409,13 @@ const Payment = () => {
                   
                   <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
                     <div className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="flex items-center cursor-pointer">
-                        <CreditCard className="h-5 w-5 mr-2 text-blue-600" />
-                        Credit/Debit Card
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                       <RadioGroupItem value="upi" id="upi" />
-                      <Label htmlFor="upi" className="cursor-pointer">UPI Payment</Label>
+                      <Label htmlFor="upi" className="flex items-center cursor-pointer">
+                        <div className="h-5 w-5 mr-2 bg-blue-600 rounded flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">₹</span>
+                        </div>
+                        UPI Payment
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                       <RadioGroupItem value="cod" id="cod" />
@@ -389,29 +423,36 @@ const Payment = () => {
                     </div>
                   </RadioGroup>
                   
-                  {paymentMethod === "card" && (
+                  {paymentMethod === "upi" && (
                     <div className="mt-4 p-4 border rounded-lg bg-gray-50">
                       <div className="mb-4">
-                        <Label htmlFor="cardNumber">Card Number</Label>
-                        <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+                        <Label htmlFor="upiId">Your UPI ID</Label>
+                        <Input 
+                          id="upiId" 
+                          name="upiId"
+                          placeholder="yourname@paytm / yourname@googlepay" 
+                          value={formData.upiId}
+                          onChange={handleInputChange}
+                        />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="expiry">Expiry Date</Label>
-                          <Input id="expiry" placeholder="MM/YY" />
-                        </div>
-                        <div>
-                          <Label htmlFor="cvv">CVV</Label>
-                          <Input id="cvv" placeholder="123" />
+                      <div className="text-sm text-gray-600">
+                        <p className="mb-2">Supported UPI Apps:</p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">PhonePe</span>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Google Pay</span>
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">Paytm</span>
+                          <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">BHIM</span>
                         </div>
                       </div>
                     </div>
                   )}
                   
-                  {paymentMethod === "upi" && (
-                    <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                      <Label htmlFor="upiId">UPI ID</Label>
-                      <Input id="upiId" placeholder="yourname@upi" />
+                  {paymentMethod === "cod" && (
+                    <div className="mt-4 p-4 border rounded-lg bg-yellow-50">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Cash on Delivery:</strong> Pay when your order is delivered to your doorstep. 
+                        Please keep exact change ready.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -421,7 +462,11 @@ const Payment = () => {
                   className="w-full py-6" 
                   disabled={loading}
                 >
-                  {loading ? "Processing..." : `Place Order • ₹${total.toFixed(2)}`}
+                  {loading ? "Processing..." : 
+                    paymentMethod === "upi" ? 
+                      `Proceed to UPI Payment • ₹${total.toFixed(2)}` : 
+                      `Place Order • ₹${total.toFixed(2)}`
+                  }
                 </Button>
                 
                 <div className="text-center mt-4 flex items-center justify-center text-sm text-gray-500">

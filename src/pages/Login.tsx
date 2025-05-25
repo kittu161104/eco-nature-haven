@@ -19,11 +19,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Leaf, Loader2 } from "lucide-react";
+import { Leaf, Loader2, Shield } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  adminCode: z.string().optional(),
+  isAdmin: z.boolean().default(false),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -39,14 +42,18 @@ const Login = () => {
     defaultValues: {
       email: "",
       password: "",
+      adminCode: "",
+      isAdmin: false,
     },
   });
+
+  const isAdmin = form.watch("isAdmin");
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, data.isAdmin ? data.adminCode : undefined);
       // Login function already handles navigation and toast messages
     } catch (error) {
       // Error handling is done in login function
@@ -128,6 +135,48 @@ const Login = () => {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="isAdmin"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="border-green-800/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-white flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Login as Admin
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {isAdmin && (
+                <FormField
+                  control={form.control}
+                  name="adminCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Admin Code</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter admin access code" 
+                          className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <Button 
                 type="submit" 

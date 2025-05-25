@@ -8,10 +8,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, adminCode?: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, adminCode?: string) => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
+  updateAdminCode: (currentCode: string, newCode: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
   register: async () => {},
   updateUser: () => {},
+  updateAdminCode: async () => {},
 });
 
 export const useAuth = () => {
@@ -39,6 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
+    // Initialize admin code if not exists
+    if (!localStorage.getItem("adminCode")) {
+      localStorage.setItem("adminCode", "Nature@natural");
+    }
+    
     // Check if user is already logged in
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -47,6 +54,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
     }
   }, []);
+
+  const updateAdminCode = async (currentCode: string, newCode: string) => {
+    const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
+    
+    if (currentCode !== "Natural.green.nursery") {
+      throw new Error("Invalid master code");
+    }
+    
+    localStorage.setItem("adminCode", newCode);
+    
+    toast({
+      title: "Admin code updated",
+      description: "The admin access code has been successfully updated.",
+    });
+  };
 
   const updateUser = (userData: Partial<User>) => {
     if (!user) return;
@@ -74,14 +96,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, adminCode?: string) => {
     // Simple validation
     if (!email || !password) {
       throw new Error("Email and password are required");
     }
 
     try {
-      // In a real app, we would call an API here
       const users = JSON.parse(localStorage.getItem("users") || "[]");
       const foundUser = users.find((u: any) => u.email === email && u.password === password);
 
@@ -89,18 +110,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Invalid email or password");
       }
 
+      // Determine role based on admin code
+      let role: "admin" | "customer" = "customer";
+      if (adminCode) {
+        const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
+        if (adminCode === storedAdminCode) {
+          role = "admin";
+        } else {
+          throw new Error("Invalid admin code");
+        }
+      }
+
       // Create user object without password
       const { password: _, ...userWithoutPassword } = foundUser;
       
-      // Add last login timestamp
+      // Add last login timestamp and update role
       const updatedUser = {
         ...userWithoutPassword,
+        role,
         lastLogin: new Date().toISOString()
       };
       
       // Update user in localStorage
       const updatedUsers = users.map((u: any) => 
-        u.id === updatedUser.id ? { ...u, lastLogin: updatedUser.lastLogin } : u
+        u.id === updatedUser.id ? { ...u, role, lastLogin: updatedUser.lastLogin } : u
       );
       localStorage.setItem("users", JSON.stringify(updatedUsers));
       
@@ -118,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       // Redirect based on user role
-      if (updatedUser.role === "admin") {
+      if (role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
@@ -137,7 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, adminCode?: string) => {
     // Simple validation
     if (!name || !email || !password) {
       throw new Error("All fields are required");
@@ -157,12 +190,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Email already registered");
       }
       
-      // Determine role based on email domain
+      // Determine role based on admin code
       let role: "admin" | "customer" = "customer";
-      if (email.endsWith("@nature.com")) {
-        role = "admin";
-      } else if (!email.endsWith("@gmail.com")) {
-        throw new Error("Email must end with @gmail.com or @nature.com");
+      if (adminCode) {
+        const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
+        if (adminCode === storedAdminCode) {
+          role = "admin";
+        } else {
+          throw new Error("Invalid admin code");
+        }
       }
       
       // Create new user
@@ -250,7 +286,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       logout, 
       register,
-      updateUser
+      updateUser,
+      updateAdminCode
     }}>
       {children}
     </AuthContext.Provider>
