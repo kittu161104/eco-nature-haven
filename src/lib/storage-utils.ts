@@ -1,6 +1,20 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { debounce } from 'lodash';
+
+// Simple debounce implementation to avoid lodash dependency issues
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: Parameters<T>) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // Enhanced localStorage get that handles errors gracefully
 export function getStorageItem<T>(key: string, defaultValue: T): T {
