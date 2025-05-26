@@ -111,15 +111,22 @@ body {
 }
 
 .navbar-button {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(22, 163, 74, 0.3);
-  transition: all 0.3s ease;
+  background: rgba(22, 163, 74, 0.15) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  border: 1px solid rgba(22, 163, 74, 0.4) !important;
+  transition: all 0.3s ease !important;
+  color: #22c55e !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .navbar-button:hover {
-  background: rgba(22, 163, 74, 0.2);
-  border-color: rgba(22, 163, 74, 0.6);
+  background: rgba(22, 163, 74, 0.3) !important;
+  border-color: rgba(22, 163, 74, 0.6) !important;
+  color: #16a34a !important;
 }
 
 .profile-menu {
@@ -137,4 +144,48 @@ body {
   backdrop-filter: blur(25px) saturate(180%) !important;
   border: 1px solid rgba(22, 163, 74, 0.4) !important;
   z-index: 9999 !important;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  from { filter: drop-shadow(0 0 5px #22c55e); }
+  to { filter: drop-shadow(0 0 20px #22c55e); }
+}
+
+/* Navbar specific fixes */
+.eco-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Force navbar elements to be visible */
+nav a, nav button {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
 }

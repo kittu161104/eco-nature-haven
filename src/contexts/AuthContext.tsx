@@ -21,7 +21,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (email: string, password: string, adminCode?: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, isAdmin?: boolean, adminCode?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   updateAdminCode: (masterCode: string, newAdminCode: string) => Promise<void>;
@@ -130,13 +130,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (email: string, password: string, name: string, isAdmin: boolean = false, adminCode?: string) => {
+    // If registering as admin, verify admin code first
+    if (isAdmin && adminCode) {
+      const { data: adminSettings } = await supabase
+        .from('admin_settings')
+        .select('value')
+        .eq('key', 'admin_code')
+        .single();
+      
+      const storedAdminCode = adminSettings?.value;
+      if (storedAdminCode !== adminCode) {
+        throw new Error('Invalid admin code');
+      }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name: name,
+          is_admin: isAdmin,
         },
       },
     });
@@ -146,7 +161,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     if (data.user) {
-      // Profile will be created automatically by the trigger
+      // Update profile with admin status if needed
+      if (isAdmin) {
+        await supabase
+          .from('profiles')
+          .update({ is_admin: true })
+          .eq('id', data.user.id);
+      }
+      
       const profile = await fetchProfile(data.user.id);
       setUser(profile);
     }
@@ -210,7 +232,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-green-500 text-xl">Loading...</div>
+        <div className="text-green-500 text-xl animate-pulse">Loading...</div>
       </div>
     );
   }

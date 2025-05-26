@@ -20,7 +20,6 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const updateCartCount = () => {
@@ -43,13 +42,8 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll);
     
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 200);
-    
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -75,46 +69,37 @@ const Navbar = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-500 glass ${
-        isScrolled ? "glass-heavy" : ""
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
+        isScrolled ? "glass-heavy" : "glass"
       }`}
       style={{
         background: isScrolled 
           ? "rgba(0, 0, 0, 0.95)" 
-          : "rgba(0, 0, 0, 0.9)",
+          : "rgba(0, 0, 0, 0.85)",
         backdropFilter: "blur(25px) saturate(180%)",
-        borderBottom: "1px solid rgba(22, 163, 74, 0.2)"
+        borderBottom: "1px solid rgba(22, 163, 74, 0.3)"
       }}
     >
       <div className="eco-container">
-        <div className={`flex h-16 items-center justify-between transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0 -translate-y-4'}`}>
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2 float-animation">
               <Leaf className="h-6 w-6 text-eco-500 glow-pulse" />
-              <h1 className="text-2xl font-bold" style={{ color: "#22c55e" }}>
-                <span>Natural Green</span>
+              <h1 className="text-2xl font-bold text-eco-500">
+                Natural Green
               </h1>
             </Link>
           </div>
 
           {!isMobile && (
             <nav className="mx-6 flex items-center space-x-4 lg:space-x-6">
-              {navLinks.map((link, index) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`navbar-button px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium relative
-                    ${isActive(link.path) ? "bg-green-800/30 border-green-500/60" : ""}
-                  `}
-                  style={{ 
-                    transitionDelay: `${index * 100}ms`,
-                    animation: isLoaded ? `fadeInUp 0.5s ease ${index * 100 + 300}ms forwards` : 'none',
-                    opacity: 0,
-                    color: "#22c55e",
-                    background: "rgba(22, 163, 74, 0.1)",
-                    border: "1px solid rgba(22, 163, 74, 0.3)",
-                    backdropFilter: "blur(10px)"
-                  }}
+                  className={`navbar-button px-4 py-2 rounded-lg text-sm font-medium relative transition-all duration-300 hover:scale-105 ${
+                    isActive(link.path) ? "bg-green-700/40 border-green-500/60" : ""
+                  }`}
                 >
                   {link.name}
                   {isActive(link.path) && (
@@ -129,13 +114,8 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="transition-all duration-300 navbar-button"
+              className="navbar-button transition-all duration-300 hover:scale-110"
               onClick={toggleSearch}
-              style={{ 
-                animation: isLoaded ? 'fadeInUp 0.5s ease 600ms forwards' : 'none',
-                opacity: 0,
-                color: "#22c55e"
-              }}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -143,17 +123,12 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="transition-all duration-300 relative navbar-button"
+              className="navbar-button transition-all duration-300 relative hover:scale-110"
               onClick={toggleCart}
-              style={{ 
-                animation: isLoaded ? 'fadeInUp 0.5s ease 700ms forwards' : 'none',
-                opacity: 0,
-                color: "#22c55e"
-              }}
             >
               <ShoppingCart className="h-5 w-5" />
               {cartItemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-eco-600 text-black">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-eco-600 text-black text-xs">
                   {cartItemCount}
                 </Badge>
               )}
@@ -162,21 +137,13 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="transition-all duration-300 navbar-button"
+              className="navbar-button transition-all duration-300 hover:scale-110"
               onClick={handleProfileClick}
-              style={{ 
-                animation: isLoaded ? 'fadeInUp 0.5s ease 750ms forwards' : 'none',
-                opacity: 0,
-                color: "#22c55e"
-              }}
             >
               <User className="h-5 w-5" />
             </Button>
 
-            <div style={{ 
-              animation: isLoaded ? 'fadeInUp 0.5s ease 800ms forwards' : 'none',
-              opacity: 0
-            }}>
+            <div className="navbar-button rounded-full">
               <ProfileMenu />
             </div>
 
@@ -186,12 +153,7 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="transition-all duration-300 ml-1 navbar-button"
-                    style={{ 
-                      animation: isLoaded ? 'fadeInUp 0.5s ease 900ms forwards' : 'none',
-                      opacity: 0,
-                      color: "#22c55e"
-                    }}
+                    className="navbar-button transition-all duration-300 ml-1 hover:scale-110"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
@@ -202,10 +164,9 @@ const Navbar = () => {
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`px-3 py-2 rounded-md navbar-button ${
+                        className={`px-3 py-2 rounded-md text-eco-500 navbar-button ${
                           isActive(link.path) ? "bg-green-700/40 font-semibold" : ""
                         }`}
-                        style={{ color: "#22c55e" }}
                       >
                         {link.name}
                       </Link>
