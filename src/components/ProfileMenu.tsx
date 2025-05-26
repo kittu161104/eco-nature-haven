@@ -11,20 +11,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, ShoppingCart, Settings, UserPlus, LogIn, Heart, Package, RotateCcw } from "lucide-react";
+import { User, LogOut, Settings, UserPlus, LogIn, Package } from "lucide-react";
 
 interface ProfileMenuProps {
   onClick?: () => void;
 }
 
 const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    if (onClick) onClick();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      if (onClick) onClick();
+      navigate("/");
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleLogin = () => {
@@ -44,15 +48,10 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
 
   const handleUserProfile = () => {
     if (onClick) onClick();
-    navigate(`/account/${user?.id}`);
+    navigate("/account");
   };
 
-  const handleWishlist = () => {
-    if (onClick) onClick();
-    navigate("/wishlist");
-  };
-
-  const handleOrderTracking = () => {
+  const handleOrders = () => {
     if (onClick) onClick();
     navigate("/orders");
   };
@@ -63,39 +62,31 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
         <Button
           variant="ghost"
           size="icon"
-          className="navbar-button"
-          style={{ color: "#22c55e" }}
+          className="navbar-button text-green-500 hover:text-green-400"
         >
           <User className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-64 profile-menu"
-        style={{
-          background: "rgba(0, 0, 0, 0.95)",
-          backdropFilter: "blur(25px) saturate(180%)",
-          border: "1px solid rgba(22, 163, 74, 0.4)",
-          color: "#22c55e"
-        }}
+        className="w-64 glass border-green-800/40 z-[9999]"
       >
         {isAuthenticated ? (
           <>
-            <DropdownMenuLabel>
+            <DropdownMenuLabel className="text-green-400">
               <div className="flex flex-col">
-                <span className="font-medium" style={{ color: "#22c55e" }}>{user?.name}</span>
-                <span className="text-xs" style={{ color: "#16a34a" }}>
+                <span className="font-medium">{user?.name || 'User'}</span>
+                <span className="text-xs text-green-300">
                   {user?.email}
                 </span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator style={{ backgroundColor: "rgba(22, 163, 74, 0.3)" }} />
+            <DropdownMenuSeparator className="bg-green-800/30" />
             
-            {isAdmin && (
+            {user?.is_admin && (
               <DropdownMenuItem 
                 onClick={handleAdminDashboard} 
-                className="hover:bg-green-900/30"
-                style={{ color: "#22c55e" }}
+                className="hover:bg-green-900/30 text-green-400 cursor-pointer"
               >
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
@@ -104,55 +95,25 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
             
             <DropdownMenuItem 
               onClick={handleUserProfile} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
+              className="hover:bg-green-900/30 text-green-400 cursor-pointer"
             >
               <User className="mr-2 h-4 w-4" />
               <span>My Account</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem 
-              onClick={handleWishlist} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
-            >
-              <Heart className="mr-2 h-4 w-4" />
-              <span>Wishlist</span>
-            </DropdownMenuItem>
-            
-            <DropdownMenuItem 
-              onClick={handleOrderTracking} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              <span>My Orders</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem 
-              onClick={handleOrderTracking} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
+              onClick={handleOrders} 
+              className="hover:bg-green-900/30 text-green-400 cursor-pointer"
             >
               <Package className="mr-2 h-4 w-4" />
-              <span>Order Tracking</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem 
-              onClick={handleOrderTracking} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              <span>Returns & Refunds</span>
+              <span>My Orders</span>
             </DropdownMenuItem>
             
-            <DropdownMenuSeparator style={{ backgroundColor: "rgba(22, 163, 74, 0.3)" }} />
+            <DropdownMenuSeparator className="bg-green-800/30" />
             
             <DropdownMenuItem 
               onClick={handleLogout} 
-              className="hover:bg-red-900/30"
-              style={{ color: "#22c55e" }}
+              className="hover:bg-red-900/30 text-green-400 cursor-pointer"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
@@ -162,8 +123,7 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
           <>
             <DropdownMenuItem 
               onClick={handleLogin} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
+              className="hover:bg-green-900/30 text-green-400 cursor-pointer"
             >
               <LogIn className="mr-2 h-4 w-4" />
               <span>Log in</span>
@@ -171,8 +131,7 @@ const ProfileMenu = ({ onClick }: ProfileMenuProps) => {
             
             <DropdownMenuItem 
               onClick={handleRegister} 
-              className="hover:bg-green-900/30"
-              style={{ color: "#22c55e" }}
+              className="hover:bg-green-900/30 text-green-400 cursor-pointer"
             >
               <UserPlus className="mr-2 h-4 w-4" />
               <span>Register</span>

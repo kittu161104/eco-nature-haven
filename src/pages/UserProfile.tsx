@@ -4,93 +4,32 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, Check, MapPin, Phone, User } from "lucide-react";
+import { AlertCircle, Check, MapPin, Phone, User, Package, Heart, RotateCcw, CreditCard, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { formatDate, isValidPhoneNumber, formatPhoneNumber } from "@/lib/utils";
-import { useCart } from "@/hooks/useCart";
-import { useWishlist } from "@/hooks/useWishlist";
-
-const countryOptions = [
-  { value: "in", label: "India" },
-  { value: "us", label: "United States" },
-  { value: "gb", label: "United Kingdom" },
-  { value: "ca", label: "Canada" },
-  { value: "au", label: "Australia" },
-];
-
-const stateOptions = {
-  in: [
-    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
-    "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
-    "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
-    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
-  ],
-  us: [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", 
-    "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
-    "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", 
-    "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
-    "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", 
-    "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-  ],
-  gb: ["England", "Scotland", "Wales", "Northern Ireland"],
-  ca: [
-    "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", 
-    "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan"
-  ],
-  au: [
-    "Australian Capital Territory", "New South Wales", "Northern Territory", "Queensland", 
-    "South Australia", "Tasmania", "Victoria", "Western Australia"
-  ],
-};
+import { supabase } from "@/integrations/supabase/client";
 
 const UserProfile = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, updateUser, logout } = useAuth();
-  const { clearCart } = useCart();
-  const { clearWishlist } = useWishlist();
-  
   const [isEditing, setIsEditing] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [refunds, setRefunds] = useState([]);
+  const [returns, setReturns] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    street: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "in",
-    marketing: false,
-    notifications: false,
+    address: {},
+    preferences: {},
   });
-  
-  const isAdminUser = user?.isAdmin || false;
-  
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -99,393 +38,303 @@ const UserProfile = () => {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        street: user.address?.street || "",
-        city: user.address?.city || "",
-        state: user.address?.state || "",
-        zipCode: user.address?.zipCode || "",
-        country: user.address?.country || "in",
-        marketing: user.preferences?.marketing || false,
-        notifications: user.preferences?.notifications || false,
+        address: user.address || {},
+        preferences: user.preferences || {},
       });
+      fetchUserData();
     }
   }, [isAuthenticated, user, navigate]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+  const fetchUserData = async () => {
+    if (!user) return;
+
+    // Fetch orders
+    const { data: ordersData } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    // Fetch refunds
+    const { data: refundsData } = await supabase
+      .from('refunds')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    // Fetch returns
+    const { data: returnsData } = await supabase
+      .from('returns')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    setOrders(ordersData || []);
+    setRefunds(refundsData || []);
+    setReturns(returnsData || []);
   };
-  
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
-  };
-  
-  const handleCountryChange = (value: string) => {
-    setFormData((prev) => ({ 
-      ...prev, 
-      country: value,
-      state: "" // Reset state when country changes
-    }));
-  };
-  
-  const handleStateChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, state: value }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate phone number if provided
-    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
-      toast.error("Please enter a valid phone number (10 digits)");
-      return;
-    }
     
     if (!user) return;
     
-    // Update user data
-    const updatedUser = {
-      ...user,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
-        country: formData.country,
-      },
-      preferences: {
-        marketing: formData.marketing,
-        notifications: formData.notifications,
-        theme: user.preferences?.theme || 'dark',
-      },
-    };
-    
-    updateUser(updatedUser);
-    setIsEditing(false);
-    toast.success("Profile updated successfully!");
+    try {
+      await updateUser(formData);
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
+    } catch (error: any) {
+      toast.error("Failed to update profile");
+    }
   };
-  
-  const handleLogout = () => {
-    logout();
-    clearCart();
-    clearWishlist();
-    navigate("/login");
-    toast.info("You have been logged out");
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+      toast.info("You have been logged out");
+    } catch (error) {
+      toast.error("Failed to logout");
+    }
   };
-  
-  const handleAdminPanel = () => {
-    navigate("/admin/dashboard");
-  };
-  
+
   if (!user) return null;
-  
-  const userJoinedDate = user.createdAt 
-    ? formatDate(user.createdAt) 
-    : "Unknown date";
-  
+
   return (
-    <div className="container max-w-5xl py-10">
+    <div className="container max-w-6xl py-10">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white">My Account</h1>
-            <p className="text-gray-400">Manage your account settings and preferences</p>
+            <p className="text-gray-400">Manage your account and orders</p>
           </div>
           
           <div className="flex flex-col md:flex-row gap-3">
-            {isAdminUser && (
-              <Button onClick={handleAdminPanel} className="bg-green-600 hover:bg-green-700 text-white">
+            {user.is_admin && (
+              <Button onClick={() => navigate("/admin")} className="bg-green-600 hover:bg-green-700">
                 Admin Panel
               </Button>
             )}
-            
             <Button onClick={handleLogout} variant="outline" className="border-green-600 text-green-400 hover:bg-green-900/20">
               Log Out
             </Button>
           </div>
         </div>
-        
-        <Card className="bg-black/60 border-green-900">
-          <CardHeader className="border-b border-green-900/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="bg-green-900/30 rounded-full p-3">
-                  <User className="h-6 w-6 text-green-400" />
-                </div>
-                <div>
-                  <CardTitle className="text-white">{user.name}</CardTitle>
-                  <CardDescription className="text-gray-400">Member since {userJoinedDate}</CardDescription>
-                </div>
-              </div>
-              {!isEditing && (
-                <Button 
-                  onClick={() => setIsEditing(true)}
-                  variant="outline"
-                  className="border-green-600 text-green-400 hover:bg-green-900/20"
-                >
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          
+
+        <Card className="glass border-green-800/30">
           <CardContent className="p-0">
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="w-full bg-black/90 border-b border-green-900/30 rounded-none">
-                <TabsTrigger 
-                  value="profile"
-                  className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400 rounded-none flex-grow"
-                >
+              <TabsList className="w-full bg-black/40 border-b border-green-900/30 rounded-none">
+                <TabsTrigger value="profile" className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400">
+                  <User className="h-4 w-4 mr-2" />
                   Profile
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="address"
-                  className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400 rounded-none flex-grow"
-                >
-                  Address
+                <TabsTrigger value="orders" className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400">
+                  <Package className="h-4 w-4 mr-2" />
+                  Orders
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="preferences"
-                  className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400 rounded-none flex-grow"
-                >
-                  Preferences
+                <TabsTrigger value="refunds" className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Refunds
+                </TabsTrigger>
+                <TabsTrigger value="returns" className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Returns
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="data-[state=active]:bg-green-900/20 data-[state=active]:text-white text-gray-400">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
                 </TabsTrigger>
               </TabsList>
-              
-              <form onSubmit={handleSubmit}>
-                <TabsContent value="profile" className="p-6 space-y-6">
+
+              <TabsContent value="profile" className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-green-900/30 rounded-full p-3">
+                      <User className="h-6 w-6 text-green-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">{user.name}</h3>
+                      <p className="text-gray-400">{user.email}</p>
+                    </div>
+                  </div>
+                  {!isEditing && (
+                    <Button onClick={() => setIsEditing(true)} variant="outline" className="border-green-600 text-green-400">
+                      Edit Profile
+                    </Button>
+                  )}
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-white">Full Name</Label>
+                      <Label className="text-white">Full Name</Label>
                       <Input
-                        id="name"
-                        name="name"
-                        placeholder="Your name"
                         value={formData.name}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
                         disabled={!isEditing}
                         className="bg-black/40 border-green-900/50 text-white"
                       />
                     </div>
-                    
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-white">Email Address</Label>
+                      <Label className="text-white">Email</Label>
                       <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="your.email@example.com"
                         value={formData.email}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
                         disabled={!isEditing}
                         className="bg-black/40 border-green-900/50 text-white"
                       />
                     </div>
-                    
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-white">Phone Number</Label>
+                      <Label className="text-white">Phone</Label>
                       <Input
-                        id="phone"
-                        name="phone"
-                        placeholder="Your phone number"
                         value={formData.phone}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className="bg-black/40 border-green-900/50 text-white"
-                      />
-                      {formData.phone && !isValidPhoneNumber(formData.phone) && isEditing && (
-                        <p className="text-sm text-red-400 flex items-center mt-1">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Please enter a valid 10-digit phone number
-                        </p>
-                      )}
-                      {formData.phone && isValidPhoneNumber(formData.phone) && (
-                        <p className="text-sm text-green-400 flex items-center mt-1">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {formatPhoneNumber(formData.phone)}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-white">Account Type</Label>
-                      <div className="h-10 px-3 py-2 rounded-md border border-green-900/50 bg-black/40 flex items-center text-white">
-                        {isAdminUser ? 'Administrator' : 'Customer'}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="address" className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="street" className="text-white">Street Address</Label>
-                      <Textarea
-                        id="street"
-                        name="street"
-                        placeholder="Your street address"
-                        value={formData.street}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         disabled={!isEditing}
                         className="bg-black/40 border-green-900/50 text-white"
                       />
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="city" className="text-white">City</Label>
-                        <Input
-                          id="city"
-                          name="city"
-                          placeholder="Your city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          disabled={!isEditing}
-                          className="bg-black/40 border-green-900/50 text-white"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="country" className="text-white">Country</Label>
-                        <Select 
-                          disabled={!isEditing}
-                          value={formData.country}
-                          onValueChange={handleCountryChange}
-                        >
-                          <SelectTrigger className="bg-black/40 border-green-900/50 text-white">
-                            <SelectValue placeholder="Select a country" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black border-green-900 text-white">
-                            {countryOptions.map(country => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="state" className="text-white">State / Province</Label>
-                        <Select 
-                          disabled={!isEditing || !formData.country}
-                          value={formData.state}
-                          onValueChange={handleStateChange}
-                        >
-                          <SelectTrigger className="bg-black/40 border-green-900/50 text-white">
-                            <SelectValue placeholder="Select a state" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-black border-green-900 text-white max-h-[200px]">
-                            {formData.country && stateOptions[formData.country as keyof typeof stateOptions]?.map(state => (
-                              <SelectItem key={state} value={state}>
-                                {state}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="zipCode" className="text-white">ZIP / Postal Code</Label>
-                        <Input
-                          id="zipCode"
-                          name="zipCode"
-                          placeholder="Your postal code"
-                          value={formData.zipCode}
-                          onChange={handleChange}
-                          disabled={!isEditing}
-                          className="bg-black/40 border-green-900/50 text-white"
-                        />
-                      </div>
-                    </div>
-                    
-                    {formData.street && formData.city && formData.state && (
-                      <div className="bg-green-900/10 border border-green-900/30 rounded-md p-4 flex items-start space-x-3">
-                        <MapPin className="text-green-400 h-5 w-5 mt-1 flex-shrink-0" />
-                        <div className="text-white">
-                          <p className="font-medium">{formData.name}</p>
-                          <p>{formData.street}</p>
-                          <p>
-                            {formData.city}, {formData.state} {formData.zipCode}
-                          </p>
-                          <p>
-                            {countryOptions.find(c => c.value === formData.country)?.label || formData.country}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </TabsContent>
-                
-                <TabsContent value="preferences" className="p-6 space-y-6">
+
+                  {isEditing && (
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => setIsEditing(false)} className="border-green-900 text-white">
+                        Cancel
+                      </Button>
+                      <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                        <Check className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              </TabsContent>
+
+              <TabsContent value="orders" className="p-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-white">Your Orders</h3>
+                  {orders.length > 0 ? (
+                    <div className="space-y-4">
+                      {orders.map((order: any) => (
+                        <Card key={order.id} className="glass border-green-800/30">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-semibold text-white">Order #{order.order_number}</p>
+                                <p className="text-gray-400">Total: ₹{order.total}</p>
+                                <p className="text-gray-400">Status: {order.status}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-400">
+                                  {new Date(order.created_at).toLocaleDateString()}
+                                </p>
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  order.status === 'delivered' ? 'bg-green-900/30 text-green-400' :
+                                  order.status === 'shipped' ? 'bg-blue-900/30 text-blue-400' :
+                                  'bg-yellow-900/30 text-yellow-400'
+                                }`}>
+                                  {order.status}
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No orders found.</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="refunds" className="p-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-white">Refund Requests</h3>
+                  {refunds.length > 0 ? (
+                    <div className="space-y-4">
+                      {refunds.map((refund: any) => (
+                        <Card key={refund.id} className="glass border-green-800/30">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-semibold text-white">Refund Request</p>
+                                <p className="text-gray-400">Amount: ₹{refund.amount}</p>
+                                <p className="text-gray-400">Reason: {refund.reason}</p>
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                refund.status === 'processed' ? 'bg-green-900/30 text-green-400' :
+                                refund.status === 'approved' ? 'bg-blue-900/30 text-blue-400' :
+                                'bg-yellow-900/30 text-yellow-400'
+                              }`}>
+                                {refund.status}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No refund requests found.</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="returns" className="p-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-white">Return Requests</h3>
+                  {returns.length > 0 ? (
+                    <div className="space-y-4">
+                      {returns.map((returnItem: any) => (
+                        <Card key={returnItem.id} className="glass border-green-800/30">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-semibold text-white">Return Request</p>
+                                <p className="text-gray-400">Reason: {returnItem.reason}</p>
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                returnItem.status === 'processed' ? 'bg-green-900/30 text-green-400' :
+                                returnItem.status === 'approved' ? 'bg-blue-900/30 text-blue-400' :
+                                'bg-yellow-900/30 text-yellow-400'
+                              }`}>
+                                {returnItem.status}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No return requests found.</p>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="settings" className="p-6">
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-white">Account Settings</h3>
+                  
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-white">Marketing Communications</Label>
-                        <p className="text-sm text-gray-400">
-                          Receive emails about new products, offers and announcements
-                        </p>
+                      <div>
+                        <Label className="text-white">Email Notifications</Label>
+                        <p className="text-sm text-gray-400">Receive order updates via email</p>
                       </div>
-                      <Switch
-                        checked={formData.marketing}
-                        onCheckedChange={(checked) => handleSwitchChange("marketing", checked)}
-                        disabled={!isEditing}
-                      />
+                      <Switch />
                     </div>
                     
-                    <Separator className="my-4 bg-green-900/30" />
+                    <Separator className="bg-green-900/30" />
                     
                     <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label className="text-white">Order Notifications</Label>
-                        <p className="text-sm text-gray-400">
-                          Receive updates about your orders and deliveries
-                        </p>
+                      <div>
+                        <Label className="text-white">SMS Notifications</Label>
+                        <p className="text-sm text-gray-400">Receive order updates via SMS</p>
                       </div>
-                      <Switch
-                        checked={formData.notifications}
-                        onCheckedChange={(checked) => handleSwitchChange("notifications", checked)}
-                        disabled={!isEditing}
-                      />
+                      <Switch />
                     </div>
                   </div>
-                </TabsContent>
-                
-                {isEditing && (
-                  <CardFooter className="border-t border-green-900/30 bg-black/40 px-6 py-4 flex justify-end space-x-3">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => {
-                        setIsEditing(false);
-                        if (user) {
-                          setFormData({
-                            name: user.name || "",
-                            email: user.email || "",
-                            phone: user.phone || "",
-                            street: user.address?.street || "",
-                            city: user.address?.city || "",
-                            state: user.address?.state || "",
-                            zipCode: user.address?.zipCode || "",
-                            country: user.address?.country || "in",
-                            marketing: user.preferences?.marketing || false,
-                            notifications: user.preferences?.notifications || false,
-                          });
-                        }
-                      }}
-                      className="border-green-900 text-white hover:bg-green-900/20"
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
-                      <Check className="h-4 w-4 mr-2" />
-                      Save Changes
-                    </Button>
-                  </CardFooter>
-                )}
-              </form>
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>

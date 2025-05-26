@@ -1,297 +1,182 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { User } from "@/types/user";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  user: User | null;
-  isAdmin: boolean;
-  login: (email: string, password: string, adminCode?: string) => Promise<void>;
-  logout: () => void;
-  register: (name: string, email: string, password: string, adminCode?: string) => Promise<void>;
-  updateUser: (userData: Partial<User>) => void;
-  updateAdminCode: (currentCode: string, newCode: string) => Promise<void>;
+interface UserProfile {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: any;
+  preferences?: any;
+  is_admin?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  user: null,
-  isAdmin: false,
-  login: async () => {},
-  logout: () => {},
-  register: async () => {},
-  updateUser: () => {},
-  updateAdminCode: async () => {},
-});
+interface AuthContextType {
+  user: UserProfile | null;
+  session: Session | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<UserProfile>) => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  // Compute isAdmin based on user role
-  const isAdmin = user?.role === "admin";
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    // Initialize admin code if not exists
-    if (!localStorage.getItem("adminCode")) {
-      localStorage.setItem("adminCode", "Nature@natural");
-    }
-    
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setIsAuthenticated(true);
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          setUser(profile);
+        } else {
+          setUser(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        setUser(profile);
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const updateAdminCode = async (currentCode: string, newCode: string) => {
-    const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
-    
-    if (currentCode !== "Natural.green.nursery") {
-      throw new Error("Invalid master code");
-    }
-    
-    localStorage.setItem("adminCode", newCode);
-    
-    toast({
-      title: "Admin code updated",
-      description: "The admin access code has been successfully updated.",
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.user) {
+      const profile = await fetchProfile(data.user.id);
+      setUser(profile);
+    }
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (!user) return;
-    
-    const updatedUser = { ...user, ...userData, updatedAt: new Date().toISOString() };
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    
-    // If this is a customer, also update the customers collection
-    if (user.role === "customer") {
-      try {
-        const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-        const updatedCustomers = customers.map((c: any) => 
-          c.id === parseInt(user.id) ? { ...c, name: updatedUser.name, email: updatedUser.email } : c
-        );
-        localStorage.setItem("customers", JSON.stringify(updatedCustomers));
-      } catch (error) {
-        console.error("Error updating customer data:", error);
-      }
-    }
-    
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated.",
+  const register = async (email: string, password: string, name: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+      },
     });
-  };
 
-  const login = async (email: string, password: string, adminCode?: string) => {
-    // Simple validation
-    if (!email || !password) {
-      throw new Error("Email and password are required");
+    if (error) {
+      throw error;
     }
 
-    try {
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const foundUser = users.find((u: any) => u.email === email && u.password === password);
-
-      if (!foundUser) {
-        throw new Error("Invalid email or password");
-      }
-
-      // Determine role based on admin code
-      let role: "admin" | "customer" = "customer";
-      if (adminCode) {
-        const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
-        if (adminCode === storedAdminCode) {
-          role = "admin";
-        } else {
-          throw new Error("Invalid admin code");
-        }
-      }
-
-      // Create user object without password
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      // Add last login timestamp and update role
-      const updatedUser = {
-        ...userWithoutPassword,
-        role,
-        lastLogin: new Date().toISOString()
-      };
-      
-      // Update user in localStorage
-      const updatedUsers = users.map((u: any) => 
-        u.id === updatedUser.id ? { ...u, role, lastLogin: updatedUser.lastLogin } : u
-      );
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      
-      // Set auth state
-      setUser(updatedUser);
-      setIsAuthenticated(true);
-      
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      
-      // Show success toast
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${updatedUser.name}!`,
-      });
-      
-      // Redirect based on user role
-      if (role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      let message = "An unknown error occurred";
-      if (error instanceof Error) message = error.message;
-      
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: message,
-      });
-      
-      throw new Error(message);
+    if (data.user) {
+      // Profile will be created automatically by the trigger
+      const profile = await fetchProfile(data.user.id);
+      setUser(profile);
     }
   };
 
-  const register = async (name: string, email: string, password: string, adminCode?: string) => {
-    // Simple validation
-    if (!name || !email || !password) {
-      throw new Error("All fields are required");
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
     }
-
-    if (password.length < 6) {
-      throw new Error("Password must be at least 6 characters");
-    }
-
-    try {
-      // Get existing users
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      
-      // Check if user already exists
-      const userExists = users.some((u: any) => u.email === email);
-      if (userExists) {
-        throw new Error("Email already registered");
-      }
-      
-      // Determine role based on admin code
-      let role: "admin" | "customer" = "customer";
-      if (adminCode) {
-        const storedAdminCode = localStorage.getItem("adminCode") || "Nature@natural";
-        if (adminCode === storedAdminCode) {
-          role = "admin";
-        } else {
-          throw new Error("Invalid admin code");
-        }
-      }
-      
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
-        name,
-        email,
-        password,
-        role,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      };
-      
-      // Save user
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
-      
-      // Login the user automatically
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
-      
-      // Show success toast
-      toast({
-        title: "Registration successful",
-        description: `Welcome, ${name}!`,
-      });
-      
-      // Add to customers if role is customer
-      if (role === "customer") {
-        const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-        const newCustomer = {
-          id: parseInt(newUser.id),
-          name: newUser.name,
-          email: newUser.email,
-          orders: 0,
-          totalSpent: 0,
-          lastOrder: null,
-          status: "active"
-        };
-        
-        customers.push(newCustomer);
-        localStorage.setItem("customers", JSON.stringify(customers));
-      }
-      
-      // Redirect based on role
-      if (role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      let message = "An unknown error occurred";
-      if (error instanceof Error) message = error.message;
-      
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: message,
-      });
-      
-      throw new Error(message);
-    }
-  };
-
-  const logout = () => {
     setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem("user");
-    
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    
-    navigate("/login");
+    setSession(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      user, 
-      isAdmin, 
-      login, 
-      logout, 
-      register,
-      updateUser,
-      updateAdminCode
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const updateUser = async (userData: Partial<UserProfile>) => {
+    if (!user) return;
 
-export default AuthContext;
+    const { error } = await supabase
+      .from('profiles')
+      .update(userData)
+      .eq('id', user.id);
+
+    if (error) {
+      throw error;
+    }
+
+    setUser({ ...user, ...userData });
+  };
+
+  const value = {
+    user,
+    session,
+    isAuthenticated: !!session,
+    isAdmin: user?.is_admin || false,
+    login,
+    register,
+    logout,
+    updateUser,
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-green-500 text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
