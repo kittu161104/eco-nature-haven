@@ -21,6 +21,16 @@ html {
   -ms-overflow-style: none;
 }
 
+/* Force hide all scrollbars */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   font-family: "Inter", sans-serif;
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);

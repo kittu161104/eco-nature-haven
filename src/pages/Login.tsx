@@ -55,9 +55,25 @@ const Login = () => {
     
     try {
       await login(data.email, data.password, data.isAdmin ? data.adminCode : undefined);
-      // Login function already handles navigation and toast messages
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      
+      // Navigate based on admin status
+      if (data.isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
-      // Error handling is done in login function
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
     }
   };

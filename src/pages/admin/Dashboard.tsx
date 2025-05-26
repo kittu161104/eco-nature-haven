@@ -49,8 +49,11 @@ const Dashboard = () => {
         .select('*')
         .eq('is_admin', false);
 
-      // Calculate total sales
-      const totalSales = ordersData?.reduce((sum, order) => sum + parseFloat(order.total), 0) || 0;
+      // Calculate total sales - fix the type error by ensuring we get a number
+      const totalSales = ordersData?.reduce((sum, order) => {
+        const orderTotal = typeof order.total === 'string' ? parseFloat(order.total) : order.total;
+        return sum + (orderTotal || 0);
+      }, 0) || 0;
       
       // Count active orders
       const activeOrdersCount = ordersData?.filter(order => order.status === 'processing').length || 0;
@@ -212,7 +215,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {isLoading ? '...' : formatCurrency(stats.totalSales)}
+              {isLoading ? '...' : stats.totalSales === 0 ? '₹0' : formatCurrency(stats.totalSales)}
             </div>
             <div className="text-xs text-green-400 mt-1">
               {stats.totalSales === 0 ? 'No sales yet' : 'Real-time revenue tracking'}

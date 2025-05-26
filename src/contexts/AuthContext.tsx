@@ -20,10 +20,11 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, adminCode?: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
+  updateAdminCode: (masterCode: string, newAdminCode: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -97,7 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, adminCode?: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -109,6 +110,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     if (data.user) {
       const profile = await fetchProfile(data.user.id);
+      
+      // If admin code is provided, verify it
+      if (adminCode && profile?.is_admin) {
+        const { data: adminSettings } = await supabase
+          .from('admin_settings')
+          .select('value')
+          .eq('key', 'admin_code')
+          .single();
+        
+        const storedAdminCode = adminSettings?.value;
+        if (storedAdminCode !== adminCode) {
+          await supabase.auth.signOut();
+          throw new Error('Invalid admin code');
+        }
+      }
+      
       setUser(profile);
     }
   };
@@ -159,6 +176,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser({ ...user, ...userData });
   };
 
+  const updateAdminCode = async (masterCode: string, newAdminCode: string) => {
+    // For now, use a simple master code check - in production this should be more secure
+    if (masterCode !== 'master123') {
+      throw new Error('Invalid master code');
+    }
+
+    const { error } = await supabase
+      .from('admin_settings')
+      .upsert({
+        key: 'admin_code',
+        value: newAdminCode,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      throw error;
+    }
+  };
+
   const value = {
     user,
     session,
@@ -168,6 +204,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     register,
     logout,
     updateUser,
+    updateAdminCode,
   };
 
   if (isLoading) {
