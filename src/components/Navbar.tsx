@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import ProfileMenu from "@/components/ProfileMenu";
 import CartModal from "@/components/CartModal";
 import SearchModal from "@/components/SearchModal";
 import { Menu, Search, ShoppingCart, X, Leaf, User } from "lucide-react";
@@ -97,8 +96,8 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`navbar-button px-4 py-2 rounded-lg text-sm font-medium relative transition-all duration-300 hover:scale-105 ${
-                    isActive(link.path) ? "bg-green-700/40 border-green-500/60" : ""
+                  className={`text-white hover:text-eco-400 px-4 py-2 rounded-lg text-sm font-medium relative transition-all duration-300 hover:scale-105 border border-transparent hover:border-green-500/30 hover:bg-green-700/20 ${
+                    isActive(link.path) ? "bg-green-700/40 border-green-500/60 text-eco-400" : ""
                   }`}
                 >
                   {link.name}
@@ -114,7 +113,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button transition-all duration-300 hover:scale-110"
+              className="text-white hover:text-eco-400 hover:bg-green-700/20 border border-transparent hover:border-green-500/30 transition-all duration-300 hover:scale-110"
               onClick={toggleSearch}
             >
               <Search className="h-5 w-5" />
@@ -123,7 +122,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button transition-all duration-300 relative hover:scale-110"
+              className="text-white hover:text-eco-400 hover:bg-green-700/20 border border-transparent hover:border-green-500/30 transition-all duration-300 relative hover:scale-110"
               onClick={toggleCart}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -137,15 +136,11 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="navbar-button transition-all duration-300 hover:scale-110"
+              className="text-white hover:text-eco-400 hover:bg-green-700/20 border border-transparent hover:border-green-500/30 transition-all duration-300 hover:scale-110"
               onClick={handleProfileClick}
             >
               <User className="h-5 w-5" />
             </Button>
-
-            <div className="navbar-button rounded-full">
-              <ProfileMenu />
-            </div>
 
             {isMobile && (
               <Sheet>
@@ -153,7 +148,7 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="navbar-button transition-all duration-300 ml-1 hover:scale-110"
+                    className="text-white hover:text-eco-400 hover:bg-green-700/20 border border-transparent hover:border-green-500/30 transition-all duration-300 ml-1 hover:scale-110"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
@@ -164,7 +159,7 @@ const Navbar = () => {
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`px-3 py-2 rounded-md text-eco-500 navbar-button ${
+                        className={`px-3 py-2 rounded-md text-eco-500 hover:bg-green-700/40 transition-all ${
                           isActive(link.path) ? "bg-green-700/40 font-semibold" : ""
                         }`}
                       >

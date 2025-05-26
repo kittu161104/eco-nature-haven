@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -22,6 +21,8 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string, adminCode?: string) => Promise<{ isAdmin: boolean }>;
   register: (email: string, password: string, name: string, isAdmin?: boolean, adminCode?: string) => Promise<{ isAdmin: boolean }>;
+  sendOTP: (email: string, name?: string, isSignUp?: boolean, adminCode?: string) => Promise<void>;
+  verifyOTP: (email: string, otp: string, name?: string, isSignUp?: boolean, adminCode?: string) => Promise<{ isAdmin: boolean }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   updateAdminCode: (masterCode: string, newAdminCode: string) => Promise<void>;
@@ -99,6 +100,100 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const sendOTP = async (email: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
+    if (isSignUp) {
+      // For signup, we use signUp with email confirmation
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: Math.random().toString(36).slice(-8), // Temporary password
+        options: {
+          data: {
+            name: name,
+            is_admin: adminCode === ADMIN_CODE,
+          },
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } else {
+      // For login, we use signInWithOtp
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+      });
+      
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
+  const verifyOTP = async (email: string, otp: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
+    const isAdminAction = adminCode === ADMIN_CODE;
+
+    if (isSignUp) {
+      // For signup verification
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'signup'
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        // Update profile with admin status if admin code was provided
+        if (isAdminAction) {
+          await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', data.user.id);
+        }
+        
+        const profile = await fetchProfile(data.user.id);
+        setUser(profile);
+        return { isAdmin: isAdminAction };
+      }
+    } else {
+      // For login verification
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email'
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        let profile = await fetchProfile(data.user.id);
+        
+        if (isAdminAction && (!profile?.is_admin)) {
+          // Update user to admin if they provided correct admin code
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', data.user.id);
+          
+          if (updateError) {
+            console.error('Error updating admin status:', updateError);
+          } else {
+            profile = await fetchProfile(data.user.id);
+          }
+        }
+        
+        setUser(profile);
+        return { isAdmin: isAdminAction || profile?.is_admin || false };
+      }
+    }
+
+    return { isAdmin: false };
+  };
 
   const login = async (email: string, password: string, adminCode?: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -228,6 +323,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAdmin: user?.is_admin || false,
     login,
     register,
+    sendOTP,
+    verifyOTP,
     logout,
     updateUser,
     updateAdminCode,
