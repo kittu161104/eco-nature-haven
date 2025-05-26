@@ -54,15 +54,15 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      await login(data.email, data.password, data.isAdmin ? data.adminCode : undefined);
+      const result = await login(data.email, data.password, data.adminCode);
       
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       
-      // Navigate based on admin status
-      if (data.isAdmin) {
+      // Navigate based on admin code or admin status
+      if (result.isAdmin || data.adminCode === "Natural@green") {
         navigate("/admin");
       } else {
         navigate("/");
@@ -183,7 +183,7 @@ const Login = () => {
                       <FormLabel className="text-white">Admin Code</FormLabel>
                       <FormControl>
                         <PasswordInput 
-                          placeholder="Enter admin access code" 
+                          placeholder="Enter admin access code (Natural@green)" 
                           className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                           {...field} 
                         />

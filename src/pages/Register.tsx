@@ -61,15 +61,15 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      await register(data.email, data.password, data.name, data.isAdmin, data.adminCode);
+      const result = await register(data.email, data.password, data.name, data.isAdmin, data.adminCode);
       
       toast({
         title: "Account created successfully",
         description: "Welcome to Natural Green!",
       });
       
-      // Navigate based on admin status
-      if (data.isAdmin) {
+      // Navigate based on admin code or admin status
+      if (result.isAdmin || data.adminCode === "Natural@green") {
         navigate("/admin");
       } else {
         navigate("/");
@@ -226,7 +226,7 @@ const Register = () => {
                       <FormLabel className="text-white">Admin Code</FormLabel>
                       <FormControl>
                         <PasswordInput 
-                          placeholder="Enter admin access code" 
+                          placeholder="Enter admin access code (Natural@green)" 
                           className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                           {...field} 
                         />

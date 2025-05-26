@@ -20,8 +20,8 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string, adminCode?: string) => Promise<void>;
-  register: (email: string, password: string, name: string, isAdmin?: boolean, adminCode?: string) => Promise<void>;
+  login: (email: string, password: string, adminCode?: string) => Promise<{ isAdmin: boolean }>;
+  register: (email: string, password: string, name: string, isAdmin?: boolean, adminCode?: string) => Promise<{ isAdmin: boolean }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   updateAdminCode: (masterCode: string, newAdminCode: string) => Promise<void>;
@@ -45,6 +45,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const ADMIN_CODE = "Natural@green";
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -109,40 +111,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     if (data.user) {
-      const profile = await fetchProfile(data.user.id);
+      let profile = await fetchProfile(data.user.id);
       
-      // If admin code is provided, verify it
-      if (adminCode && profile?.is_admin) {
-        const { data: adminSettings } = await supabase
-          .from('admin_settings')
-          .select('value')
-          .eq('key', 'admin_code')
-          .single();
+      // Check if admin code is provided and matches
+      const isAdminLogin = adminCode === ADMIN_CODE;
+      
+      if (isAdminLogin && (!profile?.is_admin)) {
+        // Update user to admin if they provided correct admin code
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ is_admin: true })
+          .eq('id', data.user.id);
         
-        const storedAdminCode = adminSettings?.value;
-        if (storedAdminCode !== adminCode) {
-          await supabase.auth.signOut();
-          throw new Error('Invalid admin code');
+        if (updateError) {
+          console.error('Error updating admin status:', updateError);
+        } else {
+          // Refetch profile to get updated data
+          profile = await fetchProfile(data.user.id);
         }
       }
       
       setUser(profile);
+      return { isAdmin: isAdminLogin || profile?.is_admin || false };
     }
+
+    return { isAdmin: false };
   };
 
   const register = async (email: string, password: string, name: string, isAdmin: boolean = false, adminCode?: string) => {
-    // If registering as admin, verify admin code first
-    if (isAdmin && adminCode) {
-      const { data: adminSettings } = await supabase
-        .from('admin_settings')
-        .select('value')
-        .eq('key', 'admin_code')
-        .single();
-      
-      const storedAdminCode = adminSettings?.value;
-      if (storedAdminCode !== adminCode) {
-        throw new Error('Invalid admin code');
-      }
+    // Check if admin code is provided and matches
+    const isAdminRegistration = adminCode === ADMIN_CODE;
+    
+    if (isAdmin && adminCode && !isAdminRegistration) {
+      throw new Error('Invalid admin code');
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -151,7 +152,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       options: {
         data: {
           name: name,
-          is_admin: isAdmin,
+          is_admin: isAdminRegistration,
         },
       },
     });
@@ -161,8 +162,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     if (data.user) {
-      // Update profile with admin status if needed
-      if (isAdmin) {
+      // Update profile with admin status if admin code was provided
+      if (isAdminRegistration) {
         await supabase
           .from('profiles')
           .update({ is_admin: true })
@@ -171,7 +172,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       const profile = await fetchProfile(data.user.id);
       setUser(profile);
+      return { isAdmin: isAdminRegistration };
     }
+
+    return { isAdmin: false };
   };
 
   const logout = async () => {
