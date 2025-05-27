@@ -52,9 +52,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to store OTP: ${insertError.message}`);
     }
 
-    // Send email with OTP
+    // Send email with OTP - using verified sender email
     const emailResponse = await resend.emails.send({
-      from: "Natural Green <onboarding@resend.dev>",
+      from: "Natural Green <suribhotlaabhishek25@gmail.com>",
       to: [email],
       subject: `Your verification code: ${otp}`,
       html: `

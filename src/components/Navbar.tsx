@@ -79,7 +79,7 @@ const Navbar = () => {
         borderBottom: "1px solid rgba(22, 163, 74, 0.3)"
       }}
     >
-      <div className="eco-container">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2 float-animation">
@@ -91,7 +91,7 @@ const Navbar = () => {
           </div>
 
           {!isMobile && (
-            <nav className="mx-6 flex items-center space-x-4 lg:space-x-6">
+            <nav className="mx-6 flex items-center space-x-2 lg:space-x-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
