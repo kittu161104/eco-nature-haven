@@ -1,15 +1,15 @@
-
 import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./styles/theme-overrides.css";
 import SafeSonner from "./components/SafeSonner";
 import { AnimatePresence } from "framer-motion";
+import PageTransition from "./components/PageTransition";
 
 // Eager load critical components
 import Index from "./pages/Index";
@@ -50,40 +50,52 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading fallback component
+// Loading fallback component with animation
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-pulse flex flex-col items-center">
-      <div className="h-16 w-16 bg-green-600 rounded-full opacity-70 mb-4"></div>
+      <div className="h-16 w-16 bg-green-600 rounded-full opacity-70 mb-4 animate-bounce"></div>
       <div className="h-4 w-24 bg-green-900/40 rounded mb-2.5"></div>
       <div className="h-3 w-36 bg-green-900/30 rounded"></div>
     </div>
   </div>
 );
 
-const applyStoredSettings = () => {
-  try {
-    const storedAppearanceSettings = localStorage.getItem("appearanceSettings");
-    
-    if (storedAppearanceSettings) {
-      const appearanceSettings = JSON.parse(storedAppearanceSettings);
-      
-      if (appearanceSettings.backgroundImage) {
-        document.documentElement.style.setProperty('--nursery-background', `url(${appearanceSettings.backgroundImage})`);
-      }
-      
-      if (appearanceSettings.primaryColor) {
-        document.documentElement.style.setProperty('--eco-600', appearanceSettings.primaryColor);
-      }
-      
-      if (appearanceSettings.secondaryColor) {
-        document.documentElement.style.setProperty('--eco-300', appearanceSettings.secondaryColor);
-      }
-    }
-  } catch (error) {
-    console.error("Error applying settings:", error);
-    // Fallback to default settings in case of error
-  }
+// Route animation wrapper
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+        <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+        <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
+        <Route path="/blog/:id" element={<PageTransition><BlogDetail /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
+        <Route path="/account/:id" element={<PageTransition><UserProfile /></PageTransition>} />
+        <Route path="/orders" element={<PageTransition><UserOrders /></PageTransition>} />
+        <Route path="/payment" element={<PageTransition><Payment /></PageTransition>} />
+        
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<PageTransition><Dashboard /></PageTransition>} />
+          <Route path="products" element={<PageTransition><Products /></PageTransition>} />
+          <Route path="orders" element={<PageTransition><Orders /></PageTransition>} />
+          <Route path="posts" element={<PageTransition><Posts /></PageTransition>} />
+          <Route path="customers" element={<PageTransition><Customers /></PageTransition>} />
+          <Route path="pages" element={<PageTransition><Pages /></PageTransition>} />
+          <Route path="settings" element={<PageTransition><Settings /></PageTransition>} />
+        </Route>
+        
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
 };
 
 // Throttled initialization function to prevent excessive writes
@@ -165,37 +177,9 @@ const AppContent = () => {
   return (
     <>
       <InitializeStoreData />
-      <AnimatePresence mode="wait">
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogDetail />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/account/:id" element={<UserProfile />} />
-            <Route path="/orders" element={<UserOrders />} />
-            <Route path="/payment" element={<Payment />} />
-            
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="products" element={<Products />} />
-              <Route path="orders" element={<Orders />} />
-              <Route path="posts" element={<Posts />} />
-              <Route path="customers" element={<Customers />} />
-              <Route path="pages" element={<Pages />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </AnimatePresence>
+      <Suspense fallback={<LoadingFallback />}>
+        <AnimatedRoutes />
+      </Suspense>
     </>
   );
 };

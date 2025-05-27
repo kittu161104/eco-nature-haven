@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,6 +23,7 @@ import OTPInput from "@/components/OTPInput";
 import { Separator } from "@/components/ui/separator";
 import { Leaf, Loader2, Shield, Mail } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { motion } from "framer-motion";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -30,7 +32,7 @@ const emailSchema = z.object({
 });
 
 const otpSchema = z.object({
-  otp: z.string().min(4, "Please enter the 4-digit OTP"),
+  otp: z.string().min(6, "Please enter the 6-digit OTP"),
 });
 
 type EmailFormValues = z.infer<typeof emailSchema>;
@@ -73,13 +75,13 @@ const Login = () => {
       setStep('otp');
       
       toast({
-        title: "OTP Sent",
-        description: "Please check your email for the 4-digit verification code.",
+        title: "OTP Sent Successfully",
+        description: "Please check your email for the 6-digit verification code.",
       });
     } catch (error) {
       toast({
         title: "Failed to send OTP",
-        description: error instanceof Error ? error.message : "Please try again",
+        description: error instanceof Error ? error.message : "Please check your email and try again",
         variant: "destructive",
       });
     } finally {
@@ -106,7 +108,7 @@ const Login = () => {
     } catch (error) {
       toast({
         title: "Verification failed",
-        description: error instanceof Error ? error.message : "Invalid OTP",
+        description: error instanceof Error ? error.message : "Invalid OTP. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -120,100 +122,78 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main 
-        className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-eco-950/80 to-black/90"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1742&auto=format&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundBlendMode: "overlay"
-        }}
-      >
-        <div 
-          className="w-full max-w-md space-y-8 glass border border-green-800/30 p-8 rounded-xl shadow-2xl backdrop-blur-xl transform transition-all duration-500 hover:shadow-green-700/20"
+    <PageTransition>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main 
+          className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-eco-950/80 to-black/90"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1742&auto=format&fit=crop')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundBlendMode: "overlay"
+          }}
         >
-          <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-gradient-to-br from-eco-700 to-eco-900 rounded-full flex items-center justify-center transform transition-all duration-500 animate-pulse">
-              {step === 'email' ? <Leaf className="h-8 w-8 text-white" /> : <Mail className="h-8 w-8 text-white" />}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md space-y-8 glass border border-green-800/30 p-8 rounded-xl shadow-2xl backdrop-blur-xl transform transition-all duration-500 hover:shadow-green-700/20"
+          >
+            <div className="text-center">
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="mx-auto h-16 w-16 bg-gradient-to-br from-eco-700 to-eco-900 rounded-full flex items-center justify-center transform transition-all duration-500 animate-pulse"
+              >
+                {step === 'email' ? <Leaf className="h-8 w-8 text-white" /> : <Mail className="h-8 w-8 text-white" />}
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mt-6 text-3xl font-bold tracking-tight text-white"
+              >
+                {step === 'email' ? 'Sign in to your account' : 'Enter verification code'}
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="mt-2 text-sm text-gray-300"
+              >
+                {step === 'email' ? (
+                  <>
+                    Or{" "}
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-eco-400 hover:text-eco-300" 
+                      onClick={() => navigate("/register")}
+                    >
+                      create a new account
+                    </Button>
+                  </>
+                ) : (
+                  `We've sent a 6-digit code to ${userEmail}`
+                )}
+              </motion.p>
             </div>
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
-              {step === 'email' ? 'Sign in to your account' : 'Enter verification code'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-300">
-              {step === 'email' ? (
-                <>
-                  Or{" "}
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-eco-400 hover:text-eco-300" 
-                    onClick={() => navigate("/register")}
-                  >
-                    create a new account
-                  </Button>
-                </>
-              ) : (
-                `We've sent a 4-digit code to ${userEmail}`
-              )}
-            </p>
-          </div>
-          
-          <Separator className="my-6 bg-green-800/30" />
-          
-          {step === 'email' ? (
-            <Form {...emailForm}>
-              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="your.email@example.com" 
-                          className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={emailForm.control}
-                  name="isAdmin"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="border-green-800/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-white flex items-center">
-                          <Shield className="h-4 w-4 mr-2" />
-                          Login as Admin
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {isAdmin && (
+            
+            <Separator className="my-6 bg-green-800/30" />
+            
+            {step === 'email' ? (
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
                   <FormField
                     control={emailForm.control}
-                    name="adminCode"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Admin Code</FormLabel>
+                        <FormLabel className="text-white">Email</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="Enter admin access code (Natural@green)" 
+                            placeholder="your.email@example.com" 
                             className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                             {...field} 
                           />
@@ -222,42 +202,49 @@ const Login = () => {
                       </FormItem>
                     )}
                   />
-                )}
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Send OTP
-                </Button>
-              </form>
-            </Form>
-          ) : (
-            <Form {...otpForm}>
-              <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-6">
-                <FormField
-                  control={otpForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white text-center block">Enter 4-digit code</FormLabel>
-                      <FormControl>
-                        <OTPInput
-                          length={4}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-400 text-center" />
-                    </FormItem>
+                  <FormField
+                    control={emailForm.control}
+                    name="isAdmin"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="border-green-800/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-white flex items-center">
+                            <Shield className="h-4 w-4 mr-2" />
+                            Login as Admin
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  {isAdmin && (
+                    <FormField
+                      control={emailForm.control}
+                      name="adminCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Admin Code</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter admin access code (Natural@green)" 
+                              className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-400" />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
 
-                <div className="space-y-3">
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
@@ -266,25 +253,60 @@ const Login = () => {
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Verify & Sign In
+                    Send OTP
                   </Button>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    className="w-full border-green-800/50 text-green-400 hover:bg-green-900/30"
-                    onClick={handleBackToEmail}
-                  >
-                    Back to Email
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
+                </form>
+              </Form>
+            ) : (
+              <Form {...otpForm}>
+                <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-6">
+                  <FormField
+                    control={otpForm.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white text-center block">Enter 6-digit code</FormLabel>
+                        <FormControl>
+                          <OTPInput
+                            length={6}
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400 text-center" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-3">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      Verify & Sign In
+                    </Button>
+                    
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      className="w-full border-green-800/50 text-green-400 hover:bg-green-900/30"
+                      onClick={handleBackToEmail}
+                    >
+                      Back to Email
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </motion.div>
+        </main>
+        <Footer />
+      </div>
+    </PageTransition>
   );
 };
 

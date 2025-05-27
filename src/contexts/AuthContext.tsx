@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { validateEmail, isValidEmailDomain } from "@/utils/emailValidation";
 
 interface UserProfile {
   id: string;
@@ -102,6 +103,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const sendOTP = async (email: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
+    // Validate email format
+    if (!validateEmail(email)) {
+      throw new Error("Please enter a valid email address");
+    }
+
+    // Validate email domain
+    const isDomainValid = await isValidEmailDomain(email);
+    if (!isDomainValid) {
+      throw new Error("Please enter a valid email domain");
+    }
+
     if (isSignUp) {
       // For signup, we use signUp with email confirmation
       const { error } = await supabase.auth.signUp({
@@ -116,6 +128,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       
       if (error) {
+        if (error.message.includes('User already registered')) {
+          throw new Error("An account with this email already exists. Please try logging in instead.");
+        }
         throw error;
       }
     } else {
@@ -142,6 +157,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
+        if (error.message.includes('Invalid token')) {
+          throw new Error("Invalid OTP. Please check the code and try again.");
+        }
         throw error;
       }
 
@@ -167,6 +185,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
+        if (error.message.includes('Invalid token')) {
+          throw new Error("Invalid OTP. Please check the code and try again.");
+        }
         throw error;
       }
 
@@ -333,7 +354,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-green-500 text-xl animate-pulse">Loading...</div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-green-500 text-xl animate-pulse"
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }

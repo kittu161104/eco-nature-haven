@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface OTPInputProps {
   length: number;
@@ -56,20 +57,26 @@ const OTPInput = ({ length, value, onChange, className }: OTPInputProps) => {
   };
 
   return (
-    <div className={cn("flex gap-2 justify-center", className)}>
+    <div className={cn("flex gap-3 justify-center", className)}>
       {otp.map((digit, index) => (
-        <Input
+        <motion.div
           key={index}
-          ref={(el) => (inputRefs.current[index] = el)}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={digit}
-          onChange={(e) => handleChange(index, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(index, e)}
-          onPaste={handlePaste}
-          className="w-12 h-12 text-center text-lg font-semibold bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all"
-        />
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: index * 0.1, duration: 0.3 }}
+        >
+          <Input
+            ref={(el) => (inputRefs.current[index] = el)}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={digit}
+            onChange={(e) => handleChange(index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            onPaste={handlePaste}
+            className="w-14 h-14 text-center text-xl font-bold bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all duration-300 hover:border-green-600 focus:ring-2 focus:ring-green-500/20"
+          />
+        </motion.div>
       ))}
     </div>
   );
