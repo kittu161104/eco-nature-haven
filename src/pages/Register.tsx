@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Leaf, Loader2, Shield, Mail } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
+import { validateEmail, isValidEmailDomain } from "@/utils/emailValidation";
 
 const detailsSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -72,6 +73,27 @@ const Register = () => {
     setIsLoading(true);
     
     try {
+      // Validate email format
+      if (!validateEmail(data.email)) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate email domain
+      const isValidDomain = await isValidEmailDomain(data.email);
+      if (!isValidDomain) {
+        toast({
+          title: "Invalid Email Domain",
+          description: "Please enter an email with a valid domain",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await sendOTP(data.email, data.name, true, data.adminCode);
       setUserEmail(data.email);
       setUserName(data.name);
@@ -181,7 +203,7 @@ const Register = () => {
                 ) : (
                   `We've sent a 6-digit code to ${userEmail}`
                 )}
-              </p>
+              </motion.p>
             </div>
             
             <Separator className="my-6 bg-green-800/30" />
