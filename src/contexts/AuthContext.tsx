@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { validateEmail, isValidEmailDomain } from "@/utils/emailValidation";
+import { motion } from "framer-motion";
 
 interface UserProfile {
   id: string;

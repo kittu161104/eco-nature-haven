@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -96,6 +97,22 @@ const AnimatedRoutes = () => {
       </Routes>
     </AnimatePresence>
   );
+};
+
+// Apply stored theme settings function
+const applyStoredSettings = () => {
+  try {
+    const settings = localStorage.getItem("appearanceSettings");
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      // Apply theme settings to document
+      if (parsedSettings.theme) {
+        document.documentElement.className = parsedSettings.theme;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to apply stored settings:", error);
+  }
 };
 
 // Throttled initialization function to prevent excessive writes
