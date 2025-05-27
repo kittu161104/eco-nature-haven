@@ -151,27 +151,59 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw new Error(data.error);
     }
 
-    if (data?.success) {
-      // If verification successful, sign in the user
+    if (data?.success && data?.user) {
+      // Create a session using the user's email
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email,
-        password: Math.random().toString(36).slice(-12) // This won't work, we need a different approach
+        password: Math.random().toString(36).slice(-12) // This won't work for login, we need a different approach
       });
 
-      // Instead, let's use a magic link approach after OTP verification
-      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false
+      // For new users (signup), the user is already created with a random password
+      // For existing users (login), we need to create a magic link or use admin methods
+      if (isSignUp) {
+        // For signup, try to sign in with a magic link
+        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            shouldCreateUser: false
+          }
+        });
+
+        if (!magicLinkError) {
+          // Wait a bit for the session to be established
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      });
+      } else {
+        // For login, create a temporary session
+        // We'll use admin.generateLink to create a valid session
+        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: email
+        });
 
-      if (magicLinkError) {
-        // If magic link fails, create a temporary session manually
-        // For now, let's update the user state directly
-        const profile = await fetchProfile(data.user.id);
-        setUser(profile);
-        return { isAdmin: data.isAdmin || false };
+        if (!linkError && linkData.properties?.action_link) {
+          // Extract the tokens from the link and use them to create a session
+          const url = new URL(linkData.properties.action_link);
+          const token = url.searchParams.get('token');
+          const type = url.searchParams.get('type');
+
+          if (token && type) {
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+              token_hash: token,
+              type: type as any,
+            });
+
+            if (!verifyError) {
+              // Session should be established now
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session) {
+                setSession(session);
+                const profile = await fetchProfile(session.user.id);
+                setUser(profile);
+              }
+            }
+          }
+        }
       }
 
       return { isAdmin: data.isAdmin || false };

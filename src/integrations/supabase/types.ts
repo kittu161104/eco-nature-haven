@@ -152,6 +152,42 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_codes: {
+        Row: {
+          admin_code: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          is_signup: boolean
+          name: string | null
+          otp_code: string
+          used: boolean
+        }
+        Insert: {
+          admin_code?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          is_signup?: boolean
+          name?: string | null
+          otp_code: string
+          used?: boolean
+        }
+        Update: {
+          admin_code?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          is_signup?: boolean
+          name?: string | null
+          otp_code?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
