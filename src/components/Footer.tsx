@@ -12,9 +12,9 @@ const Footer = () => {
     email: "info@naturalgreennursery.com",
     description: "Your one-stop destination for all eco-friendly plants, gardening tools, and expert advice for a greener home and planet.",
     socialLinks: [
-      { name: "facebook", url: "#" },
-      { name: "instagram", url: "#" },
-      { name: "pinterest", url: "#" }
+      { name: "facebook", url: "" },
+      { name: "instagram", url: "" },
+      { name: "whatsapp", url: "" }
     ],
     quickLinks: [
       { name: "Shop Plants", url: "/shop" },
@@ -45,9 +45,9 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Brand Column */}
-          <div className="col-span-1 lg:col-span-2 xl:col-span-1 space-y-6">
+          <div className="space-y-6">
             <Link to="/" className="flex items-center space-x-2">
               <Leaf className="h-6 w-6 text-eco-400" />
               <span className="font-serif font-bold text-xl">
@@ -61,7 +61,7 @@ const Footer = () => {
               {footerData.socialLinks.map((link, index) => (
                 <a 
                   key={index}
-                  href={link.url} 
+                  href={link.url || "#"} 
                   className="text-gray-400 hover:text-eco-400 transition-colors transform hover:scale-110 duration-300"
                   aria-label={link.name}
                 >
@@ -77,13 +77,9 @@ const Footer = () => {
                       <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                     </svg>
                   )}
-                  {link.name === "pinterest" && (
+                  {link.name === "whatsapp" && (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
-                      <path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"></path>
-                      <path d="M12 2v2"></path>
-                      <path d="M12 20v2"></path>
-                      <path d="M20 12h2"></path>
-                      <path d="M2 12h2"></path>
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                   )}
                 </a>
@@ -127,24 +123,6 @@ const Footer = () => {
                 <span className="text-gray-300">{footerData.email}</span>
               </li>
             </ul>
-          </div>
-
-          {/* Newsletter Section */}
-          <div className="space-y-6">
-            <h3 className="font-serif font-bold text-lg text-eco-400">Stay Updated</h3>
-            <p className="text-gray-300 text-sm">
-              Subscribe to our newsletter for the latest updates on eco-friendly gardening tips and new arrivals.
-            </p>
-            <div className="space-y-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email"
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-eco-400 focus:outline-none transition-colors duration-300"
-              />
-              <button className="w-full bg-gradient-to-r from-eco-600 to-eco-700 hover:from-eco-700 hover:to-eco-800 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
-                Subscribe
-              </button>
-            </div>
           </div>
         </div>
 

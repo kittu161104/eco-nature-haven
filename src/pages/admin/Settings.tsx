@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, Palette, Smartphone, Shield } from "lucide-react";
+import { Settings as SettingsIcon, Palette, Smartphone, Shield, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import AdminSocialSettings from "@/components/admin/AdminSocialSettings";
 
 const Settings = () => {
   const [settings, setSettings] = useState({
@@ -92,7 +93,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="payments" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 bg-green-900/20">
+        <TabsList className="grid w-full grid-cols-4 bg-green-900/20">
           <TabsTrigger value="payments" className="data-[state=active]:bg-green-700/30">
             <Smartphone className="h-4 w-4 mr-2" />
             Payment Settings
@@ -100,6 +101,10 @@ const Settings = () => {
           <TabsTrigger value="security" className="data-[state=active]:bg-green-700/30">
             <Shield className="h-4 w-4 mr-2" />
             Security
+          </TabsTrigger>
+          <TabsTrigger value="social" className="data-[state=active]:bg-green-700/30">
+            <Share2 className="h-4 w-4 mr-2" />
+            Social Media
           </TabsTrigger>
           <TabsTrigger value="appearance" className="data-[state=active]:bg-green-700/30">
             <Palette className="h-4 w-4 mr-2" />
@@ -167,6 +172,10 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="social" className="space-y-4">
+          <AdminSocialSettings />
         </TabsContent>
 
         <TabsContent value="appearance" className="space-y-4">
