@@ -39,13 +39,20 @@ try {
 
 // Make rendering resilient by wrapping in try/catch
 try {
-  ReactDOM.createRoot(getRootElement()).render(
+  const rootElement = getRootElement();
+  console.log("Starting React app render...");
+  
+  ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <ErrorBoundary>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ErrorBoundary>
     </React.StrictMode>,
   );
+  
+  console.log("React app rendered successfully");
 } catch (error) {
   handleError(error);
   

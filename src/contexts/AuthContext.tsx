@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { validateEmail, isValidEmailDomain } from "@/utils/emailValidation";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   id: string;
@@ -84,17 +85,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          setSession(initialSession);
+          
+          if (initialSession?.user) {
+            const profile = await fetchProfile(initialSession.user.id);
+            if (mounted) {
+              setUser(profile);
+            }
+          }
+          
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
-          setUser(profile);
+          if (mounted) {
+            setUser(profile);
+          }
         } else {
           setUser(null);
-          // Clear cache on logout
           profileCache.clear();
         }
         
@@ -102,19 +134,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setUser(profile);
-      }
-      
-      setIsLoading(false);
-    });
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string, adminCode?: string) => {
@@ -194,6 +219,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           name: name,
           is_admin: isAdminRegistration,
         },
+        emailRedirectTo: undefined, // Disable email confirmation
       },
     });
 
@@ -291,9 +317,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-green-500 text-xl animate-pulse"
+          className="text-green-500 text-xl"
         >
-          Loading...
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+            <span>Loading...</span>
+          </div>
         </motion.div>
       </div>
     );
