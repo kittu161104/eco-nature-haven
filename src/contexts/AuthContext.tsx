@@ -51,17 +51,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const ADMIN_CODE = "Natural@green";
 
+  // Cache for user profiles to reduce database calls
+  const profileCache = new Map<string, UserProfile>();
+
   const fetchProfile = async (userId: string) => {
     try {
+      // Check cache first
+      if (profileCache.has(userId)) {
+        return profileCache.get(userId);
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle for better error handling
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
         return null;
+      }
+
+      // Cache the result
+      if (data) {
+        profileCache.set(userId, data);
       }
 
       return data;
@@ -82,6 +95,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(profile);
         } else {
           setUser(null);
+          // Clear cache on logout
+          profileCache.clear();
         }
         
         setIsLoading(false);
@@ -104,112 +119,103 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const sendOTP = async (email: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+    
     // Validate email format
-    if (!validateEmail(email)) {
+    if (!validateEmail(normalizedEmail)) {
       throw new Error("Please enter a valid email address");
     }
 
     // Validate email domain
-    const isDomainValid = await isValidEmailDomain(email);
+    const isDomainValid = await isValidEmailDomain(normalizedEmail);
     if (!isDomainValid) {
       throw new Error("Please enter a valid email domain");
     }
 
-    // Call our custom OTP edge function
-    const { data, error } = await supabase.functions.invoke('send-otp', {
-      body: {
-        email,
-        name,
-        isSignUp,
-        adminCode
+    try {
+      // Call our custom OTP edge function
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: {
+          email: normalizedEmail,
+          name,
+          isSignUp,
+          adminCode
+        }
+      });
+
+      if (error) {
+        console.error('Send OTP error:', error);
+        throw new Error(error.message || 'Failed to send OTP');
       }
-    });
 
-    if (error) {
-      throw new Error(error.message || 'Failed to send OTP');
-    }
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
-    if (data?.error) {
-      throw new Error(data.error);
+      console.log('OTP sent successfully to:', normalizedEmail);
+    } catch (error) {
+      console.error('Send OTP failed:', error);
+      throw error;
     }
   };
 
   const verifyOTP = async (email: string, otp: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
-    // Call our custom OTP verification edge function
-    const { data, error } = await supabase.functions.invoke('verify-otp', {
-      body: {
-        email,
-        otp
-      }
-    });
-
-    if (error) {
-      throw new Error(error.message || 'Failed to verify OTP');
-    }
-
-    if (data?.error) {
-      throw new Error(data.error);
-    }
-
-    if (data?.success && data?.user) {
-      // Create a session using the user's email
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: Math.random().toString(36).slice(-12) // This won't work for login, we need a different approach
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    try {
+      // Call our custom OTP verification edge function
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
+        body: {
+          email: normalizedEmail,
+          otp: otp.trim()
+        }
       });
 
-      // For new users (signup), the user is already created with a random password
-      // For existing users (login), we need to create a magic link or use admin methods
-      if (isSignUp) {
-        // For signup, try to sign in with a magic link
+      if (error) {
+        console.error('Verify OTP error:', error);
+        throw new Error(error.message || 'Failed to verify OTP');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      if (data?.success && data?.user) {
+        // Clear cache and refetch session
+        profileCache.clear();
+        
+        // For both signup and login, create a magic link session
         const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-          email: email,
+          email: normalizedEmail,
           options: {
             shouldCreateUser: false
           }
         });
 
         if (!magicLinkError) {
-          // Wait a bit for the session to be established
+          // Wait for session to be established
           await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      } else {
-        // For login, create a temporary session
-        // We'll use admin.generateLink to create a valid session
-        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: email
-        });
-
-        if (!linkError && linkData.properties?.action_link) {
-          // Extract the tokens from the link and use them to create a session
-          const url = new URL(linkData.properties.action_link);
-          const token = url.searchParams.get('token');
-          const type = url.searchParams.get('type');
-
-          if (token && type) {
-            const { error: verifyError } = await supabase.auth.verifyOtp({
-              token_hash: token,
-              type: type as any,
-            });
-
-            if (!verifyError) {
-              // Session should be established now
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session) {
-                setSession(session);
-                const profile = await fetchProfile(session.user.id);
-                setUser(profile);
-              }
-            }
+          
+          // Get the latest session
+          const { data: { session: newSession } } = await supabase.auth.getSession();
+          if (newSession) {
+            setSession(newSession);
+            const profile = await fetchProfile(newSession.user.id);
+            setUser(profile);
           }
         }
+
+        console.log('OTP verified successfully for:', normalizedEmail);
+        return { isAdmin: data.isAdmin || false };
       }
 
-      return { isAdmin: data.isAdmin || false };
+      return { isAdmin: false };
+    } catch (error) {
+      console.error('Verify OTP failed:', error);
+      throw error;
     }
-
-    return { isAdmin: false };
   };
 
   const login = async (email: string, password: string, adminCode?: string) => {
@@ -238,7 +244,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (updateError) {
           console.error('Error updating admin status:', updateError);
         } else {
-          // Refetch profile to get updated data
+          // Clear cache and refetch profile
+          profileCache.delete(data.user.id);
           profile = await fetchProfile(data.user.id);
         }
       }
@@ -297,6 +304,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
     setUser(null);
     setSession(null);
+    profileCache.clear();
   };
 
   const updateUser = async (userData: Partial<UserProfile>) => {
@@ -311,7 +319,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
 
-    setUser({ ...user, ...userData });
+    // Update cache
+    const updatedUser = { ...user, ...userData };
+    profileCache.set(user.id, updatedUser);
+    setUser(updatedUser);
   };
 
   const updateAdminCode = async (masterCode: string, newAdminCode: string) => {
