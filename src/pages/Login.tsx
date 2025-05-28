@@ -19,106 +19,64 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import OTPInput from "@/components/OTPInput";
 import { Separator } from "@/components/ui/separator";
-import { Leaf, Loader2, Shield, Mail } from "lucide-react";
+import { Leaf, Loader2, Shield, Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 
-const emailSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   isAdmin: z.boolean().default(false),
   adminCode: z.string().optional(),
 });
 
-const otpSchema = z.object({
-  otp: z.string().min(6, "Please enter the 6-digit OTP"),
-});
-
-type EmailFormValues = z.infer<typeof emailSchema>;
-type OTPFormValues = z.infer<typeof otpSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [userEmail, setUserEmail] = useState('');
-  const [adminCode, setAdminCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { sendOTP, verifyOTP } = useAuth();
+  const { login } = useAuth();
 
-  const emailForm = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
+      password: "",
       isAdmin: false,
       adminCode: "",
     },
   });
 
-  const otpForm = useForm<OTPFormValues>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: {
-      otp: "",
-    },
-  });
+  const isAdmin = form.watch("isAdmin");
 
-  const isAdmin = emailForm.watch("isAdmin");
-
-  const onEmailSubmit = async (data: EmailFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     
     try {
-      await sendOTP(data.email, undefined, false, data.adminCode);
-      setUserEmail(data.email);
-      setAdminCode(data.adminCode || '');
-      setStep('otp');
-      
-      toast({
-        title: "OTP Sent Successfully",
-        description: "Please check your email for the 6-digit verification code.",
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to send OTP",
-        description: error instanceof Error ? error.message : "Please check your email and try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onOTPSubmit = async (data: OTPFormValues) => {
-    setIsLoading(true);
-    
-    try {
-      const result = await verifyOTP(userEmail, data.otp, undefined, false, adminCode);
+      const result = await login(data.email, data.password, data.adminCode);
       
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       
-      if (result.isAdmin || adminCode === "Natural@green") {
+      if (result.isAdmin || data.adminCode === "Natural@green") {
         navigate("/admin");
       } else {
         navigate("/");
       }
     } catch (error) {
       toast({
-        title: "Verification failed",
-        description: error instanceof Error ? error.message : "Invalid OTP. Please try again.",
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleBackToEmail = () => {
-    setStep('email');
-    otpForm.reset();
   };
 
   return (
@@ -147,7 +105,7 @@ const Login = () => {
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 className="mx-auto h-16 w-16 bg-gradient-to-br from-eco-700 to-eco-900 rounded-full flex items-center justify-center transform transition-all duration-500 animate-pulse"
               >
-                {step === 'email' ? <Leaf className="h-8 w-8 text-white" /> : <Mail className="h-8 w-8 text-white" />}
+                <Leaf className="h-8 w-8 text-white" />
               </motion.div>
               <motion.h2 
                 initial={{ opacity: 0, y: 20 }}
@@ -155,7 +113,7 @@ const Login = () => {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="mt-6 text-3xl font-bold tracking-tight text-white"
               >
-                {step === 'email' ? 'Sign in to your account' : 'Enter verification code'}
+                Sign in to your account
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -163,37 +121,105 @@ const Login = () => {
                 transition={{ delay: 0.4, duration: 0.5 }}
                 className="mt-2 text-sm text-gray-300"
               >
-                {step === 'email' ? (
-                  <>
-                    Or{" "}
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-eco-400 hover:text-eco-300" 
-                      onClick={() => navigate("/register")}
-                    >
-                      create a new account
-                    </Button>
-                  </>
-                ) : (
-                  `We've sent a 6-digit code to ${userEmail}`
-                )}
+                Or{" "}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-eco-400 hover:text-eco-300" 
+                  onClick={() => navigate("/register")}
+                >
+                  create a new account
+                </Button>
               </motion.p>
             </div>
             
             <Separator className="my-6 bg-green-800/30" />
             
-            {step === 'email' ? (
-              <Form {...emailForm}>
-                <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="your.email@example.com" 
+                          className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password" 
+                            className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all pr-10" 
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-green-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-green-400" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-red-400" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isAdmin"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="border-green-800/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-white flex items-center">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Login as Admin
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                {isAdmin && (
                   <FormField
-                    control={emailForm.control}
-                    name="email"
+                    control={form.control}
+                    name="adminCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Email</FormLabel>
+                        <FormLabel className="text-white">Admin Code</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="your.email@example.com" 
+                            placeholder="Enter admin access code (Natural@green)" 
                             className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                             {...field} 
                           />
@@ -202,106 +228,20 @@ const Login = () => {
                       </FormItem>
                     )}
                   />
+                )}
 
-                  <FormField
-                    control={emailForm.control}
-                    name="isAdmin"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="border-green-800/50 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-white flex items-center">
-                            <Shield className="h-4 w-4 mr-2" />
-                            Login as Admin
-                          </FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {isAdmin && (
-                    <FormField
-                      control={emailForm.control}
-                      name="adminCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">Admin Code</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Enter admin access code (Natural@green)" 
-                              className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-400" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Send OTP
-                  </Button>
-                </form>
-              </Form>
-            ) : (
-              <Form {...otpForm}>
-                <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-6">
-                  <FormField
-                    control={otpForm.control}
-                    name="otp"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white text-center block">Enter 6-digit code</FormLabel>
-                        <FormControl>
-                          <OTPInput
-                            length={6}
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-400 text-center" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="space-y-3">
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      Verify & Sign In
-                    </Button>
-                    
-                    <Button 
-                      type="button"
-                      variant="outline"
-                      className="w-full border-green-800/50 text-green-400 hover:bg-green-900/30"
-                      onClick={handleBackToEmail}
-                    >
-                      Back to Email
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-eco-700 to-eco-800 hover:from-eco-600 hover:to-eco-700 text-white transition-all duration-300 transform hover:scale-[1.02]" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Sign In
+                </Button>
+              </form>
+            </Form>
           </motion.div>
         </main>
         <Footer />

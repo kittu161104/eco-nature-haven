@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -23,8 +24,6 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string, adminCode?: string) => Promise<{ isAdmin: boolean }>;
   register: (email: string, password: string, name: string, isAdmin?: boolean, adminCode?: string) => Promise<{ isAdmin: boolean }>;
-  sendOTP: (email: string, name?: string, isSignUp?: boolean, adminCode?: string) => Promise<void>;
-  verifyOTP: (email: string, otp: string, name?: string, isSignUp?: boolean, adminCode?: string) => Promise<{ isAdmin: boolean }>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   updateAdminCode: (masterCode: string, newAdminCode: string) => Promise<void>;
@@ -65,7 +64,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle(); // Use maybeSingle for better error handling
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
@@ -118,7 +117,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sendOTP = async (email: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
+  const login = async (email: string, password: string, adminCode?: string) => {
     // Normalize email
     const normalizedEmail = email.toLowerCase().trim();
     
@@ -127,100 +126,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw new Error("Please enter a valid email address");
     }
 
-    // Validate email domain
-    const isDomainValid = await isValidEmailDomain(normalizedEmail);
-    if (!isDomainValid) {
-      throw new Error("Please enter a valid email domain");
-    }
-
-    try {
-      // Call our custom OTP edge function
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: {
-          email: normalizedEmail,
-          name,
-          isSignUp,
-          adminCode
-        }
-      });
-
-      if (error) {
-        console.error('Send OTP error:', error);
-        throw new Error(error.message || 'Failed to send OTP');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      console.log('OTP sent successfully to:', normalizedEmail);
-    } catch (error) {
-      console.error('Send OTP failed:', error);
-      throw error;
-    }
-  };
-
-  const verifyOTP = async (email: string, otp: string, name?: string, isSignUp: boolean = false, adminCode?: string) => {
-    // Normalize email
-    const normalizedEmail = email.toLowerCase().trim();
-    
-    try {
-      // Call our custom OTP verification edge function
-      const { data, error } = await supabase.functions.invoke('verify-otp', {
-        body: {
-          email: normalizedEmail,
-          otp: otp.trim()
-        }
-      });
-
-      if (error) {
-        console.error('Verify OTP error:', error);
-        throw new Error(error.message || 'Failed to verify OTP');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      if (data?.success && data?.user) {
-        // Clear cache and refetch session
-        profileCache.clear();
-        
-        // For both signup and login, create a magic link session
-        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-          email: normalizedEmail,
-          options: {
-            shouldCreateUser: false
-          }
-        });
-
-        if (!magicLinkError) {
-          // Wait for session to be established
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Get the latest session
-          const { data: { session: newSession } } = await supabase.auth.getSession();
-          if (newSession) {
-            setSession(newSession);
-            const profile = await fetchProfile(newSession.user.id);
-            setUser(profile);
-          }
-        }
-
-        console.log('OTP verified successfully for:', normalizedEmail);
-        return { isAdmin: data.isAdmin || false };
-      }
-
-      return { isAdmin: false };
-    } catch (error) {
-      console.error('Verify OTP failed:', error);
-      throw error;
-    }
-  };
-
-  const login = async (email: string, password: string, adminCode?: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizedEmail,
       password,
     });
 
@@ -258,6 +165,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const register = async (email: string, password: string, name: string, isAdmin: boolean = false, adminCode?: string) => {
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Validate email format
+    if (!validateEmail(normalizedEmail)) {
+      throw new Error("Please enter a valid email address");
+    }
+
+    // Validate email domain
+    const isDomainValid = await isValidEmailDomain(normalizedEmail);
+    if (!isDomainValid) {
+      throw new Error("Please enter a valid email domain");
+    }
+
     // Check if admin code is provided and matches
     const isAdminRegistration = adminCode === ADMIN_CODE;
     
@@ -266,7 +187,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         data: {
@@ -281,12 +202,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     if (data.user) {
-      // Update profile with admin status if admin code was provided
-      if (isAdminRegistration) {
-        await supabase
-          .from('profiles')
-          .update({ is_admin: true })
-          .eq('id', data.user.id);
+      // Create or update profile with admin status if admin code was provided
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          name: name,
+          email: normalizedEmail,
+          is_admin: isAdminRegistration,
+          updated_at: new Date().toISOString()
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
       }
       
       const profile = await fetchProfile(data.user.id);
@@ -351,8 +279,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAdmin: user?.is_admin || false,
     login,
     register,
-    sendOTP,
-    verifyOTP,
     logout,
     updateUser,
     updateAdminCode,
