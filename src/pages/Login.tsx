@@ -63,12 +63,16 @@ const Login = () => {
         description: "Welcome back!",
       });
       
-      if (result.isAdmin || data.adminCode === "Natural@green") {
+      // Navigate based on admin status
+      if (result.isAdmin) {
+        console.log("Navigating to admin portal");
         navigate("/admin");
       } else {
+        console.log("Navigating to customer portal");
         navigate("/");
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
@@ -219,7 +223,7 @@ const Login = () => {
                         <FormLabel className="text-white">Admin Code</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder="Enter admin access code (Natural@green)" 
+                            placeholder="Enter admin access code" 
                             className="bg-black/40 border-green-800/50 text-white focus:border-green-500 transition-all" 
                             {...field} 
                           />
